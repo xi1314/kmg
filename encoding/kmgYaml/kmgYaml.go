@@ -24,6 +24,14 @@ func MustReadFile(path string, obj interface{}) {
 	}
 }
 
+func MustMarshal(obj interface{}) []byte {
+	out, err := Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
 func WriteFile(path string, obj interface{}) error {
 	out, err := Marshal(obj)
 	if err != nil {

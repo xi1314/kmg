@@ -28,6 +28,7 @@ type GoTest struct {
 	moduleName   string
 	bench        string
 	onePackage   bool
+	runArg       string
 	buildContext *build.Context
 }
 
@@ -49,6 +50,7 @@ func (commamd *GoTest) ConfigFlagSet(f *flag.FlagSet) {
 	f.StringVar(&commamd.moduleName, "m", "", "module name to test")
 	f.StringVar(&commamd.bench, "bench", "", "bench parameter pass to go test")
 	f.BoolVar(&commamd.onePackage, "onePackage", false, "only test one package")
+	f.StringVar(&commamd.runArg, "run", "", "Run only those tests and examples matching the regular expression.")
 }
 func (command *GoTest) Execute(context *console.Context) (err error) {
 	command.context = context
@@ -154,6 +156,10 @@ func (command *GoTest) gotest(path string) error {
 	if command.bench != "" {
 		args = append(args, "-bench", command.bench)
 	}
+	if command.runArg != "" {
+		args = append(args, "-run", command.runArg)
+	}
+
 	cmd := kmgCmd.NewStdioCmd(command.context, "go", args...)
 	cmd.Dir = path
 	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
