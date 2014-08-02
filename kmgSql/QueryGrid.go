@@ -16,7 +16,7 @@ func (db *Db) QueryGrid(query string, args ...interface{}) (output []map[string]
 	for rows.Next() {
 		rowArray := make([]interface{}, lenColumn)
 		//box value with *RawByte
-		for k1, _ := range rowArray {
+		for k1 := range rowArray {
 			var s sql.RawBytes
 			rowArray[k1] = &s
 		}

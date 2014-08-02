@@ -57,7 +57,7 @@ func Array2XlsxIo(data [][]string, w io.Writer) (err error) {
 	return
 }
 func array2XlsxWriteSharedStrings(zw *zip.Writer, data [][]string) (err error) {
-	siList := []xlsxSharedStringSi{xlsxSharedStringSi{""}}
+	siList := []xlsxSharedStringSi{{""}}
 	for _, row := range data {
 		for _, v1 := range row {
 			if v1 == "" { //ignore blank cell can save space

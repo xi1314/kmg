@@ -13,8 +13,8 @@ func TestWriteRead(ot *testing.T) {
 	t := kmgTest.NewTestTools(ot)
 	buf := &bytes.Buffer{}
 	inData := [][]string{
-		[]string{"中文"},
-		[]string{"1", "", "2"},
+		{"中文"},
+		{"1", "", "2"},
 	}
 	err := Array2XlsxIo(inData, buf)
 	t.Equal(err, nil)
