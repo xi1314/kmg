@@ -124,6 +124,22 @@ func StringToInt(t Transformer, in reflect.Value, out reflect.Value) (err error)
 	return
 }
 
+// "" => 0
+func StringToUint(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	inS := in.String()
+	inS = strings.TrimSpace(inS)
+	if inS == "" {
+		out.SetUint(uint64(0))
+		return nil
+	}
+	i, err := strconv.ParseUint(inS, 10, out.Type().Bits())
+	if err != nil {
+		return
+	}
+	out.SetUint(i)
+	return
+}
+
 // "" => 0.0
 func StringToFloat(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	inS := in.String()

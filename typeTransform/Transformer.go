@@ -23,6 +23,7 @@ const (
 	Struct
 	Slice
 	Array
+	Uint
 )
 
 type TransformerFunc func(traner Transformer, in reflect.Value, out reflect.Value) (err error)
@@ -63,10 +64,11 @@ func GetReflectKind(in reflect.Value) Kind {
 	switch t.Kind() {
 	case reflect.String:
 		return String
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Uintptr:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return Int
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Uintptr:
+		return Uint
 	case reflect.Float32, reflect.Float64:
 		return Float
 	case reflect.Ptr:
@@ -96,6 +98,7 @@ var DefaultTransformer = Transformer{
 	String: map[Kind]TransformerFunc{
 		String: StringToString,
 		Int:    StringToInt,
+		Uint:   StringToUint,
 		Float:  StringToFloat,
 		Bool:   StringToBool,
 		Time:   NewStringToTimeFunc(time.Local),
