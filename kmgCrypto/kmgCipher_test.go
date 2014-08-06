@@ -1,4 +1,4 @@
-package kmgCipher
+package kmgCrypto
 
 import (
 	"github.com/bronze1man/kmg/kmgTest"

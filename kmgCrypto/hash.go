@@ -1,4 +1,4 @@
-package kmgHash
+package kmgCrypto
 
 import (
 	"crypto/md5"

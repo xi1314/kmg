@@ -5,12 +5,18 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/crypto/kmgTls"
 	"github.com/bronze1man/kmg/dependencyInjection"
-	//"github.com/bronze1man/kmg/net/kmgHttp"
+	"github.com/bronze1man/kmg/kmgCrypto"
 	"net"
 	"net/http"
 )
+
+var AdditionHttpHandler []HttpHandlerConfig
+
+type HttpHandlerConfig struct {
+	Path    string
+	Handler http.Handler
+}
 
 //start a golang http api server
 type GoHttpApiServerCommand struct {
@@ -58,13 +64,16 @@ func (command *GoHttpApiServerCommand) Execute(context *console.Context) error {
 			jsonHttpHandler.Filter,
 		},
 	})
+	for _, handlerConfig := range AdditionHttpHandler {
+		http.Handle(handlerConfig.Path, handlerConfig.Handler)
+	}
 	l, err := command.listen()
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(context.Stdout, "Listen on %s\n", l.Addr().String())
 	if command.isHttps {
-		tlsConfig, err := kmgTls.CreateTlsConfig()
+		tlsConfig, err := kmgCrypto.CreateTlsConfig()
 		if err != nil {
 			return fmt.Errorf("fail at kmgTls.CreateTlsConfig,error:%s", err.Error())
 		}

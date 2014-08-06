@@ -1,4 +1,4 @@
-package kmgCipher
+package kmgCrypto
 
 import (
 	"crypto/aes"

@@ -1,4 +1,4 @@
-package kmgTls
+package kmgCrypto
 
 import (
 	"bytes"

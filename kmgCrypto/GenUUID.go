@@ -1,4 +1,4 @@
-package uuid
+package kmgCrypto
 
 import (
 	"crypto/rand"
