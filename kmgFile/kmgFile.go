@@ -28,6 +28,20 @@ func WriteFile(path string, content []byte) (err error) {
 	return ioutil.WriteFile(path, content, os.FileMode(0777))
 }
 
+func Mkdir(path string) (err error) {
+	return os.MkdirAll(path, os.FileMode(0777))
+}
+
+func AppendFile(path string, content []byte) (err error) {
+	f, err := os.OpenFile(path, os.O_APPEND, os.FileMode(0777))
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_, err = f.Write(content)
+	return
+}
+
 func FileExist(path string) (exist bool, err error) {
 	_, err = os.Stat(path)
 	if err != nil {

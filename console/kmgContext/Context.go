@@ -26,6 +26,8 @@ type Context struct {
 	DataPath string
 	//default to $AppPath/tmp
 	TmpPath string
+	//default to ./app/log
+	LogPath string
 
 	//should come from environment
 	GOROOT string
@@ -60,6 +62,9 @@ func (context *Context) Init() {
 	}
 	if context.ConfigPath == "" {
 		context.ConfigPath = filepath.Join(context.AppPath, "config")
+	}
+	if context.LogPath == "" {
+		context.LogPath = filepath.Join(context.AppPath, "log")
 	}
 	if len(context.GOPATH) == 0 {
 		context.GOPATH = []string{context.ProjectPath}

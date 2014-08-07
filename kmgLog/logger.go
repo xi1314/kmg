@@ -1,7 +1,15 @@
 package kmgLog
 
 import "fmt"
-import "runtime/debug"
+import (
+	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/encoding/kmgJson"
+	"github.com/bronze1man/kmg/kmgFile"
+	"io/ioutil"
+	"path/filepath"
+	"runtime/debug"
+	"time"
+)
 
 type Logger struct {
 }
@@ -45,4 +53,26 @@ func (obj *Logger) LogError(err error) {
 func (obj *Logger) VarDump(v interface{}) {
 	message := fmt.Sprintf("%#v", v)
 	obj.Log(LOG_DEBUG, message)
+}
+
+func init() {
+	if kmgContext.Default != nil {
+		kmgFile.Mkdir(kmgContext.Default.LogPath)
+	}
+}
+
+type logRow struct {
+	Time string
+	Msg  string
+	Obj  string
+}
+
+func Log(category string, msg string, obj interface{}) {
+	logPath := kmgContext.Default.LogPath
+	toWrite := kmgJson.MustMarshal(logRow{
+		Time: time.Now().String(),
+		Msg:  msg,
+		Obj:  obj,
+	})
+	kmgFile.AppendFile(filepath.Join(logPath, category), toWrite)
 }

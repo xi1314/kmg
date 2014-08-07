@@ -75,3 +75,11 @@ func MustMarshalToString(obj interface{}) string {
 	}
 	return string(output)
 }
+
+func MustMarshal(obj interface{}) []byte {
+	output, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	return output
+}
