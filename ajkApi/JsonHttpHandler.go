@@ -5,6 +5,7 @@ import (
 	//"errors"
 	//"fmt"
 	//"github.com/bronze1man/kmg/kmgReflect"
+	"github.com/bronze1man/kmg/kmgLog"
 	"github.com/bronze1man/kmg/sessionStore"
 	"net/http"
 	"reflect"
@@ -54,6 +55,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	})
 
 	if err != nil {
+		kmgLog.Log("apiError", err.Error(), nil)
 		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error(), Guid: session.Id})
 		return
 	}
