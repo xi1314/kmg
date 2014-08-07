@@ -5,7 +5,6 @@ import (
 	"github.com/bronze1man/kmg/console/kmgContext"
 	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgFile"
-	"io/ioutil"
 	"path/filepath"
 	"runtime/debug"
 	"time"

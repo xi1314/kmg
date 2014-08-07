@@ -30,6 +30,7 @@ type GoTest struct {
 	onePackage   bool
 	runArg       string
 	buildContext *build.Context
+	onlyBuild    bool
 }
 
 func (command *GoTest) GetNameConfig() *console.NameConfig {
@@ -51,6 +52,7 @@ func (commamd *GoTest) ConfigFlagSet(f *flag.FlagSet) {
 	f.StringVar(&commamd.bench, "bench", "", "bench parameter pass to go test")
 	f.BoolVar(&commamd.onePackage, "onePackage", false, "only test one package")
 	f.StringVar(&commamd.runArg, "run", "", "Run only those tests and examples matching the regular expression.")
+	f.BoolVar(&commamd.onlyBuild, "onlyBuild", false, "only build all package(not test)")
 }
 func (command *GoTest) Execute(context *console.Context) (err error) {
 	command.context = context
@@ -139,7 +141,7 @@ func (command *GoTest) handlePath(path string) error {
 	if pkg.IsCommand() {
 		return nil
 	}
-	if len(pkg.TestGoFiles) == 0 {
+	if command.onlyBuild || len(pkg.TestGoFiles) == 0 {
 		//如果没有测试文件,还会尝试build一下这个目录
 		return command.gobuild(path)
 		//return nil
