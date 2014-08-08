@@ -73,5 +73,9 @@ func Log(category string, msg string, obj interface{}) {
 		Msg:  msg,
 		Obj:  obj,
 	})
-	kmgFile.AppendFile(filepath.Join(logPath, category+".log"), toWrite)
+	err := kmgFile.AppendFile(filepath.Join(logPath, category+".log"), toWrite)
+	if err!=nil{
+		panic(err)
+	}
+	return
 }
