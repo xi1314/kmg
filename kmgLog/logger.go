@@ -72,7 +72,7 @@ func Log(category string, msg string, obj interface{}) {
 		Time: time.Now(),
 		Msg:  msg,
 		Obj:  obj,
-	}),byte('\n'))
+	}), byte('\n'))
 	err := kmgFile.AppendFile(filepath.Join(logPath, category+".log"), toWrite)
 	if err != nil {
 		panic(err)
