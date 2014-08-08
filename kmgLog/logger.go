@@ -68,11 +68,11 @@ type logRow struct {
 
 func Log(category string, msg string, obj interface{}) {
 	logPath := kmgContext.Default.LogPath
-	toWrite := kmgJson.MustMarshal(logRow{
+	toWrite := append(kmgJson.MustMarshal(logRow{
 		Time: time.Now(),
 		Msg:  msg,
 		Obj:  obj,
-	})
+	}),byte('\n'))
 	err := kmgFile.AppendFile(filepath.Join(logPath, category+".log"), toWrite)
 	if err!=nil{
 		panic(err)
