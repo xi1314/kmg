@@ -36,7 +36,9 @@ func (extension *BeegoExtension) LoadDependencyInjection(
 }
 
 func (boot *BeegoExtension) Boot(c *dependencyInjection.Container) error {
-	orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
-	orm.SetDataBaseTZ("default", time.UTC)
+	RegisterDb.Do(func() {
+		orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
+		orm.SetDataBaseTZ("default", time.UTC)
+	})
 	return nil
 }

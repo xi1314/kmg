@@ -69,7 +69,14 @@ func (sess *Session) DeleteAndNewSession() (err error) {
 
 //delete current session,and delete all data in this session
 func (sess *Session) DeleteSession() (err error) {
-	panic("[Session.DeleteSession]not implement!")
+	err = sess.manager.Provider.Delete(sess.Id)
+	if err != nil {
+		return
+	}
+	sess.Id = ""
+	sess.data = nil
+	return
+	//panic("[Session.DeleteSession]not implement!")
 }
 
 //save this Session and reload it from SessionProvider,should only used for test

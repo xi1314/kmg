@@ -33,6 +33,9 @@ func (manager *Manager) newSession() (session *Session, err error) {
 	return
 }
 func (manager *Manager) Save(session *Session) (err error) {
+	if session.Id == "" {
+		return
+	}
 	value, err := session.marshal()
 	if err != nil {
 		return
