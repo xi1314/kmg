@@ -28,14 +28,15 @@ func (extension *BeegoExtension) LoadDependencyInjection(
 	c.MustSetDefinition(&dependencyInjection.Definition{
 		TypeReflect: reflect.TypeOf((*orm.Ormer)(nil)).Elem(),
 		Factory: func(c *dependencyInjection.Container) (interface{}, error) {
-			RegisterDb.Do(func() {
-				orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
-				orm.SetDataBaseTZ("default", time.UTC)
-			})
-
 			return orm.NewOrm(), nil
 		},
 		Scope: dependencyInjection.ScopeRequest,
 	})
+	return nil
+}
+
+func (boot *BeegoExtension) Boot(c *dependencyInjection.Container) error {
+	orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
+	orm.SetDataBaseTZ("default", time.UTC)
 	return nil
 }
