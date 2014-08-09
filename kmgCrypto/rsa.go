@@ -3,6 +3,8 @@ package kmgCrypto
 import (
 	"crypto"
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"math/big"
 )
@@ -30,9 +32,10 @@ func RsaEncrypt(c *big.Int, pub *rsa.PublicKey, m *big.Int) *big.Int {
 }
 
 var (
-	ErrInputSize  = errors.New("input size too large")
-	ErrEncryption = errors.New("encryption error")
-	ErrDecryption = errors.New("decryption error")
+	ErrInputSize           = errors.New("input size too large")
+	ErrEncryption          = errors.New("encryption error")
+	ErrDecryption          = errors.New("decryption error")
+	ErrNotRsaTypePublicKey = errors.New("public key is not rsa type.")
 )
 
 func RsaPrivateEncryptPKCS1v15(priv *rsa.PrivateKey, data []byte) (enc []byte, err error) {
@@ -96,4 +99,39 @@ func RsaPrivateEncryptPKCS1v15(priv *rsa.PrivateKey, data []byte) (enc []byte, e
 		enc = m.Bytes()
 		return
 	*/
+}
+
+func RsaParseOpensslPrivateKey(b []byte) (key *rsa.PrivateKey, err error) {
+	block, _ := pem.Decode(b)
+	return x509.ParsePKCS1PrivateKey(block.Bytes)
+}
+func RsaParseOpensslPublicKey(b []byte) (pub *rsa.PublicKey, err error) {
+	block, _ := pem.Decode(b)
+	pk, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return
+	}
+	pub, ok := pk.(*rsa.PublicKey)
+	if !ok {
+		return nil, ErrNotRsaTypePublicKey
+	}
+	return pub, nil
+}
+
+func RsaOpensslSign(pub *rsa.PrivateKey, h crypto.Hash, msg []byte) (s []byte, err error) {
+	h1 := h.New()
+	h1.Write(msg)
+	digest := h1.Sum(nil)
+	s, err = rsa.SignPKCS1v15(nil, pub, h, digest)
+	return
+}
+
+//这个接口应该和php版的openssl_verify在使用rsa公钥的时候有完全相同的输入输出,加密的坑简直太多了..
+//msg是需要验证签名的消息,sig是签名之后生成的
+func RsaOpensslVerify(pub *rsa.PublicKey, h crypto.Hash, msg []byte, sig []byte) (err error) {
+	h1 := h.New()
+	h1.Write(msg)
+	digest := h1.Sum(nil)
+	err = rsa.VerifyPKCS1v15(pub, h, digest, sig)
+	return
 }
