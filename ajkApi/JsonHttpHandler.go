@@ -59,7 +59,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 
 	if err != nil {
 		go httpLog(httpLogRequest{
-			Dur:    time.Since(startTime),
+			Dur:    time.Since(startTime).String(),
 			Name:   rawInput.Name,
 			Err:    err.Error(),
 			SessId: session.Id,
@@ -73,7 +73,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	go httpLog(httpLogRequest{
-		Dur:    time.Since(startTime),
+		Dur:    time.Since(startTime).String(),
 		Name:   rawInput.Name,
 		Err:    "",
 		SessId: session.Id,

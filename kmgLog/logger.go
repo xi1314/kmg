@@ -61,7 +61,7 @@ func init() {
 }
 
 type logRow struct {
-	Time time.Time
+	Time string
 	Msg  string
 	Obj  interface{}
 }
@@ -69,7 +69,7 @@ type logRow struct {
 func Log(category string, msg string, obj interface{}) {
 	logPath := kmgContext.Default.LogPath
 	toWrite := append(kmgJson.MustMarshal(logRow{
-		Time: time.Now(),
+		Time: time.Now().Format(time.RFC3339),
 		Msg:  msg,
 		Obj:  obj,
 	}), byte('\n'))
