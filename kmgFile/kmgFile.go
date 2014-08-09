@@ -27,6 +27,9 @@ func GetFileBaseWithoutExt(p string) string {
 func WriteFile(path string, content []byte) (err error) {
 	return ioutil.WriteFile(path, content, os.FileMode(0777))
 }
+func ReadFileAll(path string) (content []byte, err error) {
+	return ioutil.ReadFile(path)
+}
 
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
