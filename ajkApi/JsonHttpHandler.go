@@ -9,6 +9,7 @@ import (
 	"github.com/bronze1man/kmg/sessionStore"
 	"net/http"
 	"reflect"
+	"time"
 )
 
 type JsonHttpInput struct {
@@ -36,6 +37,7 @@ func (handler *JsonHttpHandler) Filter(c *HttpApiContext, _ []HttpApiFilter) {
 	handler.ServeHTTP(c.ResponseWriter, c.Request)
 }
 func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	startTime := time.Now()
 	var err error
 	defer req.Body.Close()
 	rawInput := &httpInput{}
@@ -47,7 +49,8 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	var apiOutput interface{}
 	session, err := handler.SessionStoreManager.Load(rawInput.Guid)
 	if err != nil {
-		panic(err)
+		kmgLog.Log("apiError", "[session.Load] "+err.Error(), nil)
+		return
 	}
 	err = handler.ApiManager.RpcCall(session, rawInput.Name, func(meta *ApiFuncMeta) error {
 		apiOutput, err = structRpcCall(meta, rawInput)
@@ -55,15 +58,41 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	})
 
 	if err != nil {
-		kmgLog.Log("apiError", err.Error(), nil)
+		go httpLog(httpLogRequest{
+			Dur:    time.Since(startTime),
+			Name:   rawInput.Name,
+			Err:    err.Error(),
+			SessId: session.Id,
+		})
 		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error(), Guid: session.Id})
 		return
 	}
 	err = handler.SessionStoreManager.Save(session)
 	if err != nil {
-		panic(err)
+		kmgLog.Log("apiError", "[session.Save] "+err.Error(), nil)
+		return
 	}
+	go httpLog(httpLogRequest{
+		Dur:    time.Since(startTime),
+		Name:   rawInput.Name,
+		Err:    "",
+		SessId: session.Id,
+	})
 	handler.returnOutput(w, &JsonHttpOutput{Data: apiOutput, Guid: session.Id})
+}
+
+type httpLogRequest struct {
+	Dur    string
+	Name   string
+	Err    string
+	SessId string
+}
+
+func httpLog(req httpLogRequest) {
+	kmgLog.Log("apiAccess", req.Err, req)
+	if req.Err != "" {
+		kmgLog.Log("apiError", req.Err, req)
+	}
 }
 
 //TODO finish rpcCall by function param name
