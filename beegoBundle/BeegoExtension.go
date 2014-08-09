@@ -13,6 +13,8 @@ var RegisterDb sync.Once
 type BeegoExtension struct {
 }
 
+type singleInitObj struct{}
+
 func (extension *BeegoExtension) LoadDependencyInjection(
 	c *dependencyInjection.ContainerBuilder) error {
 	c.MustSetDefinition(&dependencyInjection.Definition{
@@ -26,13 +28,19 @@ func (extension *BeegoExtension) LoadDependencyInjection(
 	c.MustSetDefinition(&dependencyInjection.Definition{
 		TypeReflect: reflect.TypeOf((*orm.Ormer)(nil)).Elem(),
 		Factory: func(c *dependencyInjection.Container) (interface{}, error) {
+			return orm.NewOrm(), nil
+		},
+		Scope: dependencyInjection.ScopeRequest,
+	})
+	c.MustSetDefinition(&dependencyInjection.Definition{
+		TypeReflect: reflect.TypeOf((*singleInitObj)(nil)).Elem(),
+		Factory: func(c *dependencyInjection.Container) (interface{}, error) {
 			RegisterDb.Do(func() {
 				orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
 				orm.SetDataBaseTZ("default", time.UTC)
 			})
-			return orm.NewOrm(), nil
+			return singleInitObj{}, nil
 		},
-		Scope: dependencyInjection.ScopeRequest,
 	})
 	return nil
 }
