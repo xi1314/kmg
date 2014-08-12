@@ -40,7 +40,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	startTime := time.Now()
 	var err error
 	rawInput := &httpInput{}
-	defer func(){
+	defer func() {
 		go httpLog(httpLogRequest{
 			Name:   rawInput.Name,
 			Dur:    time.Since(startTime).String(),
@@ -58,7 +58,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	var apiOutput interface{}
 	session, err := handler.SessionStoreManager.Load(rawInput.Guid)
 	if err != nil {
-		err = fmt.Errorf("[session.load] %s",err.Error())
+		err = fmt.Errorf("[session.load] %s", err.Error())
 		return
 	}
 	err = handler.ApiManager.RpcCall(session, rawInput.Name, func(meta *ApiFuncMeta) error {
@@ -72,7 +72,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	}
 	err = handler.SessionStoreManager.Save(session)
 	if err != nil {
-		err = fmt.Errorf("[session.Save] %s",err.Error())
+		err = fmt.Errorf("[session.Save] %s", err.Error())
 		return
 	}
 	handler.returnOutput(w, &JsonHttpOutput{Data: apiOutput, Guid: session.Id})
@@ -87,8 +87,8 @@ type httpLogRequest struct {
 }
 
 func httpLog(req httpLogRequest) {
-	errStr:=""
-	if req.Err!=nil{
+	errStr := ""
+	if req.Err != nil {
 		errStr = req.Err.Error()
 	}
 	kmgLog.Log("apiAccess", errStr, req)
