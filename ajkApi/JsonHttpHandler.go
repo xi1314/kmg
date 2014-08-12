@@ -3,7 +3,7 @@ package ajkApi
 import (
 	"encoding/json"
 	//"errors"
-	//"fmt"
+	"fmt"
 	//"github.com/bronze1man/kmg/kmgReflect"
 	"github.com/bronze1man/kmg/kmgLog"
 	"github.com/bronze1man/kmg/sessionStore"
@@ -39,8 +39,17 @@ func (handler *JsonHttpHandler) Filter(c *HttpApiContext, _ []HttpApiFilter) {
 func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	startTime := time.Now()
 	var err error
-	defer req.Body.Close()
 	rawInput := &httpInput{}
+	defer func(){
+		go httpLog(httpLogRequest{
+			Name:   rawInput.Name,
+			Dur:    time.Since(startTime).String(),
+			Err:    err,
+			SessId: rawInput.Guid,
+			Ip:     req.RemoteAddr,
+		})
+	}()
+	defer req.Body.Close()
 	err = json.NewDecoder(req.Body).Decode(rawInput)
 	if err != nil {
 		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error()})
@@ -49,7 +58,7 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	var apiOutput interface{}
 	session, err := handler.SessionStoreManager.Load(rawInput.Guid)
 	if err != nil {
-		kmgLog.Log("apiError", "[session.Load] "+err.Error(), nil)
+		err = fmt.Errorf("[session.load] %s",err.Error())
 		return
 	}
 	err = handler.ApiManager.RpcCall(session, rawInput.Name, func(meta *ApiFuncMeta) error {
@@ -58,40 +67,33 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	})
 
 	if err != nil {
-		go httpLog(httpLogRequest{
-			Dur:    time.Since(startTime).String(),
-			Name:   rawInput.Name,
-			Err:    err.Error(),
-			SessId: session.Id,
-		})
 		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error(), Guid: session.Id})
 		return
 	}
 	err = handler.SessionStoreManager.Save(session)
 	if err != nil {
-		kmgLog.Log("apiError", "[session.Save] "+err.Error(), nil)
+		err = fmt.Errorf("[session.Save] %s",err.Error())
 		return
 	}
-	go httpLog(httpLogRequest{
-		Dur:    time.Since(startTime).String(),
-		Name:   rawInput.Name,
-		Err:    "",
-		SessId: session.Id,
-	})
 	handler.returnOutput(w, &JsonHttpOutput{Data: apiOutput, Guid: session.Id})
 }
 
 type httpLogRequest struct {
 	Dur    string
 	Name   string
-	Err    string
+	Err    error
 	SessId string
+	Ip     string
 }
 
 func httpLog(req httpLogRequest) {
-	kmgLog.Log("apiAccess", req.Err, req)
-	if req.Err != "" {
-		kmgLog.Log("apiError", req.Err, req)
+	errStr:=""
+	if req.Err!=nil{
+		errStr = req.Err.Error()
+	}
+	kmgLog.Log("apiAccess", errStr, req)
+	if errStr != "" {
+		kmgLog.Log("apiError", errStr, req)
 	}
 }
 
@@ -216,7 +218,6 @@ func (handler *JsonHttpHandler) returnOutput(w http.ResponseWriter, output *Json
 	w.Header().Set("Content-Type", "text/json; charset=utf-8")
 	err := json.NewEncoder(w).Encode(output)
 	if err != nil {
-		//TODO log error
-		panic(err)
+		kmgLog.Log("apiError", "[JsonHttpHandler.returnOutput] json.NewEncoder(w).Encode(output)"+err.Error(), nil)
 	}
 }
