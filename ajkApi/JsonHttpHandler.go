@@ -45,7 +45,6 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 			Name:    rawInput.Name,
 			Dur:     time.Since(startTime).String(),
 			Err:     err,
-			ErrType: reflect.ValueOf(err).Type().Name(),
 			SessId:  rawInput.Guid,
 			Ip:      req.RemoteAddr,
 		})
@@ -85,7 +84,6 @@ type httpLogRequest struct {
 	Err     error
 	SessId  string
 	Ip      string
-	ErrType string
 }
 
 func httpLog(req httpLogRequest) {
