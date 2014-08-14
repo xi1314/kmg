@@ -42,11 +42,12 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	rawInput := &httpInput{}
 	defer func() {
 		go httpLog(httpLogRequest{
-			Name:   rawInput.Name,
-			Dur:    time.Since(startTime).String(),
-			Err:    err,
-			SessId: rawInput.Guid,
-			Ip:     req.RemoteAddr,
+			Name:    rawInput.Name,
+			Dur:     time.Since(startTime).String(),
+			Err:     err,
+			ErrType: reflect.ValueOf(err).Type().Name(),
+			SessId:  rawInput.Guid,
+			Ip:      req.RemoteAddr,
 		})
 	}()
 	defer req.Body.Close()
@@ -79,11 +80,12 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 }
 
 type httpLogRequest struct {
-	Dur    string
-	Name   string
-	Err    error
-	SessId string
-	Ip     string
+	Name    string
+	Dur     string
+	Err     error
+	SessId  string
+	Ip      string
+	ErrType string
 }
 
 func httpLog(req httpLogRequest) {
