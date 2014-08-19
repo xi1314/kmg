@@ -9,3 +9,12 @@ func MustStdBase64DecodeString(s string) (out []byte) {
 	}
 	return
 }
+
+func StdBase64Decode(s []byte) (out []byte, err error) {
+	out = make([]byte, base64.StdEncoding.DecodedLen(len(s)))
+	nw, err := base64.StdEncoding.Decode(out, s)
+	if err != nil {
+		return nil, err
+	}
+	return out[:nw], nil
+}
