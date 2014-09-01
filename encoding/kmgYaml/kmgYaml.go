@@ -138,7 +138,6 @@ func Yaml2JsonTransformData(in interface{}) (out interface{}, err error) {
 	default:
 		return in, nil
 	}
-	return in, nil
 }
 
 func debugPrintf(s string, sa ...interface{}) {

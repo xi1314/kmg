@@ -19,6 +19,15 @@ func NewCryptSeedMathRand() (r *mrand.Rand, err error) {
 }
 
 //a kmgRand new from crypt source,only use 8 Byte crypt random...
+func MustNewCryptSeedKmgRand() (r *KmgRand) {
+	mr, err := NewCryptSeedMathRand()
+	if err != nil {
+		panic(err)
+	}
+	return &KmgRand{mr}
+}
+
+//a kmgRand new from crypt source,only use 8 Byte crypt random...
 func NewCryptSeedKmgRand() (r *KmgRand, err error) {
 	mr, err := NewCryptSeedMathRand()
 	if err != nil {

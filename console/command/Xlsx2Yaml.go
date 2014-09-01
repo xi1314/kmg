@@ -9,9 +9,9 @@ import (
 )
 
 type Xlsx2Yaml struct {
-	filePath         *string
-	format           *string
-	isOutputAllSheet *bool
+	filePath         string
+	format           string
+	isOutputAllSheet bool
 }
 
 func (command *Xlsx2Yaml) GetNameConfig() *console.NameConfig {
@@ -20,9 +20,9 @@ func (command *Xlsx2Yaml) GetNameConfig() *console.NameConfig {
 	}
 }
 func (command *Xlsx2Yaml) ConfigFlagSet(f *flag.FlagSet) {
-	command.filePath = f.String("input", "", "input file path")
-	command.format = f.String("format", "grid", "output yaml format(grid,raw)")
-	command.isOutputAllSheet = f.Bool("outputAllSheet", false, "is output all sheet(default just out first one)?")
+	f.StringVar(&command.filePath, "input", "", "input file path")
+	f.StringVar(&command.format, "format", "grid", "output yaml format(grid,raw)")
+	f.BoolVar(&command.isOutputAllSheet, "outputAllSheet", false, "is output all sheet(default just out first one)?")
 }
 func (command *Xlsx2Yaml) Execute(context *console.Context) error {
 	if *command.filePath == "" {
@@ -32,7 +32,7 @@ func (command *Xlsx2Yaml) Execute(context *console.Context) error {
 			return fmt.Errorf("need input file")
 		}
 	}
-	rawArray, err := kmgExcel.XlsxFile2Array(*command.filePath)
+	rawArray, err := kmgExcel.XlsxFile2Array(command.filePath)
 	if err != nil {
 		return err
 	}
@@ -52,9 +52,9 @@ func (command *Xlsx2Yaml) Execute(context *console.Context) error {
 }
 
 func (command *Xlsx2Yaml) formatOutput(rawArray [][][]string) (interface{}, error) {
-	switch *command.format {
+	switch command.format {
 	case "raw":
-		if *command.isOutputAllSheet {
+		if command.isOutputAllSheet {
 			return rawArray, nil
 		} else {
 			return rawArray[0], nil
@@ -68,7 +68,7 @@ func (command *Xlsx2Yaml) formatOutput(rawArray [][][]string) (interface{}, erro
 			}
 			o = append(o, o1)
 		}
-		if *command.isOutputAllSheet {
+		if command.isOutputAllSheet {
 			return o, nil
 		} else {
 			return o[0], nil

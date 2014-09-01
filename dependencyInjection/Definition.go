@@ -109,7 +109,6 @@ func (definition *Definition) GetInst(c *Container) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("invalid definition init type,id: %s", definition.Id)
 	}
-	return nil, fmt.Errorf("invalid definition init type,id: %s", definition.Id)
 }
 
 func (definition *Definition) getInstFromType(c *Container) (interface{}, error) {

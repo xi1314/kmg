@@ -1309,8 +1309,8 @@ func yaml_parser_fetch_value(parser *yaml_parser_t) bool {
 			if !parser.simple_key_allowed {
 				fmt.Println(kmgDebug.GetCurrentStack(0).ToString())
 				panic("mapping values are not allowed in this context1")
-				return yaml_parser_set_scanner_error(parser, "", parser.mark,
-					"mapping values are not allowed in this context")
+				//return yaml_parser_set_scanner_error(parser, "", parser.mark,
+				//	"mapping values are not allowed in this context")
 			}
 
 			// Add the BLOCK-MAPPING-START token if needed.
