@@ -87,3 +87,8 @@ func DateSub(t1 time.Time, t2 time.Time, loc *time.Location) time.Duration {
 func DateSubLocal(t1 time.Time, t2 time.Time) time.Duration {
 	return DateSub(t1, t2, time.Local)
 }
+
+//是否同一天
+func IsSameDay(t1 time.Time, t2 time.Time, loc *time.Location) bool {
+	return DateSub(t1, t2, loc) == 0
+}
