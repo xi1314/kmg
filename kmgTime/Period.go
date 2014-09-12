@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+//小时区间,取值范围[0,24]
+type PeriodHour struct {
+	Start int
+	End   int
+}
+
 // a period time start from Start,end to End,
 // start must before or equal end
 type Period struct {
