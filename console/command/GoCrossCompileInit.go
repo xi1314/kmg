@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"path/filepath"
 	"runtime"
@@ -16,7 +16,7 @@ func (command *GoCrossCompileInit) GetNameConfig() *console.NameConfig {
 	return &console.NameConfig{Name: "GoCrossCompileInit", Short: "cross compile init target in current project"}
 }
 func (command *GoCrossCompileInit) Execute(context *console.Context) (err error) {
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err != nil {
 		return
 	}

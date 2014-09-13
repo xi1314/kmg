@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
@@ -56,11 +56,11 @@ func (commamd *GoTest) ConfigFlagSet(f *flag.FlagSet) {
 }
 func (command *GoTest) Execute(context *console.Context) (err error) {
 	command.context = context
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err == nil {
 		command.gopath = kmgc.GOPATH[0]
 	} else {
-		if kmgContext.IsNotFound(err) {
+		if kmgProjectConfig.IsNotFound(err) {
 			command.gopath = os.Getenv("GOPATH")
 		} else {
 			return

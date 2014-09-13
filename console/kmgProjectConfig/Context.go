@@ -1,4 +1,4 @@
-package kmgContext
+package kmgProjectConfig
 
 import (
 	"github.com/bronze1man/kmg/encoding/kmgYaml"

@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
@@ -33,7 +33,7 @@ func (commamd *GoAllImport) ConfigFlagSet(f *flag.FlagSet) {
 	f.StringVar(&commamd.packageName, "p", "main", "package name in generate golang file(default to main)")
 }
 func (command *GoAllImport) Execute(context *console.Context) (err error) {
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err != nil {
 		return
 	}

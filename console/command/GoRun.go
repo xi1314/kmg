@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
 )
 
@@ -15,7 +15,7 @@ func (command *GoRun) GetNameConfig() *console.NameConfig {
 func (command *GoRun) Execute(context *console.Context) (err error) {
 	args := append([]string{"run"}, context.Args[2:]...)
 	cmd := kmgCmd.NewStdioCmd(context, "go", args...)
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err != nil {
 		return
 	}

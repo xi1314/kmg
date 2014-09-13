@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"os"
 )
@@ -15,7 +15,7 @@ func (command *GoFmt) GetNameConfig() *console.NameConfig {
 }
 func (command *GoFmt) Execute(context *console.Context) (err error) {
 	var fmtDir string
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err == nil {
 		fmtDir = kmgc.ProjectPath
 	} else {

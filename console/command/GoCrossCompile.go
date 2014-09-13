@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"path/filepath"
@@ -31,7 +31,7 @@ func (command *GoCrossCompile) Execute(context *console.Context) (err error) {
 		return fmt.Errorf("need gofile parameter")
 	}
 	targetFile := context.FlagSet().Arg(0)
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err != nil {
 		return
 	}

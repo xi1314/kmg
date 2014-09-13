@@ -2,7 +2,7 @@ package kernel
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/dependencyInjection"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"io/ioutil"
@@ -19,7 +19,7 @@ type Kernel struct {
 	// 2.Parameter.Env
 	Env string
 	// set this value to tell kernel where some path is,or it will guess from work dir.
-	Context *kmgContext.Context
+	Context *kmgProjectConfig.Context
 	// default load from Context.ConfigPath/parameters.yml
 	Parameters map[string]interface{}
 }
@@ -100,6 +100,6 @@ func (kernel *Kernel) guessContext() (err error) {
 	if kernel.Context != nil {
 		return nil
 	}
-	kernel.Context, err = kmgContext.FindFromWd()
+	kernel.Context, err = kmgProjectConfig.FindFromWd()
 	return
 }

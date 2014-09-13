@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgContext"
+	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/fsnotify"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"os"
@@ -40,7 +40,7 @@ func (command *GoWatch) Execute(context *console.Context) (err error) {
 		return fmt.Errorf("usage: %s watch [packages]", context.ExecutionName)
 	}
 	command.mainFilePath = context.Args[2]
-	kmgc, err := kmgContext.FindFromWd()
+	kmgc, err := kmgProjectConfig.FindFromWd()
 	if err != nil {
 		return
 	}
