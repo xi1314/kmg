@@ -2,15 +2,11 @@ package ajkApi
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/dependencyInjection"
 	"github.com/bronze1man/kmg/sessionStore"
 	"reflect"
 	"strings"
 )
 
-type containerAwareApiManager struct {
-	c *dependencyInjection.Container
-}
 type ApiFuncArgumentError struct {
 	Reason  string
 	ApiName string
@@ -29,14 +25,20 @@ func (err *ApiFuncNotFoundError) Error() string {
 	return fmt.Sprintf("api function not found, reason:%s, name:%s", err.Reason, err.ApiName)
 }
 
+var DefaultApiManager RegisterApiManager = NewApiManager()
+
+type RegisterApiManager map[string]interface{}
+
+
 /*
  container service + method -> api
  the api name will be "serviceName.methodName"
 */
-func NewApiManagerFromContainer(c *dependencyInjection.Container) ApiManagerInterface {
-	return &containerAwareApiManager{c: c}
+func NewApiManager()RegisterApiManager{
+	return make(RegisterApiManager)
 }
-func (manager *containerAwareApiManager) RpcCall(
+
+func (manager *RegisterApiManager) RpcCall(
 	session *sessionStore.Session,
 	name string,
 	caller func(*ApiFuncMeta) error,

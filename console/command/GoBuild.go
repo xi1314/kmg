@@ -2,8 +2,8 @@ package command
 
 import (
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgConfig"
 )
 
 type GoBuild struct {

@@ -3,9 +3,9 @@ package command
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/console/kmgProjectConfig"
 	"github.com/bronze1man/kmg/fsnotify"
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgConfig"
 	"os"
 	"os/exec"
 	"path/filepath"

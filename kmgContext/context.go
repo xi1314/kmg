@@ -1,4 +1,4 @@
-package kmgProjectConfig
+package kmgContext
 
 //一个上下文对象,可以保存当前上下文对象的一些内容,也可以修改这些内容
 type Context interface {

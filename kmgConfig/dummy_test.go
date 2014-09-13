@@ -1,4 +1,4 @@
-package kmgProjectConfig
+package kmgConfig
 
 import "testing"
 

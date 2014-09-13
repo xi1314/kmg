@@ -2,43 +2,25 @@ package beegoBundle
 
 import (
 	"github.com/astaxie/beego/orm"
-	"github.com/bronze1man/kmg/dependencyInjection"
-	"reflect"
-	"sync"
+	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgContext"
 	"time"
 )
 
-var RegisterDb sync.Once
+type tBeegoOrmKey struct{}
 
-type BeegoExtension struct {
+var beegoOrmKey tBeegoOrmKey = tBeegoOrmKey{}
+
+func init() {
+	orm.RegisterDataBase("default", "mysql", kmgConfig.DefParameter.GetDbConfig().GetDsn())
+	orm.SetDataBaseTZ("default", time.UTC)
 }
 
-type SingleInitObj struct{}
-
-func (extension *BeegoExtension) LoadDependencyInjection(
-	c *dependencyInjection.ContainerBuilder) error {
-	c.MustSetDefinition(&dependencyInjection.Definition{
-		Type: (*BeegoOrmSyncDbCommand)(nil),
-	}).AddTag("command")
-
-	c.MustSetDefinition(&dependencyInjection.Definition{
-		Type: (*BeegoOrmCreateDbCommand)(nil),
-	}).AddTag("command")
-
-	c.MustSetDefinition(&dependencyInjection.Definition{
-		TypeReflect: reflect.TypeOf((*orm.Ormer)(nil)).Elem(),
-		Factory: func(c *dependencyInjection.Container) (interface{}, error) {
-			return orm.NewOrm(), nil
-		},
-		Scope: dependencyInjection.ScopeRequest,
-	})
-	return nil
-}
-
-func (boot *BeegoExtension) Boot(c *dependencyInjection.Container) error {
-	RegisterDb.Do(func() {
-		orm.RegisterDataBase("default", "mysql", c.MustGetString("kmgSql.DbConfig.Dsn"))
-		orm.SetDataBaseTZ("default", time.UTC)
-	})
-	return nil
+func ContextGetOrm(c kmgContext.Context) orm.Ormer {
+	o, ok := c.Value(beegoOrmKey).(orm.Ormer)
+	if !ok {
+		o = orm.NewOrm()
+		c.SetValue(beegoOrmKey, o)
+	}
+	return o
 }

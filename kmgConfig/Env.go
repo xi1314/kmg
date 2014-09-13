@@ -1,20 +1,26 @@
-package kmgProjectConfig
+package kmgConfig
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-var Default *Context
+var DefEnv *Env
 
 func init() {
-	Default, _ = FindFromWd() //TODO 调用者错误处理过于复杂?
+	var err error
+	DefEnv, err = LoadEnvFromWd()
+	if err != nil {
+		panic(fmt.Errorf("can not getEnv,do you forget create a .kmg.yml at project root? err: %s", err))
+	}
 }
 
 //if you init it like &Context{xxx},please call Init()
-type Context struct {
+//和目录相关的环境配置? .kmg.yml
+type Env struct {
 	GOPATH             []string
 	CrossCompileTarget []CompileTarget
 
@@ -35,13 +41,13 @@ type Context struct {
 	ProjectPath string
 }
 
-func (context *Context) GOPATHToString() string {
+func (context *Env) GOPATHToString() string {
 	if len(context.GOPATH) == 0 {
 		return ""
 	}
 	return strings.Join(context.GOPATH, ":")
 }
-func (context *Context) Init() {
+func (context *Env) Init() {
 	for i, p := range context.GOPATH {
 		if filepath.IsAbs(p) {
 			continue
@@ -70,7 +76,7 @@ func (context *Context) Init() {
 		context.GOPATH = []string{context.ProjectPath}
 	}
 }
-func FindFromPath(p string) (context *Context, err error) {
+func FindFromPath(p string) (context *Env, err error) {
 	p, err = filepath.Abs(p)
 	if err != nil {
 		return
@@ -93,7 +99,7 @@ func FindFromPath(p string) (context *Context, err error) {
 		}
 		p = thisP
 	}
-	context = &Context{}
+	context = &Env{}
 	err = kmgYaml.ReadFile(kmgFilePath, context)
 	if err != nil {
 		return
@@ -106,7 +112,7 @@ func FindFromPath(p string) (context *Context, err error) {
 	return
 }
 
-func FindFromWd() (context *Context, err error) {
+func LoadEnvFromWd() (context *Env, err error) {
 	p, err := os.Getwd()
 	if err != nil {
 		return
