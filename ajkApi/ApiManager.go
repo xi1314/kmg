@@ -2,6 +2,7 @@ package ajkApi
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgContext"
 	"github.com/bronze1man/kmg/sessionStore"
 	"reflect"
 	"strings"
@@ -27,18 +28,29 @@ func (err *ApiFuncNotFoundError) Error() string {
 
 var DefaultApiManager RegisterApiManager = NewApiManager()
 
-type RegisterApiManager map[string]interface{}
+//api注册方式
+type RegisterApiManager map[string]func(c kmgContext.Context) interface{}
 
+type tKey uint8
+
+const sessionKey tKey = 1
+
+func ContextSetSession(c kmgContext.Context, sess *sessionStore.Session) {
+	c.SetValue(sessionKey, sess)
+}
+func ContextGetSession(c kmgContext.Context) *sessionStore.Session {
+	return c.Value(sessionKey).(*sessionStore.Session)
+}
 
 /*
  container service + method -> api
  the api name will be "serviceName.methodName"
 */
-func NewApiManager()RegisterApiManager{
+func NewApiManager() RegisterApiManager {
 	return make(RegisterApiManager)
 }
 
-func (manager *RegisterApiManager) RpcCall(
+func (manager RegisterApiManager) RpcCall(
 	session *sessionStore.Session,
 	name string,
 	caller func(*ApiFuncMeta) error,
@@ -47,25 +59,16 @@ func (manager *RegisterApiManager) RpcCall(
 	if dotP == -1 {
 		return &ApiFuncNotFoundError{Reason: "name not cantain .", ApiName: name}
 	}
-	c, err := manager.c.EnterScope(dependencyInjection.ScopeRequest)
-	if err != nil {
-		return err
-	}
+	c := kmgContext.NewContext()
+	ContextSetSession(c, session)
 
-	err = c.Set("github.com/bronze1man/kmg/sessionStore.Session", session, dependencyInjection.ScopeRequest)
-	if err != nil {
-		return err
-	}
-
-	defer c.LeaveScope()
 	serviceName := name[:dotP]
-	if !c.Has(serviceName) {
+	serviceIniter, ok := manager[serviceName]
+	if !ok {
 		return &ApiFuncNotFoundError{Reason: "service not exist", ApiName: name}
 	}
-	service, err := c.Get(serviceName)
-	if err != nil {
-		return err
-	}
+	service := serviceIniter(c)
+
 	serviceType := reflect.TypeOf(service)
 	methodName := name[dotP+1:]
 	method, ok := serviceType.MethodByName(methodName)

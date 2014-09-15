@@ -1,10 +1,12 @@
 package kmgConfig
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"github.com/bronze1man/kmg/kmgSql"
 	"path/filepath"
+	"sync"
 )
 
 var DefParameter *Parameter
@@ -29,6 +31,9 @@ type Parameter struct {
 
 	SessionPrefix     string
 	SessionExpiration string
+
+	dbOnce sync.Once
+	db     *kmgSql.Db
 }
 
 func (p *Parameter) GetDbConfig() *kmgSql.DbConfig {
@@ -38,4 +43,18 @@ func (p *Parameter) GetDbConfig() *kmgSql.DbConfig {
 		Host:     p.DatabaseHost,
 		DbName:   p.DatabaseDbName,
 	}
+}
+
+//放错地方了?
+func (p *Parameter) GetDb() (db *kmgSql.Db) {
+	p.dbOnce.Do(func() {
+		odb, err := sql.Open("mysql", p.GetDbConfig().GetDsn())
+		if err != nil {
+			panic(err)
+		}
+		p.db = &kmgSql.Db{
+			DB: odb,
+		}
+	})
+	return p.db
 }

@@ -5,8 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/dependencyInjection"
+	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgCrypto"
+	"github.com/bronze1man/kmg/sessionStore"
+	"github.com/bronze1man/kmg/sessionStore/memcacheProvider"
 	"net"
 	"net/http"
 )
@@ -20,7 +22,6 @@ type HttpHandlerConfig struct {
 
 //start a golang http api server
 type GoHttpApiServerCommand struct {
-	Container     *dependencyInjection.Container
 	http          string
 	https         string
 	randPort      bool
@@ -28,9 +29,6 @@ type GoHttpApiServerCommand struct {
 	tcpListenAddr string
 }
 
-func (command *GoHttpApiServerCommand) SetContainer(Container *dependencyInjection.Container) {
-	command.Container = Container
-}
 func (command *GoHttpApiServerCommand) GetNameConfig() *console.NameConfig {
 	return &console.NameConfig{Name: "GoHttpApiServer", Short: `start a golang http api server `}
 }
@@ -47,12 +45,12 @@ func (command *GoHttpApiServerCommand) Execute(context *console.Context) error {
 	} else {
 		command.tcpListenAddr = command.http
 	}
-	c := command.Container
-	ihandler, err := c.GetByType((*JsonHttpHandler)(nil))
-	if err != nil {
-		return err
+	jsonHttpHandler := &JsonHttpHandler{
+		ApiManager: DefaultApiManager,
+		SessionStoreManager: &sessionStore.Manager{
+			Provider: memcacheProvider.New(kmgConfig.DefParameter.MemcacheHostList...),
+		},
 	}
-	jsonHttpHandler := ihandler.(*JsonHttpHandler)
 	http.Handle("/api", &HttpApiFilterManager{
 		Filters: []HttpApiFilter{
 			jsonHttpHandler.Filter,
