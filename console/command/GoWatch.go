@@ -40,7 +40,7 @@ func (command *GoWatch) Execute(context *console.Context) (err error) {
 		return fmt.Errorf("usage: %s watch [packages]", context.ExecutionName)
 	}
 	command.mainFilePath = context.Args[2]
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err != nil {
 		return
 	}

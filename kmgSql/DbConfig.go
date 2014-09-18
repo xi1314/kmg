@@ -2,6 +2,7 @@ package kmgSql
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgConfig"
 )
 
 type DbConfig struct {
@@ -17,4 +18,13 @@ func (config *DbConfig) GetDsn() string {
 		config.Password,
 		config.Host,
 		config.DbName)
+}
+
+func GetDbConfigFromConfig(p *kmgConfig.Parameter) *DbConfig {
+	return &DbConfig{
+		Username: p.DatabaseUsername,
+		Password: p.DatabasePassword,
+		Host:     p.DatabaseHost,
+		DbName:   p.DatabaseDbName,
+	}
 }

@@ -25,9 +25,9 @@ func (command *Xlsx2Yaml) ConfigFlagSet(f *flag.FlagSet) {
 	f.BoolVar(&command.isOutputAllSheet, "outputAllSheet", false, "is output all sheet(default just out first one)?")
 }
 func (command *Xlsx2Yaml) Execute(context *console.Context) error {
-	if *command.filePath == "" {
+	if command.filePath == "" {
 		if context.FlagSet().NArg() == 1 {
-			*command.filePath = context.FlagSet().Arg(0)
+			command.filePath = context.FlagSet().Arg(0)
 		} else {
 			return fmt.Errorf("need input file")
 		}

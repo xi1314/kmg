@@ -33,7 +33,7 @@ func (commamd *GoAllImport) ConfigFlagSet(f *flag.FlagSet) {
 	f.StringVar(&commamd.packageName, "p", "main", "package name in generate golang file(default to main)")
 }
 func (command *GoAllImport) Execute(context *console.Context) (err error) {
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err != nil {
 		return
 	}

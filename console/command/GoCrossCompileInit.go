@@ -16,7 +16,7 @@ func (command *GoCrossCompileInit) GetNameConfig() *console.NameConfig {
 	return &console.NameConfig{Name: "GoCrossCompileInit", Short: "cross compile init target in current project"}
 }
 func (command *GoCrossCompileInit) Execute(context *console.Context) (err error) {
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err != nil {
 		return
 	}

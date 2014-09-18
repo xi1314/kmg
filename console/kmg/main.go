@@ -24,5 +24,7 @@ func main() {
 	manager.MustAdd(&command.Json2Yaml{})
 	manager.MustAdd(&command.Xlsx2Yaml{})
 	manager.MustAdd(&command.ParpareReflect{})
+	manager.MustAdd(&command.Go{})
+	manager.MustAdd(&command.GenerateHttpsCert{})
 	manager.ExecuteGlobal()
 }

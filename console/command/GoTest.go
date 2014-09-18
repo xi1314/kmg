@@ -56,11 +56,11 @@ func (commamd *GoTest) ConfigFlagSet(f *flag.FlagSet) {
 }
 func (command *GoTest) Execute(context *console.Context) (err error) {
 	command.context = context
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err == nil {
 		command.gopath = kmgc.GOPATH[0]
 	} else {
-		if kmgProjectConfig.IsNotFound(err) {
+		if kmgConfig.IsNotFound(err) {
 			command.gopath = os.Getenv("GOPATH")
 		} else {
 			return

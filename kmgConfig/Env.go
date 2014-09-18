@@ -1,22 +1,11 @@
 package kmgConfig
 
 import (
-	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
-var DefEnv *Env
-
-func init() {
-	var err error
-	DefEnv, err = LoadEnvFromWd()
-	if err != nil {
-		panic(fmt.Errorf("can not getEnv,do you forget create a .kmg.yml at project root? err: %s", err))
-	}
-}
 
 //if you init it like &Context{xxx},please call Init()
 //和目录相关的环境配置? .kmg.yml

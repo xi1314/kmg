@@ -15,7 +15,7 @@ func (command *GoFmt) GetNameConfig() *console.NameConfig {
 }
 func (command *GoFmt) Execute(context *console.Context) (err error) {
 	var fmtDir string
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err == nil {
 		fmtDir = kmgc.ProjectPath
 	} else {

@@ -31,7 +31,7 @@ func (command *GoCrossCompile) Execute(context *console.Context) (err error) {
 		return fmt.Errorf("need gofile parameter")
 	}
 	targetFile := context.FlagSet().Arg(0)
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err != nil {
 		return
 	}

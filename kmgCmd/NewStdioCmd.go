@@ -4,7 +4,17 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+func RunOsStdioCmd(name string, args ...string) error {
+	return NewOsStdioCmd(name, args...).Run()
+}
+
+func RunOsStdioCmdString(cmd string) error {
+	args := strings.Split(cmd, " ")
+	return NewOsStdioCmd(args[0], args[1:]...).Run()
+}
 
 func NewOsStdioCmd(name string, args ...string) *exec.Cmd {
 	cmd := exec.Command(name, args...)

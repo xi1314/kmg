@@ -15,7 +15,7 @@ func (command *GoBuild) GetNameConfig() *console.NameConfig {
 func (command *GoBuild) Execute(context *console.Context) (err error) {
 	args := append([]string{"build"}, context.Args[2:]...)
 	cmd := kmgCmd.NewStdioCmd(context, "go", args...)
-	kmgc, err := kmgProjectConfig.FindFromWd()
+	kmgc, err := kmgConfig.LoadEnvFromWd()
 	if err != nil {
 		return
 	}

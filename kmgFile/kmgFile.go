@@ -27,12 +27,25 @@ func GetFileBaseWithoutExt(p string) string {
 func WriteFile(path string, content []byte) (err error) {
 	return ioutil.WriteFile(path, content, os.FileMode(0777))
 }
+func MustWriteFile(path string, content []byte) {
+	err := ioutil.WriteFile(path, content, os.FileMode(0777))
+	if err != nil {
+		panic(err)
+	}
+}
 func ReadFileAll(path string) (content []byte, err error) {
 	return ioutil.ReadFile(path)
 }
 
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
+}
+
+func MustMkdirAll(dirname string) {
+	err := os.MkdirAll(dirname, os.FileMode(0777))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func AppendFile(path string, content []byte) (err error) {
@@ -65,6 +78,8 @@ func RemoveExtFromFilePath(path string) string {
 func ReadDir(dirname string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(dirname)
 }
+
+
 
 //copy file
 // * override dst file if it exist,
