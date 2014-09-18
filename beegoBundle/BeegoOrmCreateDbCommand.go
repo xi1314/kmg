@@ -5,8 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/kmgConfig"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	"github.com/bronze1man/kmg/kmgSql"
+
 )
 
 type BeegoOrmCreateDbCommand struct {
@@ -24,7 +26,7 @@ func (command *BeegoOrmCreateDbCommand) ConfigFlagSet(flag *flag.FlagSet) {
 }
 func (command *BeegoOrmCreateDbCommand) Execute(context *console.Context) (err error) {
 	//work around for container bug
-	DbConfig := kmgConfig.DefParameter.GetDbConfig()
+	DbConfig := kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter)
 
 	dsn := fmt.Sprintf("%s:%s@%s/?charset=utf8&timeout=5s",
 		DbConfig.Username,

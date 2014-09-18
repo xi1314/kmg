@@ -3,11 +3,11 @@ package kmgLog
 import "fmt"
 import (
 	"github.com/bronze1man/kmg/encoding/kmgJson"
-	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
 	"path/filepath"
 	"runtime/debug"
 	"time"
+	"github.com/bronze1man/kmg/kmgConfig/defaultEnv"
 )
 
 type Logger struct {
@@ -55,8 +55,8 @@ func (obj *Logger) VarDump(v interface{}) {
 }
 
 func init() {
-	if kmgConfig.DefEnv != nil {
-		kmgFile.Mkdir(kmgConfig.DefEnv.LogPath)
+	if defaultEnv.Env != nil {
+		kmgFile.Mkdir(defaultEnv.Env.LogPath)
 	}
 }
 
@@ -67,7 +67,7 @@ type logRow struct {
 }
 
 func Log(category string, msg string, obj interface{}) {
-	logPath := kmgConfig.DefEnv.LogPath
+	logPath := defaultEnv.Env.LogPath
 	toWrite := append(kmgJson.MustMarshal(logRow{
 		Time: time.Now().Format(time.RFC3339),
 		Msg:  msg,

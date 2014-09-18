@@ -2,9 +2,11 @@ package beegoBundle
 
 import (
 	"github.com/astaxie/beego/orm"
-	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgContext"
+	"github.com/bronze1man/kmg/kmgSql"
+
 	"time"
+	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 )
 
 type tBeegoOrmKey struct{}
@@ -12,7 +14,7 @@ type tBeegoOrmKey struct{}
 var beegoOrmKey tBeegoOrmKey = tBeegoOrmKey{}
 
 func init() {
-	orm.RegisterDataBase("default", "mysql", kmgConfig.DefParameter.GetDbConfig().GetDsn())
+	orm.RegisterDataBase("default", "mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter).GetDsn())
 	orm.SetDataBaseTZ("default", time.UTC)
 }
 
