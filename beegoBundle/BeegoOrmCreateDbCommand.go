@@ -5,10 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/console"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 	"github.com/bronze1man/kmg/kmgSql"
-
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type BeegoOrmCreateDbCommand struct {

@@ -3,11 +3,11 @@ package kmgLog
 import "fmt"
 import (
 	"github.com/bronze1man/kmg/encoding/kmgJson"
+	"github.com/bronze1man/kmg/kmgConfig/defaultEnv"
 	"github.com/bronze1man/kmg/kmgFile"
 	"path/filepath"
 	"runtime/debug"
 	"time"
-	"github.com/bronze1man/kmg/kmgConfig/defaultEnv"
 )
 
 type Logger struct {
