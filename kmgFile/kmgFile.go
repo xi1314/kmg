@@ -79,8 +79,6 @@ func ReadDir(dirname string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(dirname)
 }
 
-
-
 //copy file
 // * override dst file if it exist,
 // * mkdir if base dir not exist
