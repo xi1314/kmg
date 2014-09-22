@@ -3,14 +3,19 @@ package defaultEnv
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgConfig"
+	"sync"
 )
 
-var Env *kmgConfig.Env
+var envOnce sync.Once
+var env *kmgConfig.Env
 
-func init() {
-	var err error
-	Env, err = kmgConfig.LoadEnvFromWd()
-	if err != nil {
-		panic(fmt.Errorf("can not getEnv,do you forget create a .kmg.yml at project root? err: %s", err))
-	}
+func Env() *kmgConfig.Env {
+	envOnce.Do(func() {
+		var err error
+		env, err = kmgConfig.LoadEnvFromWd()
+		if err != nil {
+			panic(fmt.Errorf("can not getEnv,do you forget create a .kmg.yml at project root? err: %s", err))
+		}
+	})
+	return env
 }

@@ -55,8 +55,8 @@ func (obj *Logger) VarDump(v interface{}) {
 }
 
 func init() {
-	if defaultEnv.Env != nil {
-		kmgFile.Mkdir(defaultEnv.Env.LogPath)
+	if defaultEnv.Env() != nil {
+		kmgFile.Mkdir(defaultEnv.Env().LogPath)
 	}
 }
 
@@ -67,7 +67,7 @@ type logRow struct {
 }
 
 func Log(category string, msg string, obj interface{}) {
-	logPath := defaultEnv.Env.LogPath
+	logPath := defaultEnv.Env().LogPath
 	toWrite := append(kmgJson.MustMarshal(logRow{
 		Time: time.Now().Format(time.RFC3339),
 		Msg:  msg,

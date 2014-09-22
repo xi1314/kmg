@@ -24,8 +24,9 @@ func (command *BeegoOrmCreateDbCommand) ConfigFlagSet(flag *flag.FlagSet) {
 	flag.StringVar(&command.env, "env", "dev", "database env(dev,test)")
 }
 func (command *BeegoOrmCreateDbCommand) Execute(context *console.Context) (err error) {
+	InitOrm()
 	//work around for container bug
-	DbConfig := kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter)
+	DbConfig := kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter())
 
 	dsn := fmt.Sprintf("%s:%s@%s/?charset=utf8&timeout=5s",
 		DbConfig.Username,

@@ -22,6 +22,7 @@ func (command *BeegoOrmSyncDbCommand) ConfigFlagSet(flag *flag.FlagSet) {
 	flag.StringVar(&command.env, "env", "dev", "database env(dev,test)")
 }
 func (command *BeegoOrmSyncDbCommand) Execute(context *console.Context) error {
+	InitOrm()
 	//TODO register database config stuff.
 	os.Args = []string{
 		os.Args[0], "orm", "syncdb",

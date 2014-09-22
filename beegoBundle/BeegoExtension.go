@@ -13,8 +13,8 @@ type tBeegoOrmKey struct{}
 
 var beegoOrmKey tBeegoOrmKey = tBeegoOrmKey{}
 
-func init() {
-	orm.RegisterDataBase("default", "mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter).GetDsn())
+func InitOrm() {
+	orm.RegisterDataBase("default", "mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter()).GetDsn())
 	orm.SetDataBaseTZ("default", time.UTC)
 }
 

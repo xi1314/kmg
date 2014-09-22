@@ -48,7 +48,7 @@ func (command *GoHttpApiServerCommand) Execute(context *console.Context) error {
 	jsonHttpHandler := &JsonHttpHandler{
 		ApiManager: DefaultApiManager,
 		SessionStoreManager: &sessionStore.Manager{
-			Provider: memcacheProvider.New(defaultParameter.Parameter.MemcacheHostList...),
+			Provider: memcacheProvider.New(defaultParameter.Parameter().MemcacheHostList...),
 		},
 	}
 	http.Handle("/api", &HttpApiFilterManager{

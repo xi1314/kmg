@@ -12,7 +12,7 @@ var db *kmgSql.Db
 
 func GetDb() *kmgSql.Db {
 	dbonce.Do(func() {
-		odb, err := sql.Open("mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter).GetDsn())
+		odb, err := sql.Open("mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter()).GetDsn())
 		if err != nil {
 			panic(err)
 		}
