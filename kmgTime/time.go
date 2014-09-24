@@ -56,6 +56,14 @@ func MustFromMysqlFormat(timeString string) time.Time {
 	return t
 }
 
+func MustFromMysqlFormatInLocation(timeString string,loc *time.Location) time.Time {
+	t, err := time.ParseInLocation(FormatMysql, timeString,loc)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 //local time
 func MustFromLocalMysqlFormat(timeString string) time.Time {
 	t, err := time.ParseInLocation(FormatMysql, timeString, time.Local)
