@@ -26,3 +26,9 @@ func Md5Hex(data []byte) string {
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
+
+func Md5HexFromString(data string) string {
+	hash := md5.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil))
+}
