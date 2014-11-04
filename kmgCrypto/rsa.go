@@ -4,10 +4,10 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"math/big"
-	"encoding/base64"
 )
 
 //使用和rsa.SignPKCS1v15相同的算法,但是返回解密后的数据
@@ -142,15 +142,15 @@ func RsaOpensslVerify(pub *rsa.PublicKey, h crypto.Hash, msg []byte, sig []byte)
 // 并且提供一种签名的方式
 // 读入 PKCS1格式私钥字符串 , 需要签名的数据
 // 返回 签名后的数据
-func RsaWithSha1PKCS1OpensslSignBase64(PKCS1privateKey []byte,msg []byte)(s string,err error){
+func RsaWithSha1PKCS1OpensslSignBase64(PKCS1privateKey []byte, msg []byte) (s string, err error) {
 	block, _ := pem.Decode(PKCS1privateKey)
 	private, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return
 	}
-	b,err:=RsaOpensslSign(private,crypto.SHA1,msg)
-	if err!=nil{
+	b, err := RsaOpensslSign(private, crypto.SHA1, msg)
+	if err != nil {
 		return
 	}
-	return base64.StdEncoding.EncodeToString(b),nil
+	return base64.StdEncoding.EncodeToString(b), nil
 }
