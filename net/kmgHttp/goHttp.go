@@ -34,3 +34,9 @@ func UrlGetContent(url string) (b []byte, err error) {
 	}
 	return ResponseReadAllBody(resp)
 }
+
+func HeaderToString(header http.Header) (s string) {
+	buf := bytes.Buffer{}
+	header.Write(buf)
+	return string(buf.Bytes())
+}
