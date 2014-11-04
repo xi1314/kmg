@@ -36,7 +36,7 @@ func UrlGetContent(url string) (b []byte, err error) {
 }
 
 func HeaderToString(header http.Header) (s string) {
-	buf := bytes.Buffer{}
+	buf := &bytes.Buffer{}
 	header.Write(buf)
 	return string(buf.Bytes())
 }
