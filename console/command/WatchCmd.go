@@ -2,11 +2,12 @@ package command
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/fsnotify"
 	"github.com/bronze1man/kmg/kmgCmd"
-	"os"
-	"os/exec"
 )
 
 type WatchCmd struct {

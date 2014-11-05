@@ -3,9 +3,10 @@ package kmgExcel
 import (
 	"archive/zip"
 	"bytes"
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgTest"
 	"github.com/tealeg/xlsx"
-	"testing"
 	//"fmt"
 )
 

@@ -2,8 +2,9 @@ package typeTransform
 
 import "testing"
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"reflect"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestManager(ot *testing.T) {

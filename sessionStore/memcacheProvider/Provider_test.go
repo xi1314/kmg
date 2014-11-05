@@ -1,9 +1,10 @@
 package memcacheProvider
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"os"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func Test(ot *testing.T) {

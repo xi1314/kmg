@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/kmgConfig"
-	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/bronze1man/kmg/console"
+	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 type GoAllImport struct {

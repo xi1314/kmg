@@ -2,11 +2,12 @@ package defaultParameter
 
 import (
 	"fmt"
+	"path/filepath"
+	"sync"
+
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConfig/defaultEnv"
-	"path/filepath"
-	"sync"
 )
 
 var parameterOnce sync.Once

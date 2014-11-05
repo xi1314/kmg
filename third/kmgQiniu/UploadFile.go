@@ -2,6 +2,7 @@ package kmgQiniu
 
 import (
 	"fmt"
+
 	qiniuIo "github.com/qiniu/api/io"
 	"github.com/qiniu/api/rs"
 	"github.com/qiniu/rpc"

@@ -2,8 +2,9 @@ package ajkApi
 
 import (
 	"compress/flate"
-	"github.com/bronze1man/kmg/net/kmgHttp"
 	"net/http"
+
+	"github.com/bronze1man/kmg/net/kmgHttp"
 )
 
 type HttpApiFilter func(c *HttpApiContext, fc []HttpApiFilter)

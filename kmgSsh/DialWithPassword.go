@@ -1,8 +1,9 @@
 package kmgSsh
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"fmt"
+
+	"code.google.com/p/go.crypto/ssh"
 )
 
 type typePassword string

@@ -2,9 +2,10 @@ package defaultDb
 
 import (
 	"database/sql"
+	"sync"
+
 	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 	"github.com/bronze1man/kmg/kmgSql"
-	"sync"
 )
 
 var dbonce sync.Once

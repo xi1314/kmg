@@ -40,3 +40,26 @@ func HeaderToString(header http.Header) (s string) {
 	header.Write(buf)
 	return string(buf.Bytes())
 }
+
+//把request转换成[]byte,并且使body可以被再次读取
+func MustRequestToStringCanRead(req *http.Request) (s string) {
+	oldBody := req.Body
+	defer oldBody.Close()
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(body))
+	buf := &bytes.Buffer{}
+	req.Write(buf)
+	req.Body = ioutil.NopCloser(bytes.NewReader(body))
+	return string(buf.Bytes())
+}
+
+func MustRequestFromString(reqString string) (req *http.Request) {
+	req, err := http.ReadRequest(bufio.NewReader(bytes.NewReader([]byte(reqString))))
+	if err != nil {
+		panic(err)
+	}
+	return req
+}

@@ -2,9 +2,10 @@ package typeTransform
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgType"
 	"reflect"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgType"
 )
 
 //golang的kind分的太细

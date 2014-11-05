@@ -1,9 +1,10 @@
 package kmgTime
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestGetPeriodFromSortedList(ot *testing.T) {

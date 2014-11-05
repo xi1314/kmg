@@ -1,8 +1,9 @@
 package command
 
 import (
-	"github.com/bronze1man/kmg/console"
 	"os"
+
+	"github.com/bronze1man/kmg/console"
 )
 
 type CurrentDir struct {

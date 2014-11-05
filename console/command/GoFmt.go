@@ -1,10 +1,11 @@
 package command
 
 import (
+	"os"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
-	"os"
 )
 
 type GoFmt struct {

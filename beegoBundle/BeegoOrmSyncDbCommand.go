@@ -2,9 +2,10 @@ package beegoBundle
 
 import (
 	"flag"
+	"os"
+
 	"github.com/astaxie/beego/orm"
 	"github.com/bronze1man/kmg/console"
-	"os"
 )
 
 type BeegoOrmSyncDbCommand struct {

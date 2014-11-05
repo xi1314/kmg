@@ -1,13 +1,14 @@
 package upyun
 
 import (
-	"github.com/bronze1man/kmg/kmgLog"
-	"github.com/bronze1man/kmg/kmgTask"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgLog"
+	"github.com/bronze1man/kmg/kmgTask"
 )
 
 //批量upyun操作

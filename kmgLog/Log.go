@@ -3,9 +3,10 @@ package kmgLog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgFile"
 	"path/filepath"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 type Logger struct {

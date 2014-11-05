@@ -3,12 +3,14 @@ package kmgCrypto
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 	//"encoding/pem"
 	//"fmt"
 	//"crypto/x509"
 	"crypto"
+
 	"github.com/bronze1man/kmg/encoding/kmgBase64"
 	//"fmt"
 )

@@ -2,14 +2,15 @@ package kmgSsh
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/ssh"
 	"fmt"
-	"github.com/bronze1man/kmg/archive/kmgTar"
-	"github.com/bronze1man/kmg/kmgCmd"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"code.google.com/p/go.crypto/ssh"
+	"github.com/bronze1man/kmg/archive/kmgTar"
+	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 //transfer a directory to remote host,with single tcp and tar.gz format

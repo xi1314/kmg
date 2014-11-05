@@ -2,8 +2,9 @@ package defaultEnv
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConfig"
 	"sync"
+
+	"github.com/bronze1man/kmg/kmgConfig"
 )
 
 var envOnce sync.Once

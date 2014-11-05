@@ -2,10 +2,11 @@ package kmgSsh
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/ssh"
 	"fmt"
-	"github.com/howeyc/gopass"
 	"os"
+
+	"code.google.com/p/go.crypto/ssh"
+	"github.com/howeyc/gopass"
 )
 
 //run sudo a command in remote and ask password in current console,

@@ -5,8 +5,9 @@ import (
 	"github.com/bronze1man/kmg/kmgContext"
 	"github.com/bronze1man/kmg/kmgSql"
 
-	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 )
 
 type tBeegoOrmKey struct{}

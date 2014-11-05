@@ -3,11 +3,12 @@ package command
 import (
 	"flag"
 	"fmt"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
-	"path/filepath"
 )
 
 type GoCrossCompile struct {

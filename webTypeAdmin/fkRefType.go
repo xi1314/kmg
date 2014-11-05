@@ -2,9 +2,10 @@ package webTypeAdmin
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgType"
 	"html/template"
 	"reflect"
+
+	"github.com/bronze1man/kmg/kmgType"
 )
 
 var fkRefReflectType = reflect.TypeOf((*FkRef)(nil)).Elem()

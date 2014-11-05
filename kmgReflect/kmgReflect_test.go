@@ -1,9 +1,10 @@
 package kmgReflect
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"reflect"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 type ta struct {

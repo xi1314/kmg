@@ -2,9 +2,10 @@ package kmgYaml
 
 import "testing"
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"reflect"
 	"sort"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestKeyListLess(ot *testing.T) {

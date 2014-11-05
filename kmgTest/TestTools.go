@@ -3,8 +3,9 @@ package kmgTest
 import "fmt"
 import "reflect"
 import (
-	"github.com/bronze1man/kmg/kmgDebug" //TODO 移除这个依赖?
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgDebug" //TODO 移除这个依赖?
 )
 
 type TestingTB interface {

@@ -3,6 +3,7 @@ package command
 import (
 	"flag"
 	"fmt"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/encoding/kmgExcel"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"

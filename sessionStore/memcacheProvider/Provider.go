@@ -1,8 +1,9 @@
 package memcacheProvider
 
 import (
-	"github.com/bradfitz/gomemcache/memcache"
 	"net"
+
+	"github.com/bradfitz/gomemcache/memcache"
 )
 
 type Provider struct {

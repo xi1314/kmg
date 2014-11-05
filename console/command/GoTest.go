@@ -3,13 +3,14 @@ package command
 import (
 	"flag"
 	"fmt"
+	"go/build"
+	"os"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
-	"go/build"
-	"os"
-	"path/filepath"
 )
 
 /*
