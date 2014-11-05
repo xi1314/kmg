@@ -5,7 +5,7 @@ import (
 )
 
 func AddParameterToUrl(urls string, s map[string]string) (urlout string, err error) {
-	u, err := url.Parse("http://core.wall-et.net/order/check/checkOrder")
+	u, err := url.Parse(urls)
 	if err != nil {
 		return "", err
 	}
