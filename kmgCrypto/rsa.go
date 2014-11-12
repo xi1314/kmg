@@ -156,6 +156,6 @@ func RsaWithSha1PKCS1OpensslSignBase64(PKCS1privateKey []byte, msg []byte) (s st
 }
 
 //有时候会得到一个没有头没有尾的publicKey,使用这个函数加上 -----BEGIN PUBLIC KEY----- -----END PUBLIC KEY-----
-func PemAddStartEnd(in string)[]byte{
-	return []byte("-----BEGIN PUBLIC KEY-----\n"+in+"\n-----END PUBLIC KEY-----");
+func PemAddStartEnd(in string) []byte {
+	return []byte("-----BEGIN PUBLIC KEY-----\n" + in + "\n-----END PUBLIC KEY-----")
 }
