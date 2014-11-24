@@ -3,6 +3,7 @@ package kmgHttp
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -25,6 +26,15 @@ func DumpResponseToBytes(resp *http.Response) (b []byte, err error) {
 func ResponseReadAllBody(resp *http.Response) (b []byte, err error) {
 	defer resp.Body.Close()
 	return ioutil.ReadAll(resp.Body)
+}
+
+func MustResponseReadAllBody(resp *http.Response) (b []byte) {
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
 
 func UrlGetContent(url string) (b []byte, err error) {
@@ -62,4 +72,14 @@ func MustRequestFromString(reqString string) (req *http.Request) {
 		panic(err)
 	}
 	return req
+}
+
+func NewHttpsCertNotCheckClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 }

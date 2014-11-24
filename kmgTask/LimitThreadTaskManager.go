@@ -46,6 +46,10 @@ func (t *LimitThreadTaskManager) AddTask(task Task) {
 	t.task_chan <- task
 }
 
+func (t *LimitThreadTaskManager) AddFunc(f func()) {
+	t.AddTask(TaskFunc(f))
+}
+
 //等待所有任务完成
 func (t *LimitThreadTaskManager) Wait() {
 	t.wg.Wait()
@@ -64,6 +68,5 @@ func (t *LimitThreadTaskManager) AddTaskNewThread(task Task) {
 	go func() {
 		defer t.wg.Done()
 		task.Run()
-
 	}()
 }
