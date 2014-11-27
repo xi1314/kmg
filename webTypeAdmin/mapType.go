@@ -1,9 +1,10 @@
 package webTypeAdmin
 
 import (
-	"github.com/bronze1man/kmg/kmgType"
 	"html/template"
 	"reflect"
+
+	"github.com/bronze1man/kmg/kmgType"
 )
 
 //path -> key(Key type)

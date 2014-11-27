@@ -1,10 +1,11 @@
 package kmgConfig
 
 import (
-	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/encoding/kmgYaml"
 )
 
 //if you init it like &Context{xxx},please call Init()

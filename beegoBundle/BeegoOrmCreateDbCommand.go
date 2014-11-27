@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+
 	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	"github.com/bronze1man/kmg/kmgSql"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -23,8 +25,9 @@ func (command *BeegoOrmCreateDbCommand) ConfigFlagSet(flag *flag.FlagSet) {
 	flag.StringVar(&command.env, "env", "dev", "database env(dev,test)")
 }
 func (command *BeegoOrmCreateDbCommand) Execute(context *console.Context) (err error) {
+	InitOrm()
 	//work around for container bug
-	DbConfig := kmgConfig.DefParameter.GetDbConfig()
+	DbConfig := kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter())
 
 	dsn := fmt.Sprintf("%s:%s@%s/?charset=utf8&timeout=5s",
 		DbConfig.Username,

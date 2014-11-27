@@ -3,10 +3,11 @@ package kmgCrypto
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/bronze1man/kmg/kmgTest"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 type mockAddr struct {

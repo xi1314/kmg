@@ -1,11 +1,12 @@
 package command
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"github.com/bronze1man/kmg/kmgReflect"
-	"os"
-	"path/filepath"
 )
 
 type ParpareReflect struct {

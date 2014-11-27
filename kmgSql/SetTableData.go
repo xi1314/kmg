@@ -3,8 +3,9 @@ package kmgSql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"strings"
+
+	"github.com/bronze1man/kmg/encoding/kmgYaml"
 )
 
 func (db *Db) MustSetTablesDataYaml(yaml string) {

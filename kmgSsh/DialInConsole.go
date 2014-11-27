@@ -1,11 +1,12 @@
 package kmgSsh
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"fmt"
-	"github.com/howeyc/gopass"
 	"io/ioutil"
 	"os"
+
+	"code.google.com/p/go.crypto/ssh"
+	"github.com/howeyc/gopass"
 )
 
 type consoleAskPassword struct {

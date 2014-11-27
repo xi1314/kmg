@@ -2,10 +2,11 @@
 package fsnotify
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
-	originFsnotify "github.com/howeyc/fsnotify"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgFile"
+	originFsnotify "github.com/howeyc/fsnotify"
 )
 
 // it is a wrapper of github.com/howeyc/fsnotify.Watcher

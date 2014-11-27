@@ -1,8 +1,6 @@
 package kmgRand
 
-import (
 //"fmt"
-)
 
 func (t *Tester) TestCombinatoricsRandom2d() {
 	r := NewInt64SeedKmgRand(0)

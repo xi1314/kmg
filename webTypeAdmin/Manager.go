@@ -3,10 +3,11 @@ package webTypeAdmin
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgType"
 	"html/template"
 	"net/http"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgType"
 )
 
 type Manager struct {

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgRand/LcgCalculateConstants"
 	"os"
 	"strconv"
+
+	"github.com/bronze1man/kmg/kmgRand/LcgCalculateConstants"
 )
 
 func main() {

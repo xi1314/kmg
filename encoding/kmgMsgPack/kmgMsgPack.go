@@ -2,9 +2,10 @@ package kmgMsgPack
 
 import (
 	"bytes"
-	"github.com/ugorji/go/codec"
 	"io/ioutil"
 	"os"
+
+	"github.com/ugorji/go/codec"
 )
 
 func WriteFile(path string, obj interface{}) (err error) {

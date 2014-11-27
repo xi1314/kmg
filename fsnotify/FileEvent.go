@@ -1,8 +1,9 @@
 package fsnotify
 
 import (
-	originFsnotify "github.com/howeyc/fsnotify"
 	"time"
+
+	originFsnotify "github.com/howeyc/fsnotify"
 )
 
 //it is a wrapper of github.com/howeyc/fsnotify.FileEvent

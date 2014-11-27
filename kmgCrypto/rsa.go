@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"math/big"
@@ -134,4 +135,27 @@ func RsaOpensslVerify(pub *rsa.PublicKey, h crypto.Hash, msg []byte, sig []byte)
 	digest := h1.Sum(nil)
 	err = rsa.VerifyPKCS1v15(pub, h, digest, sig)
 	return
+}
+
+//支付宝签名的默认方式,
+// 放在这里主要用于文档该功能如何实现,
+// 并且提供一种签名的方式
+// 读入 PKCS1格式私钥字符串 , 需要签名的数据
+// 返回 签名后的数据
+func RsaWithSha1PKCS1OpensslSignBase64(PKCS1privateKey []byte, msg []byte) (s string, err error) {
+	block, _ := pem.Decode(PKCS1privateKey)
+	private, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return
+	}
+	b, err := RsaOpensslSign(private, crypto.SHA1, msg)
+	if err != nil {
+		return
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+//有时候会得到一个没有头没有尾的publicKey,使用这个函数加上 -----BEGIN PUBLIC KEY----- -----END PUBLIC KEY-----
+func PemAddStartEnd(in string) []byte {
+	return []byte("-----BEGIN PUBLIC KEY-----\n" + in + "\n-----END PUBLIC KEY-----")
 }

@@ -1,11 +1,12 @@
 package kmgYaml
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"math"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 var unmarshalIntTest = 123

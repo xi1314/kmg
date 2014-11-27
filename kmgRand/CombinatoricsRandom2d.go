@@ -2,6 +2,7 @@ package kmgRand
 
 import (
 	"fmt"
+
 	"github.com/bronze1man/kmg/kmgMath"
 	"github.com/bronze1man/kmg/kmgSlice"
 	"github.com/bronze1man/kmg/kmgSort"

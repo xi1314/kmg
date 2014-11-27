@@ -2,13 +2,14 @@ package command
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/fsnotify"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
-	"os"
-	"os/exec"
-	"path/filepath"
 )
 
 //Warning!! do not use go run to build executes...

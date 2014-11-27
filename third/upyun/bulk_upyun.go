@@ -1,35 +1,36 @@
 package upyun
 
-import "github.com/bronze1man/kmg/kmgTask"
-import "github.com/bronze1man/kmg/kmgLog"
-import "os"
-import "strconv"
-import "time"
-import "sync"
-import "path/filepath"
+import (
+	"os"
+	"path/filepath"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/bronze1man/kmg/kmgLog"
+	"github.com/bronze1man/kmg/kmgTask"
+)
 
 //批量upyun操作
 type BulkUpyun struct {
-	UpYun  *UpYun
-	Tm     *kmgTask.LimitThreadTaskManager
-	Logger kmgLog.Logger
+	UpYun *UpYun
+	Tm    *kmgTask.LimitThreadTaskManager
 }
 
 //批量上传接口
 //upload a file
 func (obj *BulkUpyun) UploadFile(upyun_path, local_path string) {
 	obj.Tm.AddTask(kmgTask.TaskFunc(func() {
-
-		obj.Logger.Info("upload file: " + upyun_path)
+		kmgLog.Log("upyun", "upload file: "+upyun_path, nil)
 		file, err := os.Open(local_path)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		defer file.Close()
 		err = obj.UpYun.WriteFile(upyun_path, file, true)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		return
@@ -39,20 +40,21 @@ func (obj *BulkUpyun) UploadFile(upyun_path, local_path string) {
 //upload a dir
 func (obj *BulkUpyun) UploadDir(upyun_path, local_path string) {
 	obj.Tm.AddTask(kmgTask.TaskFunc(func() {
-		obj.Logger.Info("upload dir: " + upyun_path)
+		kmgLog.Log("upyun", "upload dir: "+upyun_path, nil)
+
 		dir, err := os.Open(local_path)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		file_list, err := dir.Readdir(0)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		err = obj.UpYun.MkDir(upyun_path, true)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		for _, file_info := range file_list {
@@ -72,22 +74,22 @@ func (obj *BulkUpyun) UploadDir(upyun_path, local_path string) {
 //download a file
 func (obj *BulkUpyun) DownloadFile(upyun_path, local_path string) {
 	obj.Tm.AddTask(kmgTask.TaskFunc(func() {
-		obj.Logger.Info("download file: " + upyun_path)
+		kmgLog.Log("upyun", "download file: "+upyun_path, nil)
 		err := os.MkdirAll(filepath.Dir(local_path), os.FileMode(0777))
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 
 		file, err := os.Create(local_path)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		defer file.Close()
 		err = obj.UpYun.ReadFile(upyun_path, file)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		return
@@ -97,11 +99,11 @@ func (obj *BulkUpyun) DownloadFile(upyun_path, local_path string) {
 //resursive download a dir
 func (obj *BulkUpyun) DownloadDir(upyun_path string, file_path string) {
 	obj.Tm.AddTask(kmgTask.TaskFunc(func() {
-		obj.Logger.Info("download dir: " + upyun_path)
+		kmgLog.Log("upyun", "download dir: "+upyun_path, nil)
 		file_list, err := obj.UpYun.ReadDir(upyun_path)
 		file_mode := os.FileMode(0777)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		for _, file_info := range file_list {
@@ -112,14 +114,14 @@ func (obj *BulkUpyun) DownloadDir(upyun_path string, file_path string) {
 			if file_type == "folder" {
 				err := os.MkdirAll(this_local_path, file_mode)
 				if err != nil {
-					obj.Logger.Error("os.MkdirAll fail!" + err.Error())
+					kmgLog.Log("upyunError", "os.MkdirAll fail!"+err.Error(), err)
 					return
 				}
 				obj.DownloadDir(this_upyun_path, this_local_path)
 			} else if file_type == "file" {
 				obj.DownloadFile(this_upyun_path, this_local_path)
 			} else {
-				obj.Logger.Critical("unknow file type2:" + file_type)
+				kmgLog.Log("upyunError", "unknow file type2:"+file_type, err)
 				return
 			}
 		}
@@ -151,10 +153,10 @@ func (obj *BulkUpyun) DeleteDir(upyun_path string) {
 func (obj *BulkUpyun) deleteFile(upyun_path string, finish_wg *sync.WaitGroup) {
 	obj.Tm.AddTask(kmgTask.TaskFunc(func() {
 		defer finish_wg.Done()
-		obj.Logger.Info("delete file: " + upyun_path)
+		kmgLog.Log("upyun", "delete file: "+upyun_path, nil)
 		err := obj.UpYun.DeleteFile(upyun_path)
 		if err != nil {
-			obj.Logger.Error("delete file failed!:" + upyun_path + ":" + err.Error())
+			kmgLog.Log("upyunError", "delete file failed!:"+upyun_path+":"+err.Error(), nil)
 			return
 		}
 		return
@@ -172,10 +174,10 @@ func (obj *BulkUpyun) deleteDir(upyun_path string, finish_wg *sync.WaitGroup) {
 			wg.Wait()
 			finish_wg.Done()
 		}))
-		obj.Logger.Info("delete dir: " + upyun_path)
+		kmgLog.Log("upyun", "delete dir: "+upyun_path, nil)
 		file_list, err := obj.UpYun.ReadDir(upyun_path)
 		if err != nil {
-			obj.Logger.LogError(err)
+			kmgLog.Log("upyunError", err.Error(), err)
 			return
 		}
 		for _, file_info := range file_list {
@@ -189,7 +191,7 @@ func (obj *BulkUpyun) deleteDir(upyun_path string, finish_wg *sync.WaitGroup) {
 				wg.Add(1)
 				obj.deleteFile(this_upyun_path, wg)
 			} else {
-				obj.Logger.Critical("unknow file type2:" + file_type)
+				kmgLog.Log("upyunError", "unknow file type2:"+file_type, nil)
 				return
 			}
 		}

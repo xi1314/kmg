@@ -1,8 +1,9 @@
 package command
 
 import (
-	"github.com/bronze1man/kmg/console"
 	"runtime"
+
+	"github.com/bronze1man/kmg/console"
 )
 
 type CurrentPlatform struct {

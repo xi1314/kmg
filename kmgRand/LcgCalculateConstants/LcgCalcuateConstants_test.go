@@ -1,8 +1,9 @@
 package LcgCalculateConstants
 
 import (
-	"github.com/bronze1man/kmg/kmgRand"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgRand"
 )
 
 func TestLcgCalculateConstants(ot *testing.T) {

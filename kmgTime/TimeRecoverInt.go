@@ -19,6 +19,12 @@ func (t *TimeRecoverInt) Sync(now time.Time) {
 	timeDuring := now.Sub(t.LastRecoverTime)
 	staminaTimes := float64(timeDuring) / float64(t.AddDuration)
 	addStamina := int(math.Floor(staminaTimes))
+	//添加体力后,体力满了
+	if (addStamina + t.Num) >= t.Max {
+		t.LastRecoverTime = now
+		t.Num = t.Max
+		return
+	}
 	//可能是数据错误,重置
 	if addStamina < 0 {
 		t.LastRecoverTime = now
@@ -26,12 +32,6 @@ func (t *TimeRecoverInt) Sync(now time.Time) {
 	}
 	//没有添加体力
 	if addStamina == 0 {
-		return
-	}
-	//添加体力后,体力满了
-	if (addStamina + t.Num) >= t.Max {
-		t.LastRecoverTime = now
-		t.Num = t.Max
 		return
 	}
 	t.Num = addStamina + t.Num

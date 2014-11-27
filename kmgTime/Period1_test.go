@@ -1,9 +1,10 @@
 package kmgTime
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"sort"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 //approach 1

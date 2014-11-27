@@ -3,12 +3,13 @@ package command
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgFile"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/console"
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 //https证书生成,会先生成一个根证书,然后生成几个客户端证书

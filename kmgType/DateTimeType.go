@@ -1,9 +1,10 @@
 package kmgType
 
 import (
-	"github.com/bronze1man/kmg/kmgTime"
 	"reflect"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 var DateTimeReflectType = reflect.TypeOf((*time.Time)(nil)).Elem()

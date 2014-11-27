@@ -1,8 +1,9 @@
 package kmgExcel
 
 import (
-	"github.com/tealeg/xlsx"
 	"strings"
+
+	"github.com/tealeg/xlsx"
 	//"io"
 	//"archive/zip"
 )

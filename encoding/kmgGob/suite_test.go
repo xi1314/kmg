@@ -1,8 +1,9 @@
 package kmgGob
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func Test(t *testing.T) {

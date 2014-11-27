@@ -2,10 +2,11 @@ package kmgQiniu
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgTask"
-	"github.com/qiniu/api/rs"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgTask"
+	"github.com/qiniu/api/rs"
 	//"github.com/qiniu/rpc"
 )
 

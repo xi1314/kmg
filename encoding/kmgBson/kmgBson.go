@@ -2,8 +2,9 @@ package kmgBson
 
 import (
 	"io/ioutil"
-	"labix.org/v2/mgo/bson"
 	"os"
+
+	"labix.org/v2/mgo/bson"
 )
 
 func WriteFile(path string, obj interface{}) (err error) {
