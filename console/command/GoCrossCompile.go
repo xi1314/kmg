@@ -12,6 +12,7 @@ import (
 
 type GoCrossCompile struct {
 	outputPath string
+	version    string
 }
 
 func (command *GoCrossCompile) GetNameConfig() *console.NameConfig {
@@ -25,6 +26,7 @@ the output file will put into $project_root/bin/name_GOOS_GOARCH[.exe]
 }
 func (command *GoCrossCompile) ConfigFlagSet(flag *flag.FlagSet) {
 	flag.StringVar(&command.outputPath, "o", "", "output file dir(file name come from source file name),default to $project_root/bin")
+	flag.StringVar(&command.version, "v", "", "version string in output file name")
 }
 func (command *GoCrossCompile) Execute(context *console.Context) (err error) {
 	if len(context.Args) <= 2 {
@@ -40,7 +42,13 @@ func (command *GoCrossCompile) Execute(context *console.Context) (err error) {
 		command.outputPath = filepath.Join(kmgc.ProjectPath, "bin")
 	}
 	for _, target := range kmgc.CrossCompileTarget {
-		fileName := targetName + "_" + target.GetGOOS() + "_" + target.GetGOARCH()
+		fileName := ""
+		if command.version == "" {
+			fileName = targetName + "_" + target.GetGOOS() + "_" + target.GetGOARCH()
+		} else {
+			fileName = targetName + "_" + command.version + "_" + target.GetGOOS() + "_" + target.GetGOARCH()
+		}
+
 		if target.GetGOOS() == "windows" {
 			fileName = fileName + ".exe"
 		}
