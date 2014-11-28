@@ -9,4 +9,3 @@ type StructWriterReaderCloser struct {
 	io.Reader
 	io.Closer
 }
-

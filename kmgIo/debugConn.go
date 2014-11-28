@@ -14,19 +14,19 @@ type debugRwc struct {
 func NewDebugRwc(rwc io.ReadWriteCloser, name string) debugRwc {
 	return debugRwc{
 		ReadWriteCloser: rwc,
-		Name:   name,
+		Name:            name,
 	}
 }
 
 func (c debugRwc) Write(b []byte) (n int, err error) {
 	n, err = c.ReadWriteCloser.Write(b)
-	fmt.Println("[debugConn]", c.Name, "Write len:",n,"err:",err,"content:", b)
+	fmt.Println("[debugConn]", c.Name, "Write len:", n, "err:", err, "content:", b)
 	return n, err
 }
 
 func (c debugRwc) Read(b []byte) (n int, err error) {
 	n, err = c.ReadWriteCloser.Read(b)
-	fmt.Println("[debugConn]", c.Name, "Read inputLen:",len(b),"outputLen:",n,"err:",err,"content:", b[:n])
+	fmt.Println("[debugConn]", c.Name, "Read inputLen:", len(b), "outputLen:", n, "err:", err, "content:", b[:n])
 	return n, err
 }
 

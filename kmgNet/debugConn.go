@@ -1,11 +1,10 @@
 package kmgNet
 
 import (
+	"github.com/bronze1man/kmg/kmgIo"
 	"io"
 	"net"
-	"github.com/bronze1man/kmg/kmgIo"
 )
-
 
 // a net.Conn with Reader Writer Closer override
 type connRwcer struct {

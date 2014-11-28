@@ -70,7 +70,7 @@ func UnmarshalNoType(r []byte) (interface{}, error) {
 
 // for debug to inspect content in obj
 func MustMarshalToString(obj interface{}) string {
-	output, err := json.Marshal(obj)
+	output, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
 		panic(err)
 	}
