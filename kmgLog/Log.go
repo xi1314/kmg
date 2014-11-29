@@ -41,7 +41,10 @@ func (lw fileJsonLogWriter) LogWrite(category string, row LogRow) (err error) {
 	}
 	return
 }
+
+//new file json log, will mkdir if dir not exist.
 func NewFileJsonLogger(logDir string) *Logger {
+	kmgFile.MustMkdirAll(logDir)
 	return &Logger{
 		LogWriter: fileJsonLogWriter{
 			logDir: logDir,
