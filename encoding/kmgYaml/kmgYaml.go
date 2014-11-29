@@ -40,6 +40,13 @@ func WriteFile(path string, obj interface{}) error {
 	return ioutil.WriteFile(path, out, os.FileMode(0777))
 }
 
+func MustWriteFile(path string, obj interface{}) {
+	err := WriteFile(path, obj)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Yaml2JsonIo(r io.Reader, w io.Writer) (err error) {
 	input, err := ioutil.ReadAll(r)
 	if err != nil {
