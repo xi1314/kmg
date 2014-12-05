@@ -34,7 +34,6 @@ func MustWriteFileIndent(path string, obj interface{}) {
 	}
 }
 
-
 //读取json文件,并修正json的类型问题(map key 必须是string的问题)
 func ReadFileTypeFix(path string, obj interface{}) error {
 	b, err := ioutil.ReadFile(path)
