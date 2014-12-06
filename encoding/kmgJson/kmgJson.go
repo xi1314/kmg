@@ -88,6 +88,10 @@ func MustMarshalIndentToString(obj interface{}) string {
 	return string(output)
 }
 
+func MarshalIndent(obj interface{}) ([]byte,error) {
+	return json.MarshalIndent(obj, "", "  ")
+}
+
 func MustMarshal(obj interface{}) []byte {
 	output, err := json.Marshal(obj)
 	if err != nil {
