@@ -70,7 +70,7 @@ type stdoutLogWriter struct {
 }
 
 func (nl stdoutLogWriter) LogWrite(category string, row LogRow) (err error) {
-	b, err := json.Marshal([]interface{}{category,row})
+	b, err := json.Marshal([]interface{}{category, row})
 	if err != nil {
 		return err
 	}

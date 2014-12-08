@@ -68,6 +68,8 @@ func version() {
 
 type tActionList []Command
 
-func (t tActionList) Len() int           { return len(t) }
-func (t tActionList) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t tActionList) Less(i, j int) bool { return strings.ToLower(t[i].Name) < strings.ToLower(t[j].Name) }
+func (t tActionList) Len() int      { return len(t) }
+func (t tActionList) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+func (t tActionList) Less(i, j int) bool {
+	return strings.ToLower(t[i].Name) < strings.ToLower(t[j].Name)
+}
