@@ -29,6 +29,11 @@ func ResponseReadAllBody(resp *http.Response) (b []byte, err error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
+func RequestReadAllBody(resp *http.Request) (b []byte, err error) {
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
 func MustResponseReadAllBody(resp *http.Response) (b []byte) {
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
