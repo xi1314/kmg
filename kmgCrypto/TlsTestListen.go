@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"net"
 	"sync"
+	//"github.com/bronze1man/kmg/kmgNet"
 )
 
 var testServerPrivateCert = []byte(`-----BEGIN RSA PRIVATE KEY-----
@@ -87,3 +88,16 @@ func GetTlsTestServerConfig() *tls.Config {
 	})
 	return tlsTestServerConfig
 }
+
+// 返回一个不验证对方证书有效性,并且发送127.0.0.1域名给对方的拨号器
+// 这个拨号器是不安全的,仅供测试或不需要安全的应用
+/*
+func NewTestTlsDialer(addr string) kmgNet.RwcDialer{
+	return kmgNet.RwcDialerFunc(func(){
+		tls.Dial("tcp", addr, &tls.Config{
+				ServerName:         "127.0.0.1",
+				InsecureSkipVerify: true,
+			})
+	})
+}
+*/

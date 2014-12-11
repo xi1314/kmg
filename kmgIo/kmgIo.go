@@ -12,6 +12,3 @@ func MustReadAll(r io.Reader) (b []byte) {
 	}
 	return b
 }
-
-
-

@@ -41,7 +41,10 @@ func (lw fileJsonLogWriter) LogWrite(category string, row LogRow) (err error) {
 	}
 	return
 }
+
+//new file json log, will mkdir if dir not exist.
 func NewFileJsonLogger(logDir string) *Logger {
+	kmgFile.MustMkdirAll(logDir)
 	return &Logger{
 		LogWriter: fileJsonLogWriter{
 			logDir: logDir,
@@ -67,11 +70,11 @@ type stdoutLogWriter struct {
 }
 
 func (nl stdoutLogWriter) LogWrite(category string, row LogRow) (err error) {
-	b, err := json.Marshal(row)
+	b, err := json.Marshal([]interface{}{category, row})
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Printf("%s %s\n", category, b)
+	_, err = fmt.Printf("%s\n", b)
 	return
 }
 

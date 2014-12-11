@@ -23,6 +23,17 @@ func MustReadFile(path string, obj interface{}) {
 	}
 }
 
+func MustWriteFileIndent(path string, obj interface{}) {
+	output, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile(path, output, os.FileMode(0777))
+	if err != nil {
+		panic(err)
+	}
+}
+
 //读取json文件,并修正json的类型问题(map key 必须是string的问题)
 func ReadFileTypeFix(path string, obj interface{}) error {
 	b, err := ioutil.ReadFile(path)
@@ -69,12 +80,16 @@ func UnmarshalNoType(r []byte) (interface{}, error) {
 }
 
 // for debug to inspect content in obj
-func MustMarshalToString(obj interface{}) string {
-	output, err := json.Marshal(obj)
+func MustMarshalIndentToString(obj interface{}) string {
+	output, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
 		panic(err)
 	}
 	return string(output)
+}
+
+func MarshalIndent(obj interface{}) ([]byte, error) {
+	return json.MarshalIndent(obj, "", "  ")
 }
 
 func MustMarshal(obj interface{}) []byte {

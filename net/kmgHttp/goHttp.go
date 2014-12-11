@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {
@@ -24,6 +25,11 @@ func DumpResponseToBytes(resp *http.Response) (b []byte, err error) {
 }
 
 func ResponseReadAllBody(resp *http.Response) (b []byte, err error) {
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
+func RequestReadAllBody(resp *http.Request) (b []byte, err error) {
 	defer resp.Body.Close()
 	return ioutil.ReadAll(resp.Body)
 }
@@ -80,6 +86,27 @@ func NewHttpsCertNotCheckClient() *http.Client {
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
+		},
+	}
+}
+
+//一个不验证证书,并且使用http代理的http客户端
+// httpProxy look like http://127.0.0.1:9876
+func MustNewTestClientWithHttpProxy(httpProxy string) *http.Client {
+	var Proxy func(*http.Request) (*url.URL, error)
+	if httpProxy != "" {
+		u, err := url.Parse(httpProxy)
+		if err != nil {
+			panic(err)
+		}
+		Proxy = http.ProxyURL(u)
+	}
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+			Proxy: Proxy,
 		},
 	}
 }

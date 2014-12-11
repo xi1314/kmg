@@ -3,6 +3,8 @@ package kmgConsole
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 )
 
 var VERSION = "1.0"
@@ -14,7 +16,7 @@ type Command struct {
 
 var actionList = []Command{
 	{
-		Name:   "version",
+		Name:   "Version",
 		Runner: version,
 	},
 }
@@ -26,7 +28,7 @@ func Main() {
 	}
 	var action Command
 	for i := 0; i < len(actionList); i++ {
-		if actionList[i].Name == actionName {
+		if strings.EqualFold(actionList[i].Name, actionName) {
 			action = actionList[i]
 			break
 		}
@@ -47,13 +49,14 @@ func AddAction(action Command) {
 //avoid initialization loop
 func init() {
 	AddAction(Command{
-		Name:   "help",
+		Name:   "Help",
 		Runner: help,
 	})
 }
 
 func help() {
 	fmt.Println("Usage: ")
+	sort.Sort(tActionList(actionList))
 	for i := 0; i < len(actionList); i++ {
 		fmt.Println("\t", actionList[i].Name)
 	}
@@ -61,4 +64,12 @@ func help() {
 
 func version() {
 	fmt.Println(VERSION)
+}
+
+type tActionList []Command
+
+func (t tActionList) Len() int      { return len(t) }
+func (t tActionList) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+func (t tActionList) Less(i, j int) bool {
+	return strings.ToLower(t[i].Name) < strings.ToLower(t[j].Name)
 }
