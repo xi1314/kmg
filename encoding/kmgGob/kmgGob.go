@@ -62,6 +62,6 @@ func MustUnmarshal(data []byte, obj interface{}) {
 // 创建一个没有中间buf的gobDecode ,
 // 系统已有的gob.NewDecoder, 会在Reader不是一个ByteReader时, 使用bufio 进行读取,
 // 根据 gob.NewDecoder 的代码显示 使用singleReader可以解决问题
-func NewNonBufDecode(r io.Reader) io.Reader {
+func NewNonBufDecode(r io.Reader) *gob.Decoder {
 	return gob.NewDecoder(kmgIo.NewSingleByteReader(r))
 }
