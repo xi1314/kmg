@@ -88,8 +88,11 @@ func Unmarshal(in []byte, out interface{}) (err error) {
 	node := p.parse()
 	if node != nil {
 		val := reflect.ValueOf(out)
-		if val.Kind() != reflect.Ptr {
-			return errors.New("YAML error: Unmarshal need a pointer.")
+		switch val.Kind() {
+		case reflect.Ptr, reflect.Map:
+		default:
+			return errors.New("YAML error: Unmarshal need a pointer or a map.")
+
 		}
 		d.unmarshal(node, val)
 	}
