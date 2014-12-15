@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {
@@ -88,6 +89,22 @@ func NewHttpsCertNotCheckClient() *http.Client {
 			},
 		},
 	}
+}
+
+var httpsNotCheckClient *http.Client
+var httpsNotCheckClientOnce sync.Once
+
+func GetHttpsCertNotCheckClient() *http.Client {
+	httpsNotCheckClientOnce.Do(func() {
+		httpsNotCheckClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		}
+	})
+	return httpsNotCheckClient
 }
 
 //一个不验证证书,并且使用http代理的http客户端
