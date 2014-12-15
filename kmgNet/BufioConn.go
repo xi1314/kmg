@@ -22,11 +22,11 @@ func (c bufioConn) Close() error {
 }
 
 func (c bufioConn) LocalAddr() net.Addr {
-	return bufioAddr{}
+	return FakeAddr
 }
 
 func (c bufioConn) RemoteAddr() net.Addr {
-	return bufioAddr{}
+	return FakeAddr
 }
 
 func (c bufioConn) SetDeadline(t time.Time) error {
@@ -41,12 +41,14 @@ func (c bufioConn) SetWriteDeadline(t time.Time) error {
 	return errors.New("kmgNet.BufioConn does not support deadlines")
 }
 
-type bufioAddr struct{}
+var FakeAddr = fakeAddr{}
 
-func (a bufioAddr) Network() string {
-	return "bufioAddr"
+type fakeAddr struct{}
+
+func (a fakeAddr) Network() string {
+	return "fakeAddr"
 }
 
-func (a bufioAddr) String() string {
-	return "bufioAddr"
+func (a fakeAddr) String() string {
+	return "fakeAddr"
 }
