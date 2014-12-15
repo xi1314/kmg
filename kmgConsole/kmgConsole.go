@@ -11,6 +11,7 @@ var VERSION = "1.0"
 
 type Command struct {
 	Name   string
+	Desc   string
 	Runner func()
 }
 

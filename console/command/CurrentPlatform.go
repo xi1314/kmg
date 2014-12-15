@@ -1,21 +1,19 @@
 package command
 
 import (
+	"fmt"
+	"github.com/bronze1man/kmg/kmgConsole"
 	"runtime"
-
-	"github.com/bronze1man/kmg/console"
 )
 
-type CurrentPlatform struct {
+func init() {
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "CurrentPlatform",
+		Desc:   "get current platform(from this binary)",
+		Runner: runCurrentPlatform,
+	})
 }
 
-func (command *CurrentPlatform) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "CurrentPlatform",
-		Short: "get current platform(from this binary)",
-	}
-}
-
-func (command *CurrentPlatform) Execute(context *console.Context) (err error) {
-	_, err = context.Stdout.Write([]byte(runtime.GOOS + "_" + runtime.GOARCH))
-	return
+func runCurrentPlatform() {
+	fmt.Println(runtime.GOOS + "_" + runtime.GOARCH)
 }

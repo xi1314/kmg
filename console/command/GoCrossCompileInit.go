@@ -3,27 +3,27 @@ package command
 import (
 	"fmt"
 	"path/filepath"
-	"runtime"
 
-	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgConsole"
+	"runtime"
 )
 
-type GoCrossCompileInit struct {
+func init() {
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "GoCrossCompileInit",
+		Desc:   "cross compile init target in current project",
+		Runner: runGoCrossCompileInit,
+	})
 }
 
-func (command *GoCrossCompileInit) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "GoCrossCompileInit", Short: "cross compile init target in current project"}
-}
-func (command *GoCrossCompileInit) Execute(context *console.Context) (err error) {
+func runGoCrossCompileInit() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
-	if err != nil {
-		return
-	}
+	exitOnErr(err)
 	GOROOT := kmgc.GOROOT
 	if GOROOT == "" {
-		return fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit")
+		exitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
 	}
 	var makeShellArgs []string
 	var makeShellName string
@@ -36,14 +36,12 @@ func (command *GoCrossCompileInit) Execute(context *console.Context) (err error)
 		makeShellArgs = []string{"--no-clean"}
 	}
 	for _, target := range kmgc.CrossCompileTarget {
-		cmd := kmgCmd.NewStdioCmd(context, makeShellName, makeShellArgs...)
+		cmd := kmgCmd.NewOsStdioCmd(makeShellName, makeShellArgs...)
 		kmgCmd.SetCmdEnv(cmd, "GOOS", target.GetGOOS())
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		cmd.Dir = runCmdPath
 		err = cmd.Run()
-		if err != nil {
-			return err
-		}
+		exitOnErr(err)
 	}
 	return
 }

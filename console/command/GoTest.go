@@ -3,15 +3,80 @@ package command
 import (
 	"flag"
 	"fmt"
+	"github.com/bronze1man/kmg/console"
+	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
 	"path/filepath"
 
-	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
-	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgConsole"
 )
+
+/*
+递归目录的go test
+ 支持.kmg.yml目录结构提示文件(该文件必须存在)
+ -v 更详细的描述
+ -m 一个模块名,从这个模块名开始递归目录测试
+ -d 一个目录名,从这个目录开始递归目录测试
+ -bench benchmarks参数,直接传递到go test
+ -onePackage 不递归目录测试,仅测试一个package
+*/
+func init() {
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "GoTest",
+		Desc:   "递归目录的go test",
+		Runner: runGoTest,
+	})
+}
+
+func runGoTest() {
+	command := GoTest{}
+	flag.BoolVar(&command.v, "v", false, "show output of test")
+	flag.StringVar(&command.dir, "d", "", "dir path to test")
+	flag.StringVar(&command.moduleName, "m", "", "module name to test")
+	flag.StringVar(&command.bench, "bench", "", "bench parameter pass to go test")
+	flag.BoolVar(&command.onePackage, "onePackage", false, "only test one package")
+	flag.StringVar(&command.runArg, "run", "", "Run only those tests and examples matching the regular expression.")
+	flag.BoolVar(&command.onlyBuild, "onlyBuild", false, "only build all package(not test)")
+	flag.Parse()
+
+	kmgc, err := kmgConfig.LoadEnvFromWd()
+	if err == nil {
+		command.gopath = kmgc.GOPATH[0]
+	} else {
+		if kmgConfig.IsNotFound(err) {
+			command.gopath = os.Getenv("GOPATH")
+		} else {
+			exitOnErr(err)
+		}
+	}
+	//find root path
+	root, err := command.findRootPath()
+	exitOnErr(err)
+	command.buildContext = &build.Context{
+		GOPATH:   command.gopath,
+		Compiler: build.Default.Compiler,
+	}
+	if command.onePackage {
+		err = command.handlePath(root)
+		exitOnErr(err)
+	}
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			return nil
+		}
+		if kmgFile.IsDotFile(path) {
+			return filepath.SkipDir
+		}
+		return command.handlePath(path)
+	})
+	exitOnErr(err)
+}
 
 /*
 递归目录的 go test
@@ -34,68 +99,9 @@ type GoTest struct {
 	onlyBuild    bool
 }
 
-func (command *GoTest) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "GoTest",
-		Short: `递归目录的go test`,
-		Detail: `递归目录的go test
- 支持.kmg.yml目录结构提示文件(该文件必须存在)
- -v 更详细的描述
- -m 一个模块名,从这个模块名开始递归目录测试
- -d 一个目录名,从这个目录开始递归目录测试
- -bench benchmarks参数,直接传递到go test
- -onePackage 不递归目录测试,仅测试一个package`,
-	}
-}
-func (commamd *GoTest) ConfigFlagSet(f *flag.FlagSet) {
-	f.BoolVar(&commamd.v, "v", false, "show output of test")
-	f.StringVar(&commamd.dir, "d", "", "dir path to test")
-	f.StringVar(&commamd.moduleName, "m", "", "module name to test")
-	f.StringVar(&commamd.bench, "bench", "", "bench parameter pass to go test")
-	f.BoolVar(&commamd.onePackage, "onePackage", false, "only test one package")
-	f.StringVar(&commamd.runArg, "run", "", "Run only those tests and examples matching the regular expression.")
-	f.BoolVar(&commamd.onlyBuild, "onlyBuild", false, "only build all package(not test)")
-}
-func (command *GoTest) Execute(context *console.Context) (err error) {
-	command.context = context
-	kmgc, err := kmgConfig.LoadEnvFromWd()
-	if err == nil {
-		command.gopath = kmgc.GOPATH[0]
-	} else {
-		if kmgConfig.IsNotFound(err) {
-			command.gopath = os.Getenv("GOPATH")
-		} else {
-			return
-		}
-	}
-	//find root path
-	root, err := command.findRootPath(context)
-	if err != nil {
-		return
-	}
-	command.buildContext = &build.Context{
-		GOPATH:   command.gopath,
-		Compiler: build.Default.Compiler,
-	}
-	if command.onePackage {
-		return command.handlePath(root)
-	}
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			return nil
-		}
-		if kmgFile.IsDotFile(path) {
-			return filepath.SkipDir
-		}
-		return command.handlePath(path)
-	})
-}
-
-func (command *GoTest) findRootPath(context *console.Context) (root string, err error) {
-	if context.FlagSet().NArg() == 1 {
-		command.moduleName = context.FlagSet().Arg(0)
+func (command *GoTest) findRootPath() (root string, err error) {
+	if flag.NArg() == 1 {
+		command.moduleName = flag.Arg(0)
 	}
 	if command.dir != "" {
 		root = command.dir
@@ -173,11 +179,6 @@ func (command *GoTest) gotest(path string) error {
 }
 
 func (command *GoTest) gobuild(path string) error {
-	/*
-		args := []string{"build"}
-		if command.v {
-			fmt.Println("building ")
-		} */
 	fmt.Printf("[gobuild] path[%s]\n", path)
 	cmd := kmgCmd.NewStdioCmd(command.context, "go", "build")
 	cmd.Dir = path

@@ -1,28 +1,21 @@
 package command
 
 import (
+	"github.com/bronze1man/kmg/kmgConsole"
 	"os"
-
-	"github.com/bronze1man/kmg/console"
 )
 
-type CurrentDir struct {
+func init() {
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "CurrentDir",
+		Desc:   "get current dir(usefull in cygwin)",
+		Runner: runCurrentDir,
+	})
 }
 
-func (command *CurrentDir) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "CurrentDir",
-		Short: "get current dir(usefull in cygwin)",
-	}
-}
-
-func (command *CurrentDir) Execute(context *console.Context) error {
+func runCurrentDir() {
 	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	_, err = context.Stdout.Write([]byte(wd))
-	if err != nil {
-		return err
-	}
-	return nil
+	exitOnErr(err)
+	_, err = os.Stdout.Write([]byte(wd))
+	exitOnErr(err)
 }

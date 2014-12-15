@@ -1,26 +1,43 @@
 package command
 
 import (
-	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgConsole"
+	"os"
 )
 
-type Go struct {
+func init() {
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "Go",
+		Desc:   "run go command in current project",
+		Runner: newGoCommand(""),
+	})
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "GoBuild",
+		Desc:   "run go build in current project",
+		Runner: newGoCommand("build"),
+	})
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "GoRun",
+		Desc:   "run go run in current project",
+		Runner: newGoCommand("run"),
+	})
 }
 
-func (command *Go) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "Go", Short: "run go command in current project"}
-}
-func (command *Go) Execute(context *console.Context) (err error) {
-	cmd := kmgCmd.NewStdioCmd(context, "go", context.Args[2:]...)
-	kmgc, err := kmgConfig.LoadEnvFromWd()
-	if err != nil {
-		return
+func newGoCommand(command string) func() {
+	return func() {
+		args := []string{}
+		if command != "" {
+			args = append(args, command)
+		}
+		args = append(args, os.Args[1:]...)
+		cmd := kmgCmd.NewOsStdioCmd("go", args...)
+		kmgc, err := kmgConfig.LoadEnvFromWd()
+		exitOnErr(err)
+		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", kmgc.GOPATHToString())
+		exitOnErr(err)
+		err = cmd.Run()
+		exitOnErr(err)
 	}
-	err = kmgCmd.SetCmdEnv(cmd, "GOPATH", kmgc.GOPATHToString())
-	if err != nil {
-		return err
-	}
-	return cmd.Run()
 }
