@@ -58,6 +58,7 @@ func (server *ConnServer) Addr() (net.Addr, error) {
 
 //这一步会开始监听
 func NewTCPServer(listenAddr string, hander ConnHandler, closer io.Closer) (s *ConnServer, err error) {
+	s:=&ConnServer{}
 	s.Listener, err = net.Listen("tcp", listenAddr)
 	if err != nil {
 		return nil, err
