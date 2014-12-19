@@ -5,8 +5,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/binary"
-	"hash/adler32"
 	"hash"
+	"hash/adler32"
 )
 
 //长度32字节
@@ -36,17 +36,17 @@ func GetAdler32(message []byte) []byte {
 }
 
 //长度4字节 速度非常快 1GB/s
-func CheckAdler32Mac(message, messageMAC,key []byte) bool {
-	get := GetAdler32Mac(message,key)
+func CheckAdler32Mac(message, messageMAC, key []byte) bool {
+	get := GetAdler32Mac(message, key)
 	return hmac.Equal(get, messageMAC)
 }
 
-func GetAdler32Mac(message,key []byte) []byte {
+func GetAdler32Mac(message, key []byte) []byte {
 	mac := hmac.New(newAdler32, key)
 	mac.Write(message)
 	return mac.Sum(nil)
 }
 
-func newAdler32()hash.Hash{
+func newAdler32() hash.Hash {
 	return adler32.New()
 }

@@ -40,3 +40,27 @@ func MustServerStart(s Server) {
 		panic(err)
 	}
 }
+
+type FuncServer struct {
+	StartFunc func() error
+	CloseFunc func() error
+	AddrFunc  func() (net.Addr, error)
+	ExistAddr net.Addr
+}
+
+func (s *FuncServer) Start() error {
+	return s.StartFunc()
+}
+
+//关闭服务器,通常需要等一段时间(1ms)来等服务器确实关闭了
+func (s *FuncServer) Close() error {
+	return s.CloseFunc()
+}
+
+//监听地址,如果可能请返回net库里面有的Addr,如果还没有开始监听会panic
+func (s *FuncServer) Addr() (net.Addr, error) {
+	if s.ExistAddr != nil {
+		return s.ExistAddr, nil
+	}
+	return s.AddrFunc()
+}
