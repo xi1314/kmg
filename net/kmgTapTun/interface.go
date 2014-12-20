@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"io"
+	"runtime"
 	"strconv"
 )
 
@@ -28,7 +29,14 @@ type Interface interface {
 
 //set tun p2p ip and up this device
 func SetP2PIpAndUp(ifac Interface, srcIp string, destIp string) error {
-	return kmgCmd.RunOsStdioCmd("ifconfig", ifac.Name(), srcIp, destIp, "up")
+	switch runtime.GOOS {
+	case "darwin":
+		return kmgCmd.RunOsStdioCmd("ifconfig", ifac.Name(), srcIp, destIp, "up")
+	case "linux":
+		return kmgCmd.RunOsStdioCmd("ifconfig", ifac.Name(), srcIp, "pointopoint", destIp, "up")
+	default:
+		return ErrPlatformNotSupport
+	}
 }
 
 //set mtu on a device
