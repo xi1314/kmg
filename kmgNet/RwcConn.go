@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+func NewRwcOverConn(rwc io.ReadWriteCloser, conn net.Conn) net.Conn {
+	return &RwcOverConn{
+		Reader: rwc,
+		Writer: rwc,
+		Closer: rwc,
+		Conn:   conn,
+	}
+}
+
 type RwcOverConn struct {
 	io.Reader
 	io.Writer
