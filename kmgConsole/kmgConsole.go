@@ -15,8 +15,8 @@ type Command struct {
 	Runner func()
 }
 
-var actionList = []Command{
-	{
+var actionMap = map[string]Command{
+	"version": Command{
 		Name:   "Version",
 		Runner: version,
 	},
@@ -27,24 +27,26 @@ func Main() {
 	if len(os.Args) >= 2 {
 		actionName = os.Args[1]
 	}
-	var action Command
-	for i := 0; i < len(actionList); i++ {
-		if strings.EqualFold(actionList[i].Name, actionName) {
-			action = actionList[i]
-			break
-		}
-	}
-	if action.Name == "" {
-		fmt.Println("command not found")
+	lowerActionName := strings.ToLower(actionName)
+
+	action, exist := actionMap[lowerActionName]
+	if !exist {
+		fmt.Println("command " + actionName + " not found.(case insensitive)")
 		help()
 		return
 	}
+
 	os.Args = os.Args[1:]
 	action.Runner()
 }
 
 func AddAction(action Command) {
-	actionList = append(actionList, action)
+	name := strings.ToLower(action.Name)
+	_, exist := actionMap[name]
+	if exist {
+		panic("command " + action.Name + " already defined.(case insensitive)")
+	}
+	actionMap[name] = action
 }
 
 //avoid initialization loop
@@ -57,6 +59,10 @@ func init() {
 
 func help() {
 	fmt.Println("Usage: ")
+	actionList := make([]Command, 0, len(actionMap))
+	for _, command := range actionMap {
+		actionList = append(actionList, command)
+	}
 	sort.Sort(tActionList(actionList))
 	for i := 0; i < len(actionList); i++ {
 		fmt.Println("\t", actionList[i].Name)
