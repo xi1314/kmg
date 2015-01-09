@@ -20,7 +20,7 @@ func (entry TtlCacheEntry) GetTtl() uint32 {
 	if ttlDur < 0 {
 		ttlDur = 0
 	}
-	return uint32(kmgMath.FloorToInt(ttlDur.Seconds()))
+	return uint32(kmgMath.CeilToInt(ttlDur.Seconds()))
 }
 
 //请调用 NewTtlCache() 初始化
