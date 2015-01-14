@@ -1,7 +1,6 @@
 package kmgNet
 
 import (
-	"fmt"
 	"golang.org/x/sys/unix"
 	"net"
 	"os"
@@ -63,21 +62,11 @@ func TfoDial(nextAddr string, firstData []byte) (conn net.Conn, err error) {
 		return nil, err
 	}
 	defer unix.Close(s)
-	tcpAddr, err := net.ResolveTCPAddr("tcp", nextAddr)
+	sa, err := TcpAddrToUnixSocksAddr(nextAddr)
 	if err != nil {
 		return nil, err
 	}
-	ip := tcpAddr.IP.To4()
-	if ip == nil {
-		return nil, fmt.Errorf("[TProxyListen] only support tcp4 right now.")
-	}
-	var ipA [4]byte
-	copy(ipA[:], ip[:4])
-	sockAddr := &unix.SockaddrInet4{
-		Port: tcpAddr.Port,
-		Addr: ipA,
-	}
-	err = unix.Sendto(s, firstData, unix.MSG_FASTOPEN, sockAddr)
+	err = unix.Sendto(s, firstData, unix.MSG_FASTOPEN, sa)
 	if err != nil {
 		return
 	}
