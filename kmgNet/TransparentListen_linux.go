@@ -18,7 +18,7 @@ func TransparentListen(network string, listenAddr string) (listener net.Listener
 	if err != nil {
 		return nil, err
 	}
-	sa, err := TcpAddrToUnixSocksAddr(listenAddr)
+	sa, err := IPv4TcpAddrToUnixSocksAddr(listenAddr)
 	if err != nil {
 		return nil, err
 	}

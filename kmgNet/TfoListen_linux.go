@@ -21,7 +21,7 @@ func TfoListen(network string, listenAddr string) (listener net.Listener, err er
 	if err != nil {
 		return nil, err
 	}
-	sa, err := TcpAddrToUnixSocksAddr(listenAddr)
+	sa, err := IPv4TcpAddrToUnixSocksAddr(listenAddr)
 	if err != nil {
 		return nil, err
 	}

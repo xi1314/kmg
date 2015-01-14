@@ -62,7 +62,7 @@ func TfoDial(nextAddr string, firstData []byte) (conn net.Conn, err error) {
 		return nil, err
 	}
 	defer unix.Close(s)
-	sa, err := TcpAddrToUnixSocksAddr(nextAddr)
+	sa, err := IPv4TcpAddrToUnixSocksAddr(nextAddr)
 	if err != nil {
 		return nil, err
 	}

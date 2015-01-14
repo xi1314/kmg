@@ -1,5 +1,5 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd solaris
-	
+
 package kmgNet
 
 import (
@@ -7,16 +7,12 @@ import (
 	"net"
 )
 
-func TcpAddrToUnixSocksAddr(addr string) (sa unix.Sockaddr, err error) {
+func IPv4TcpAddrToUnixSocksAddr(addr string) (sa unix.Sockaddr, err error) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
-	if tcpAddr.IP.To4() == nil {
-		return ipToSocksAddr(unix.AF_INET6, tcpAddr.IP, tcpAddr.Port, tcpAddr.Zone)
-	} else {
-		return ipToSocksAddr(unix.AF_INET, tcpAddr.IP, tcpAddr.Port, tcpAddr.Zone)
-	}
+	return ipToSocksAddr(unix.AF_INET, tcpAddr.IP, tcpAddr.Port, tcpAddr.Zone)
 }
 
 //copy from http://golang.org/src/net/ipsock_posix.go?s=4615:4700#L130
