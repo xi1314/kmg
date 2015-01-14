@@ -14,7 +14,7 @@ import (
 // you should write something before read to use this function.
 // network is useless, it always use tcp4
 func TfoLazyDial(network string, nextAddr string) (conn net.Conn, err error) {
-	return &tfoLazyConn(network, nextAddr), nil
+	return &tfoLazyConn{nextAddr: nextAddr}, nil
 }
 
 type tfoLazyConn struct {
