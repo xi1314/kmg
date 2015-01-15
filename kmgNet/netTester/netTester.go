@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgTime"
 	"io"
 	"net"
 	"time"
@@ -12,6 +11,25 @@ import (
 
 type DirectDialer func() (net.Conn, error)
 type ListenNewer func() (net.Listener, error)
+
+/*
+func RunTcpTestWithListenAddr(listenAddr string,Dialer DirectDialer,debug bool){
+	return RunTcpListenerDialerTest(
+		func()(net.Listener,error){
+			return net.Listen("tcp",listenAddr)
+		},
+		Dialer,debug)
+}
+*/
+func RunTcpTestWithNetDialAndNetListener(listenAddr string, dialAddr string, debug bool) {
+	RunTcpListenerDialerTest(
+		func() (net.Listener, error) {
+			return net.Listen("tcp", listenAddr)
+		},
+		func() (net.Conn, error) {
+			return net.Dial("tcp", dialAddr)
+		}, debug)
+}
 
 func RunTcpListenerDialerTest(listenerNewer ListenNewer,
 	Dialer DirectDialer,
@@ -23,119 +41,9 @@ func RunTcpListenerDialerTest(listenerNewer ListenNewer,
 	readOnly(listenerNewer, Dialer, debug)
 	time.Sleep(time.Microsecond)
 	writeOnly(listenerNewer, Dialer, debug)
-}
-
-func writeRead(listenerNewer ListenNewer,
-	Dialer DirectDialer,
-	debug bool) {
-	listener := runEchoServer(listenerNewer)
-	defer listener.Close()
-
-	toWrite := []byte("hello world")
-
-	kmgTime.MustNotTimeout(func() {
-		conn1, err := Dialer()
-		mustNotError(err)
-
-		if debug {
-			conn1 = kmgNet.NewDebugConn(conn1, "writeRead")
-		}
-		defer conn1.Close()
-		for i := 0; i < 2; i++ {
-			_, err = conn1.Write(toWrite)
-			mustNotError(err)
-			time.Sleep(time.Microsecond)
-			mustReadSame(conn1, toWrite)
-			time.Sleep(time.Microsecond)
-		}
-		conn1.Close()
-	}, time.Second)
-	listener.Close()
-
-}
-
-func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
-	listener := runEchoServer(listenerNewer)
-	defer listener.Close()
-
-	toWrite := []byte("hello world")
-
-	kmgTime.MustNotTimeout(func() {
-		conn1, err := Dialer()
-		mustNotError(err)
-		if debug {
-			conn1 = kmgNet.NewDebugConn(conn1, "readWrite")
-		}
-		defer conn1.Close()
-		for i := 0; i < 2; i++ {
-			go func() {
-				time.Sleep(time.Microsecond)
-				_, err = conn1.Write(toWrite)
-				mustNotError(err)
-			}()
-			mustReadSame(conn1, toWrite)
-			time.Sleep(time.Microsecond)
-		}
-		conn1.Close()
-	}, time.Second)
-
-	listener.Close()
-}
-
-func readOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
-	toWrite := []byte("hello world")
-	listener := listenAccept(listenerNewer, func(c net.Conn) {
-		defer c.Close()
-		for i := 0; i < 2; i++ {
-			_, err := c.Write(toWrite)
-			mustNotError(err)
-			time.Sleep(time.Microsecond)
-		}
-	})
-	defer listener.Close()
-	kmgTime.MustNotTimeout(func() {
-		conn1, err := Dialer()
-		mustNotError(err)
-		if debug {
-			conn1 = kmgNet.NewDebugConn(conn1, "readOnly")
-		}
-		defer conn1.Close()
-		for i := 0; i < 2; i++ {
-			mustReadSame(conn1, toWrite)
-			time.Sleep(time.Microsecond)
-		}
-		conn1.Close()
-	}, time.Second)
-
-	listener.Close()
-}
-
-func writeOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
-	toWrite := []byte("hello world")
-	listener := listenAccept(listenerNewer, func(c net.Conn) {
-		defer c.Close()
-		for i := 0; i < 2; i++ {
-			mustReadSame(c, toWrite)
-			time.Sleep(time.Microsecond)
-		}
-	})
-	defer listener.Close()
-	kmgTime.MustNotTimeout(func() {
-		conn1, err := Dialer()
-		mustNotError(err)
-		if debug {
-			conn1 = kmgNet.NewDebugConn(conn1, "writeOnly")
-		}
-		defer conn1.Close()
-		for i := 0; i < 2; i++ {
-			_, err = conn1.Write(toWrite)
-			mustNotError(err)
-			time.Sleep(time.Microsecond)
-		}
-		conn1.Close()
-	}, time.Second)
-
-	listener.Close()
+	time.Sleep(time.Microsecond)
+	thread(listenerNewer, Dialer, debug)
+	time.Sleep(time.Microsecond)
 }
 
 func mustNotError(err error) {

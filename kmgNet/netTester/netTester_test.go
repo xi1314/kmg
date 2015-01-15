@@ -12,3 +12,7 @@ func TestRunTcpListenerDialerTest(ot *testing.T) {
 		return net.Dial("tcp", "127.0.0.1:50000")
 	}, false)
 }
+
+func TestRunTcpTestWithNetDialAndNetListener(ot *testing.T) {
+	RunTcpTestWithNetDialAndNetListener("127.0.0.1:50000", "127.0.0.1:50000")
+}
