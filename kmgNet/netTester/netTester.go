@@ -4,69 +4,179 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgTime"
 	"io"
 	"net"
 	"time"
 )
 
-func RunTcpListenerDialerTest(listener net.Listener, Dialer func() (net.Conn, error)) {
+type DirectDialer func() (net.Conn, error)
+type ListenNewer func() (net.Listener, error)
+
+func RunTcpListenerDialerTest(listenerNewer ListenNewer,
+	Dialer DirectDialer,
+	debug bool) {
+	writeRead(listenerNewer, Dialer, debug)
+	time.Sleep(time.Microsecond)
+	readWrite(listenerNewer, Dialer, debug)
+	time.Sleep(time.Microsecond)
+	readOnly(listenerNewer, Dialer, debug)
+	time.Sleep(time.Microsecond)
+	writeOnly(listenerNewer, Dialer, debug)
+}
+
+func writeRead(listenerNewer ListenNewer,
+	Dialer DirectDialer,
+	debug bool) {
+	listener := runEchoServer(listenerNewer)
 	defer listener.Close()
+
+	toWrite := []byte("hello world")
+
+	kmgTime.MustNotTimeout(func() {
+		conn1, err := Dialer()
+		mustNotError(err)
+
+		if debug {
+			conn1 = kmgNet.NewDebugConn(conn1, "writeRead")
+		}
+		defer conn1.Close()
+		for i := 0; i < 2; i++ {
+			_, err = conn1.Write(toWrite)
+			mustNotError(err)
+			time.Sleep(time.Microsecond)
+			mustReadSame(conn1, toWrite)
+			time.Sleep(time.Microsecond)
+		}
+		conn1.Close()
+	}, time.Second)
+	listener.Close()
+
+}
+
+func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
+	listener := runEchoServer(listenerNewer)
+	defer listener.Close()
+
+	toWrite := []byte("hello world")
+
+	kmgTime.MustNotTimeout(func() {
+		conn1, err := Dialer()
+		mustNotError(err)
+		if debug {
+			conn1 = kmgNet.NewDebugConn(conn1, "readWrite")
+		}
+		defer conn1.Close()
+		for i := 0; i < 2; i++ {
+			go func() {
+				time.Sleep(time.Microsecond)
+				_, err = conn1.Write(toWrite)
+				mustNotError(err)
+			}()
+			mustReadSame(conn1, toWrite)
+			time.Sleep(time.Microsecond)
+		}
+		conn1.Close()
+	}, time.Second)
+
+	listener.Close()
+}
+
+func readOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
+	toWrite := []byte("hello world")
+	listener := listenAccept(listenerNewer, func(c net.Conn) {
+		defer c.Close()
+		for i := 0; i < 2; i++ {
+			_, err := c.Write(toWrite)
+			mustNotError(err)
+			time.Sleep(time.Microsecond)
+		}
+	})
+	defer listener.Close()
+	kmgTime.MustNotTimeout(func() {
+		conn1, err := Dialer()
+		mustNotError(err)
+		if debug {
+			conn1 = kmgNet.NewDebugConn(conn1, "readOnly")
+		}
+		defer conn1.Close()
+		for i := 0; i < 2; i++ {
+			mustReadSame(conn1, toWrite)
+			time.Sleep(time.Microsecond)
+		}
+		conn1.Close()
+	}, time.Second)
+
+	listener.Close()
+}
+
+func writeOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
+	toWrite := []byte("hello world")
+	listener := listenAccept(listenerNewer, func(c net.Conn) {
+		defer c.Close()
+		for i := 0; i < 2; i++ {
+			mustReadSame(c, toWrite)
+			time.Sleep(time.Microsecond)
+		}
+	})
+	defer listener.Close()
+	kmgTime.MustNotTimeout(func() {
+		conn1, err := Dialer()
+		mustNotError(err)
+		if debug {
+			conn1 = kmgNet.NewDebugConn(conn1, "writeOnly")
+		}
+		defer conn1.Close()
+		for i := 0; i < 2; i++ {
+			_, err = conn1.Write(toWrite)
+			mustNotError(err)
+			time.Sleep(time.Microsecond)
+		}
+		conn1.Close()
+	}, time.Second)
+
+	listener.Close()
+}
+
+func mustNotError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func mustReadSame(r io.Reader, toWrite []byte) {
+	buf := make([]byte, len(toWrite))
+	n, err := io.ReadAtLeast(r, buf, len(toWrite))
+	mustNotError(err)
+	if !bytes.Equal(buf[:n], toWrite) {
+		panic(fmt.Errorf("read write data not match"))
+		return
+	}
+}
+
+func runEchoServer(listenerNewer ListenNewer) net.Listener {
+	return listenAccept(listenerNewer, func(c net.Conn) {
+		defer c.Close()
+		_, err := io.Copy(c, c)
+		if kmgNet.IsSocketCloseError(err) {
+			return
+		}
+		mustNotError(err)
+	})
+}
+
+func listenAccept(listenerNewer ListenNewer, handler func(c net.Conn)) net.Listener {
+	listener, err := listenerNewer()
+	mustNotError(err)
 	go func() {
-		for i := 0; ; i++ {
+		for {
 			c, err := listener.Accept()
 			if kmgNet.IsSocketCloseError(err) {
 				return
 			}
-			if err != nil {
-				panic(err)
-				return
-			}
-			go func(c net.Conn, i int) {
-				defer c.Close()
-				_, err := io.Copy(c, c)
-				if kmgNet.IsSocketCloseError(err) {
-					return
-				}
-				if err != nil {
-					panic(err)
-					return
-				}
-			}(c, i)
+			mustNotError(err)
+			go handler(c)
 		}
 	}()
-	toWrite := []byte("hello world")
-	buf := make([]byte, 8*1024)
-	for i := 0; i < 3; i++ {
-		//fmt.Println("request 0", i)
-		func() {
-			conn1, err := Dialer()
-			if err != nil {
-				panic(err)
-				return
-			}
-			//fmt.Println("request 1", i, conn1)
-			defer conn1.Close()
-			for i := 0; i < 3; i++ {
-				_, err = conn1.Write(toWrite)
-				if err != nil {
-					panic(err)
-					return
-				}
-				n, err := conn1.Read(buf)
-				if err != nil {
-					panic(err)
-					return
-				}
-				//fmt.Println("request 2", i)
-				if !bytes.Equal(buf[:n], toWrite) {
-					panic(fmt.Errorf("read write data not match"))
-					return
-				}
-			}
-			conn1.Close()
-			time.Sleep(time.Microsecond)
-		}()
-	}
-	listener.Close()
-	time.Sleep(time.Microsecond)
+	return listener
 }

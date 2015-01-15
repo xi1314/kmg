@@ -1,11 +1,11 @@
 package kmgNet_test
 
 import (
+	"github.com/bronze1man/kmg/kmgNet"
 	"github.com/bronze1man/kmg/kmgNet/netTester"
 	"github.com/bronze1man/kmg/kmgTest"
+	"net"
 	"testing"
-    "github.com/bronze1man/kmg/kmgNet"
-    "net"
 )
 
 func TestTfo(ot *testing.T) {
