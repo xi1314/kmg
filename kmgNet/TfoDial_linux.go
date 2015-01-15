@@ -26,12 +26,12 @@ type tfoLazyConn struct {
 
 func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
 	//fast path
-	if c.Conn != nil || !c.isClosed {
+	if c.Conn != nil && !c.isClosed {
 		return c.Conn.Read(b)
 	}
 	c.dialLock.Lock()
 	//不要使用defer,先read在解锁,会互锁
-	if c.Conn != nil || !c.isClosed {
+	if c.Conn != nil && !c.isClosed {
 		c.dialLock.Unlock()
 		return c.Conn.Read(b)
 	}
@@ -50,11 +50,11 @@ func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
 
 func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 	//fast path
-	if c.Conn != nil || !c.isClosed {
+	if c.Conn != nil && !c.isClosed {
 		return c.Conn.Write(b)
 	}
 	c.dialLock.Lock()
-	if c.Conn != nil || !c.isClosed {
+	if c.Conn != nil && !c.isClosed {
 		c.dialLock.Unlock()
 		return c.Conn.Write(b)
 	}
