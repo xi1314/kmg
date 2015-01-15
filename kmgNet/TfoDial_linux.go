@@ -96,7 +96,7 @@ const tfoFirstSize = 1000
 // 第一个包体积不要太大,需要小于一定数量,否则会被吃掉(正确性问题),
 // 如果过大,此处会在连接时发送前一部分,连接后又发送一部分
 func TfoDial(nextAddr string, data []byte) (conn net.Conn, err error) {
-	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM|unix.SOCK_NONBLOCK|unix.SOCK_CLOEXEC, 0)
+	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM, 0)
 	if err != nil {
 		return nil, err
 	}
