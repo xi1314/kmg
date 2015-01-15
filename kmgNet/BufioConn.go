@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var ErrClosing = errors.New("use of closed network connection")
-
 func BufioConn() net.Conn {
 	return &bufioConn{
 		Buffer: &bytes.Buffer{},

@@ -1,9 +1,12 @@
 package kmgNet
 
 import (
+	"errors"
 	"io"
 	"strings"
 )
+
+var ErrClosing = errors.New("use of closed network connection")
 
 //是否是因为socket没有关闭,或者socket根本没有连接而导致的错误,或者被reset (表示这个连接应该被马上关闭)
 func IsSocketCloseError(err error) bool {
