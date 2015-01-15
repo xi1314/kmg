@@ -48,15 +48,29 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 		c.lock.Unlock()
 		return c.Conn.Write(b)
 	}
-	defer c.lock.Unlock()
 	if c.isClosed {
+		c.lock.Unlock()
 		return 0, ErrClosing
 	}
-	c.Conn, err = TfoDial(c.nextAddr, b)
-	if err != nil {
-		return 0, err
+	if len(b) <= tfoFirstSize {
+		c.Conn, err = TfoDial(c.nextAddr, b)
+		if err != nil {
+			c.lock.Unlock()
+			return 0, err
+		}
+	} else {
+		c.Conn, err = TfoDial(c.nextAddr, b[:tfoFirstSize])
+		if err != nil {
+			c.lock.Unlock()
+			return 0, err
+		}
+		c.lock.Unlock()
+		_, err = c.Conn.Write(b)
+		if err != nil {
+			return 0, err
+		}
+		return len(b), err
 	}
-	return len(b), nil
 }
 
 func (c *tfoLazyConn) Close() error {
@@ -76,8 +90,9 @@ func (c *tfoLazyConn) Close() error {
 
 const tfoFirstSize = 1000
 
-//dial tcp with tcp fastopen
-//第一个包体积不要太大,需要小于一定数量,否则会被吃掉(正确性问题)
+// dial tcp with tcp fastopen
+// 第一个包体积不要太大,需要小于一定数量,否则会被吃掉(正确性问题),
+// 如果过大,此处会在连接时发送前一部分,连接后又发送一部分
 func TfoDial(nextAddr string, data []byte) (conn net.Conn, err error) {
 	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM|unix.SOCK_NONBLOCK|unix.SOCK_CLOEXEC, 0)
 	if err != nil {
@@ -88,24 +103,34 @@ func TfoDial(nextAddr string, data []byte) (conn net.Conn, err error) {
 	if err != nil {
 		return nil, err
 	}
-	err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
+	/*
+		err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
+		if err != nil {
+			return
+		}
+	*/
+	if len(data) <= tfoFirstSize {
+		err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
+		if err != nil {
+			return
+		}
+	} else {
+		err = unix.Sendto(s, data[:tfoFirstSize], unix.MSG_FASTOPEN, sa)
+		if err != nil {
+			return
+		}
+	}
+	f := os.NewFile(uintptr(s), "TFODial")
+	defer f.Close()
+	conn, err = net.FileConn(f)
 	if err != nil {
 		return
 	}
-	/*
-		if len(data)<=tfoFirstSize{
-			err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
-			if err != nil {
-				return
-			}
-		}else{
-			err = unix.Sendto(s, data[:tfoFirstSize], unix.MSG_FASTOPEN, sa)
-			if err != nil {
-				return
-			}
+	if len(data) > tfoFirstSize {
+		_, err = conn.Write(data[tfoFirstSize:])
+		if err != nil {
+			return nil, err
 		}
-	*/
-	f := os.NewFile(uintptr(s), "TFODial")
-	defer f.Close()
-	return net.FileConn(f)
+	}
+	return conn, nil
 }
