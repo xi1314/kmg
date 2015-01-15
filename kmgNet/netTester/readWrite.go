@@ -24,7 +24,7 @@ func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 		for i := 0; i < 2; i++ {
 			go func() {
 				time.Sleep(time.Microsecond)
-				_, err = conn1.Write(toWrite)
+				_, err := conn1.Write(toWrite)
 				mustNotError(err)
 			}()
 			mustReadSame(conn1, toWrite)

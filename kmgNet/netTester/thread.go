@@ -27,7 +27,7 @@ func thread(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 				defer conn.Close()
 				go func() {
 					for i := 0; i < 10; i++ {
-						_, err = conn.Write(content)
+						_, err := conn.Write(content)
 						mustNotError(err)
 						time.Sleep(time.Microsecond)
 					}
