@@ -1,7 +1,6 @@
 package kmgNet
 
 import (
-	"github.com/bronze1man/kmg/kmgNet"
 	"golang.org/x/sys/unix"
 	"net"
 	"os"
@@ -37,7 +36,7 @@ func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
 	}
 	if c.isClosed {
 		c.dialLock.Unlock()
-		return 0, kmgNet.ErrClosing
+		return 0, ErrClosing
 	}
 	c.Conn, err = net.Dial("tcp", c.nextAddr)
 	if err != nil {
@@ -60,7 +59,7 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 	}
 	defer c.dialLock.Unlock()
 	if c.isClosed {
-		return 0, kmgNet.ErrClosing
+		return 0, ErrClosing
 	}
 	c.Conn, err = TfoDial(c.nextAddr, b)
 	if err != nil {
@@ -71,7 +70,7 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 
 func (c *tfoLazyConn) Close() error {
 	if c.isClosed {
-		return kmgNet.ErrClosing
+		return ErrClosing
 	}
 	c.isClosed = true
 	if c.Conn != nil {
