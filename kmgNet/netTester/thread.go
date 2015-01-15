@@ -17,6 +17,7 @@ func thread(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 		task := kmgTask.NewLimitThreadTaskManager(10)
 		content := []byte("Hello world")
 		for i := 0; i < 30; i++ {
+			i := i
 			task.AddFunc(func() {
 				if debug {
 					fmt.Println("[thread] start", i)

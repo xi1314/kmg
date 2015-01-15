@@ -1,7 +1,6 @@
 package kmgNet
 
 import (
-	"github.com/bronze1man/kmg/kmgNet"
 	"golang.org/x/sys/unix"
 	"net"
 	"os"
@@ -20,47 +19,38 @@ func TfoLazyDial(network string, nextAddr string) (conn net.Conn, err error) {
 type tfoLazyConn struct {
 	net.Conn
 	nextAddr string
-	dialLock sync.Mutex
+	lock     sync.Mutex
 	isClosed bool
 }
 
 func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
-	//fast path
+	c.lock.Lock()
 	if c.Conn != nil && !c.isClosed {
-		return c.Conn.Read(b)
-	}
-	c.dialLock.Lock()
-	//不要使用defer,先read在解锁,会互锁
-	if c.Conn != nil && !c.isClosed {
-		c.dialLock.Unlock()
+		c.lock.Unlock()
 		return c.Conn.Read(b)
 	}
 	if c.isClosed {
-		c.dialLock.Unlock()
-		return 0, kmgNet.ErrClosing
+		c.lock.Unlock()
+		return 0, ErrClosing
 	}
 	c.Conn, err = net.Dial("tcp", c.nextAddr)
 	if err != nil {
-		c.dialLock.Unlock()
+		c.lock.Unlock()
 		return
 	}
-	c.dialLock.Unlock()
+	c.lock.Unlock()
 	return c.Conn.Read(b)
 }
 
 func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
-	//fast path
+	c.lock.Lock()
 	if c.Conn != nil && !c.isClosed {
+		c.lock.Unlock()
 		return c.Conn.Write(b)
 	}
-	c.dialLock.Lock()
-	if c.Conn != nil && !c.isClosed {
-		c.dialLock.Unlock()
-		return c.Conn.Write(b)
-	}
-	defer c.dialLock.Unlock()
+	defer c.lock.Unlock()
 	if c.isClosed {
-		return 0, kmgNet.ErrClosing
+		return 0, ErrClosing
 	}
 	c.Conn, err = TfoDial(c.nextAddr, b)
 	if err != nil {
@@ -70,19 +60,17 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 }
 
 func (c *tfoLazyConn) Close() error {
+	c.lock.Lock()
 	if c.isClosed {
-		return kmgNet.ErrClosing
+		c.lock.Unlock()
+		return ErrClosing
 	}
 	c.isClosed = true
 	if c.Conn != nil {
+		c.lock.Unlock()
 		return c.Conn.Close()
 	}
-	c.dialLock.Lock()
-	if c.Conn != nil {
-		c.dialLock.Unlock()
-		return c.Conn.Close()
-	}
-	defer c.dialLock.Unlock()
+	c.lock.Unlock()
 	return nil
 }
 
