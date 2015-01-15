@@ -10,12 +10,13 @@ import (
 
 //有9MB数据 3线程 一共10个任务
 func thread(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
-	listener := runEchoServer(listenerNewer)
-	defer listener.Close()
-
-	task := kmgTask.NewLimitThreadTaskManager(3)
-	content := bytes.Repeat([]byte("Hello world"), 1024*30)
 	kmgTime.MustNotTimeout(func() {
+
+		listener := runEchoServer(listenerNewer)
+		defer listener.Close()
+
+		task := kmgTask.NewLimitThreadTaskManager(3)
+		content := bytes.Repeat([]byte("Hello world"), 1024*30)
 		for i := 0; i < 10; i++ {
 			task.AddFunc(func() {
 				if debug {
@@ -36,6 +37,6 @@ func thread(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 				}
 			})
 		}
-	}, 10*time.Second)
-	task.Close()
+		task.Close()
+	}, 2*time.Second)
 }

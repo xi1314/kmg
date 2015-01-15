@@ -7,12 +7,13 @@ import (
 )
 
 func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
-	listener := runEchoServer(listenerNewer)
-	defer listener.Close()
-
-	toWrite := []byte("hello world")
-
 	kmgTime.MustNotTimeout(func() {
+
+		listener := runEchoServer(listenerNewer)
+		defer listener.Close()
+
+		toWrite := []byte("hello world")
+
 		conn1, err := Dialer()
 		mustNotError(err)
 		if debug {
@@ -29,7 +30,8 @@ func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 			time.Sleep(time.Microsecond)
 		}
 		conn1.Close()
+
+		listener.Close()
 	}, time.Second)
 
-	listener.Close()
 }
