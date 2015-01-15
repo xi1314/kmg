@@ -65,7 +65,7 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 			return 0, err
 		}
 		c.lock.Unlock()
-		_, err = c.Conn.Write(b)
+		_, err = c.Conn.Write(b[tfoFirstSize:])
 		if err != nil {
 			return 0, err
 		}
