@@ -28,13 +28,17 @@ func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
 		return c.Conn.Read(b)
 	}
 	c.dialLock.Lock()
-	defer c.dialLock.Unlock()
-	if c.Conn == nil {
-		c.Conn, err = net.Dial("tcp", c.nextAddr)
-		if err != nil {
-			return
-		}
+	//不要使用defer,先read在解锁,会互锁
+	if c.Conn != nil {
+		c.dialLock.Unlock()
+		return c.Conn.Read(b)
 	}
+	c.Conn, err = net.Dial("tcp", c.nextAddr)
+	if err != nil {
+		c.dialLock.Unlock()
+		return
+	}
+	c.dialLock.Unlock()
 	return c.Conn.Read(b)
 }
 
@@ -44,10 +48,11 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 		return c.Conn.Write(b)
 	}
 	c.dialLock.Lock()
-	defer c.dialLock.Unlock()
 	if c.Conn != nil {
+		c.dialLock.Unlock()
 		return c.Conn.Write(b)
 	}
+	defer c.dialLock.Unlock()
 	c.Conn, err = TfoDial(c.nextAddr, b)
 	if err != nil {
 		return 0, err
