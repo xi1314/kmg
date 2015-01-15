@@ -46,6 +46,8 @@ func RunTcpListenerDialerTest(listenerNewer ListenNewer,
 	time.Sleep(time.Microsecond)
 	thread(listenerNewer, Dialer, debug)
 	time.Sleep(time.Microsecond)
+	bigWrite(listenerNewer, Dialer, debug)
+	time.Sleep(time.Microsecond)
 }
 
 func mustNotError(err error) {

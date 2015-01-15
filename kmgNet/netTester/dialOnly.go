@@ -13,6 +13,7 @@ import (
 func dialOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
 		listener := listenAccept(listenerNewer, func(c net.Conn) {
+			time.Sleep(time.Microsecond) //防止出现reset
 			c.Close()
 		})
 		defer listener.Close()
@@ -63,6 +64,7 @@ func dialOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 			if debug {
 				conn1 = kmgNet.NewDebugConn(conn1, fmt.Sprintf("dialOnly 1 %d", i))
 			}
+			time.Sleep(time.Microsecond) //防止出现reset
 			conn1.Close()
 		}
 
