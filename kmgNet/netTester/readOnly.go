@@ -9,7 +9,6 @@ import (
 
 func readOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
-
 		toWrite := []byte("hello world")
 		listener := listenAccept(listenerNewer, func(c net.Conn) {
 			defer c.Close()
