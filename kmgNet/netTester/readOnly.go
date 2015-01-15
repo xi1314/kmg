@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//client 只读取数据,不写入数据
 func readOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
 		toWrite := []byte("hello world")

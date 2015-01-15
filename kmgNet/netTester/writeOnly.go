@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//client只写入,不读取
 func writeOnly(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
 

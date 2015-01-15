@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//client 先读后写
 func readWrite(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
 

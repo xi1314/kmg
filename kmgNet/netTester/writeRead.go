@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//client 先写后读
 func writeRead(listenerNewer ListenNewer,
 	Dialer DirectDialer,
 	debug bool) {

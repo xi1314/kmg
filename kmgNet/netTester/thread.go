@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-//有9MB数据 3线程 一共10个任务
+//多线程测试
 func thread(listenerNewer ListenNewer, Dialer DirectDialer, debug bool) {
 	kmgTime.MustNotTimeout(func() {
 		listener := runEchoServer(listenerNewer)
