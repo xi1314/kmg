@@ -70,28 +70,28 @@ func NewSizeDebugConn(conn net.Conn, name string) net.Conn {
 // a net.Conn with Reader Writer Closer override
 type stringConnRwcer struct {
 	net.Conn
-	name string
-    readNum int
-    writeNum int
+	name     string
+	readNum  int
+	writeNum int
 }
 
 func (c *stringConnRwcer) Write(b []byte) (n int, err error) {
-    c.writeNum++
+	c.writeNum++
 	n, err = c.Conn.Write(b)
 	if err != nil {
 		fmt.Println("[debugConn]", c.name, "Write len:", n, "err:", err)
 	} else {
-		fmt.Printf("[debugConn] [%s] Write %d len: %d content: %q<EndOfContent>\n", c.name, c.writeNum,n, string(b[:n]))
+		fmt.Printf("[debugConn] [%s] Write %d len: %d content: %q<EndOfContent>\n", c.name, c.writeNum, n, string(b[:n]))
 	}
 	return n, err
 }
 func (c *stringConnRwcer) Read(b []byte) (n int, err error) {
-    c.readNum++
+	c.readNum++
 	n, err = c.Conn.Read(b)
 	if err != nil {
 		fmt.Println("[debugConn]", c.name, "Read len:", n, "iLen", len(b), "err:", err)
 	} else {
-		fmt.Printf("[debugConn] [%s] Read %d len: %d iLen: %d content: %q<EndOfContent>\n", c.name, c.readNum,n, len(b), string(b[:n]))
+		fmt.Printf("[debugConn] [%s] Read %d len: %d iLen: %d content: %q<EndOfContent>\n", c.name, c.readNum, n, len(b), string(b[:n]))
 	}
 	return n, err
 }

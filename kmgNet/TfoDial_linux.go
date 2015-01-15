@@ -58,8 +58,8 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 			c.lock.Unlock()
 			return 0, err
 		}
-        c.lock.Unlock()
-        return len(b),err
+		c.lock.Unlock()
+		return len(b), err
 	} else {
 		c.Conn, err = TfoDial(c.nextAddr, b[:tfoFirstSize])
 		if err != nil {
@@ -105,12 +105,6 @@ func TfoDial(nextAddr string, data []byte) (conn net.Conn, err error) {
 	if err != nil {
 		return nil, err
 	}
-	/*
-		err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
-		if err != nil {
-			return
-		}
-	*/
 	if len(data) <= tfoFirstSize {
 		err = unix.Sendto(s, data, unix.MSG_FASTOPEN, sa)
 		if err != nil {
