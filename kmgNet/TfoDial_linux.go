@@ -8,7 +8,9 @@ import (
 )
 
 // dial tcp with tcp fastopen
-// you should use echo 3 > /proc/sys/net/ipv4/tcp_fastopen to enable it
+// you should use
+//     echo 3 > /proc/sys/net/ipv4/tcp_fastopen
+//   to enable it
 // you should use linux kernel version >3.7
 // you should write something before read to use this function.
 // network is useless, it always use tcp4
