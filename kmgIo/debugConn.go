@@ -21,23 +21,23 @@ func NewDebugRwc(rwc io.ReadWriteCloser, name string) debugRwc {
 }
 
 func (c debugRwc) Write(b []byte) (n int, err error) {
-	fmt.Println("[debugConn]", c.Name, "Write Start len:", len(b))
+	fmt.Printf("[debugConn] %s Write Start len: %d\n", c.Name, len(b))
 	n, err = c.ReadWriteCloser.Write(b)
 	if err != nil {
-		fmt.Println("[debugConn]", c.Name, "Write finish len:", n, "err:", err, "content:", b)
+		fmt.Printf("[debugConn] %s Write finish len: %d err: %s content: %#v\n", c.Name, n, err, b)
 	} else {
-		fmt.Println("[debugConn]", c.Name, "Write finish len:", n, "content:", b)
+		fmt.Printf("[debugConn] %s Write finish len: %d content: %#v\n", c.Name, n, b)
 	}
 	return n, err
 }
 
 func (c debugRwc) Read(b []byte) (n int, err error) {
-	fmt.Println("[debugConn]", c.Name, "Read Start len:", len(b))
+	fmt.Printf("[debugConn] %s Read Start len: %d\n", c.Name, len(b))
 	n, err = c.ReadWriteCloser.Read(b)
 	if err != nil {
-		fmt.Println("[debugConn]", c.Name, "Read finish inputLen:", len(b), "outputLen:", n, "err:", err, "content:", b[:n])
+		fmt.Printf("[debugConn] %s Read finish iLen: %d oLen: %d err: %s content: %#v\n", c.Name, len(b), n, err, b[:n])
 	} else {
-		fmt.Println("[debugConn]", c.Name, "Read finish inputLen:", len(b), "outputLen:", n, "content:", b[:n])
+		fmt.Printf("[debugConn] %s Read finish iLen: %d oLen: %d content: %#v\n", c.Name, len(b), n, b[:n])
 	}
 	return n, err
 }
