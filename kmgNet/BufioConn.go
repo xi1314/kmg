@@ -8,16 +8,35 @@ import (
 )
 
 func BufioConn() net.Conn {
-	return bufioConn{
+	return &bufioConn{
 		Buffer: &bytes.Buffer{},
 	}
 }
 
 type bufioConn struct {
 	*bytes.Buffer
+	hasClose bool
 }
 
-func (c bufioConn) Close() error {
+func (c *bufioConn) Read(p []byte) (n int, err error) {
+	if c.hasClose {
+		return 0, ErrClosing
+	}
+	return c.Buffer.Read(p)
+}
+
+func (c *bufioConn) Write(p []byte) (n int, err error) {
+	if c.hasClose {
+		return 0, ErrClosing
+	}
+	return c.Buffer.Write(p)
+}
+
+func (c *bufioConn) Close() error {
+	if c.hasClose {
+		return ErrClosing
+	}
+	c.hasClose = true
 	return nil
 }
 

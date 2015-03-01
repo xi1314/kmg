@@ -12,8 +12,12 @@ func RunOsStdioCmd(name string, args ...string) error {
 }
 
 func RunOsStdioCmdString(cmd string) error {
+	return NewOsStdioCmdString(cmd).Run()
+}
+
+func NewOsStdioCmdString(cmd string) *exec.Cmd {
 	args := strings.Split(cmd, " ")
-	return NewOsStdioCmd(args[0], args[1:]...).Run()
+	return NewOsStdioCmd(args[0], args[1:]...)
 }
 
 func NewOsStdioCmd(name string, args ...string) *exec.Cmd {

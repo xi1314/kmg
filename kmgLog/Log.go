@@ -7,97 +7,126 @@ import (
 	"time"
 
 	"github.com/bronze1man/kmg/kmgFile"
+	"os"
 )
 
-type Logger struct {
-	LogWriter
+type Logger interface {
+	Log(category string, objs ...interface{})
 }
 
-func (l *Logger) Log(category string, msg string, obj interface{}) (err error) {
-	return l.LogWriter.LogWrite(category, LogRow{
-		Time: time.Now().Format(time.RFC3339),
-		Msg:  msg,
-		Obj:  obj,
-	})
+// 写一条log, category是分类名 data是需要调试的对象
+// 实际格式,用户可以随意设定
+// data 必须为可以json.Marshal的数据
+// 错误处理方式为 输出到stderr (不用panic,是因为log坏了,程序应该还可以继续执行没那么重要,不忽略,是因为忽略错误后果更严重)
+func Log(category string, data ...interface{}) {
+	DefaultLogger.Log(category, data...)
 }
 
-type LogWriter interface {
-	LogWrite(category string, row LogRow) (err error)
+type LogRow struct {
+	Cat  string
+	Time string
+	Data []json.RawMessage
 }
 
-type fileJsonLogWriter struct {
+var DefaultLogger Logger = StdoutLogger
+
+var StdoutLogger Logger = stdoutLogger{}
+
+type stdoutLogger struct {
+}
+
+func (nl stdoutLogger) Log(category string, data ...interface{}) {
+	b, err := logToJson(category, data)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[StdoutLogger] logToJson fail", err)
+		return
+	}
+	_, err = fmt.Printf("%s\n", b)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[StdoutLogger] printf fail", err)
+		return
+	}
+	return
+}
+
+var NullLogger Logger = nullLogger{}
+
+type nullLogger struct {
+}
+
+func (nl nullLogger) Log(category string, data ...interface{}) {
+	return
+}
+
+type fileLoger struct {
 	logDir string
 }
 
-func (lw fileJsonLogWriter) LogWrite(category string, row LogRow) (err error) {
-	b, err := json.Marshal(row)
+func (lw fileLoger) Log(category string, data ...interface{}) {
+	b, err := logToJson(category, data)
 	if err != nil {
-		return err
+		fmt.Fprintln(os.Stderr, "[fileLoger] logToJson fail", err)
+		return
 	}
 	toWrite := append(b, byte('\n'))
 	err = kmgFile.AppendFile(filepath.Join(lw.logDir, category+".log"), toWrite)
 	if err != nil {
-		return err
+		fmt.Fprintln(os.Stderr, "[fileLoger] logToJson fail", err)
+		return
 	}
-	return
 }
 
-//new file json log, will mkdir if dir not exist.
-func NewFileJsonLogger(logDir string) *Logger {
+type mulitLogger []Logger
+
+func (ml mulitLogger) Log(category string, data ...interface{}) {
+	for i := range ml {
+		ml[i].Log(category, data...)
+	}
+}
+
+func MultiLogger(loggers ...Logger) Logger {
+	return mulitLogger(loggers)
+}
+
+type threadLogger struct {
+	logger Logger
+}
+
+func (ml threadLogger) Log(category string, data ...interface{}) {
+	go ml.Log(category, data...)
+}
+
+func ThreadLogger(logger Logger) Logger {
+	return threadLogger{logger: logger}
+}
+
+//new file log, will mkdir if dir not exist.
+// usage:
+// 		kmgLog.DefaultLogger = kmgLog.NewFileLogger("log")
+func NewFileLogger(logDir string) Logger {
 	kmgFile.MustMkdirAll(logDir)
-	return &Logger{
-		LogWriter: fileJsonLogWriter{
-			logDir: logDir,
-		},
+	return fileLoger{
+		logDir: logDir,
 	}
 }
 
-type nullLogWriter struct {
+func NewStdoutAndFileLogger(logDir string) Logger {
+	return MultiLogger(StdoutLogger, NewFileLogger(logDir))
 }
 
-func (nl nullLogWriter) LogWrite(category string, row LogRow) (err error) {
-	return nil
-}
-func NewNullJsonLogger() *Logger {
-	return &Logger{
-		LogWriter: nullLogWriter{},
+func logToJson(category string, data []interface{}) (b []byte, err error) {
+	logRow := LogRow{
+		Cat:  category,
+		Time: time.Now().Format(time.RFC3339),
+		Data: make([]json.RawMessage, len(data)),
 	}
-}
-
-var NullLogger = NewNullJsonLogger()
-
-type stdoutLogWriter struct {
-}
-
-func (nl stdoutLogWriter) LogWrite(category string, row LogRow) (err error) {
-	b, err := json.Marshal([]interface{}{category, row})
-	if err != nil {
-		return err
+	for i := range data {
+		logRow.Data[i], err = json.Marshal(data[i])
+		if err != nil {
+			return
+		}
 	}
-	_, err = fmt.Printf("%s\n", b)
-	return
-}
-
-var StdoutLogger = &Logger{
-	LogWriter: stdoutLogWriter{},
-}
-
-var DefaultLogger *Logger = StdoutLogger
-
-type LogRow struct {
-	Time string
-	Msg  string
-	Obj  interface{}
-}
-
-// 写一条log, category是分类名 msg是消息信息 obj是需要调试的对象
-// 要求obj可以被json序列化
-// 如果使用文件序列化方案 category 是文件名.
-func Log(category string, msg string, obj interface{}) {
-	err := DefaultLogger.Log(category, msg, obj)
-	if err != nil {
-		panic(err)
-	}
+	return json.Marshal(logRow)
 }
 
 // 如果f发生错误,写一条log

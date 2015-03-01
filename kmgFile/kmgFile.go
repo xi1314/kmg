@@ -48,6 +48,12 @@ func MustMkdirAll(dirname string) {
 	}
 }
 
+//保证一个文件的路径可以写入
+func MkdirForFile(path string) (err error) {
+	path = filepath.Dir(path)
+	return os.MkdirAll(path, os.FileMode(0777))
+}
+
 func AppendFile(path string, content []byte) (err error) {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0777))
 	if err != nil {
