@@ -1,4 +1,4 @@
-package command
+package goCommand
 
 import (
 	"flag"
@@ -49,19 +49,19 @@ func runGoTest() {
 		if kmgConfig.IsNotFound(err) {
 			command.gopath = os.Getenv("GOPATH")
 		} else {
-			exitOnErr(err)
+            kmgConsole.ExitOnErr(err)
 		}
 	}
 	//find root path
 	root, err := command.findRootPath()
-	exitOnErr(err)
+    kmgConsole.ExitOnErr(err)
 	command.buildContext = &build.Context{
 		GOPATH:   command.gopath,
 		Compiler: build.Default.Compiler,
 	}
 	if command.onePackage {
 		err = command.handlePath(root)
-		exitOnErr(err)
+        kmgConsole.ExitOnErr(err)
 	}
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -75,7 +75,7 @@ func runGoTest() {
 		}
 		return command.handlePath(path)
 	})
-	exitOnErr(err)
+    kmgConsole.ExitOnErr(err)
 }
 
 /*

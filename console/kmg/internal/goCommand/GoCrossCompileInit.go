@@ -1,4 +1,4 @@
-package command
+package goCommand
 
 import (
 	"fmt"
@@ -20,10 +20,10 @@ func init() {
 
 func runGoCrossCompileInit() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
-	exitOnErr(err)
+    kmgConsole.ExitOnErr(err)
 	GOROOT := kmgc.GOROOT
 	if GOROOT == "" {
-		exitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
+        kmgConsole.ExitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
 	}
 	var makeShellArgs []string
 	var makeShellName string
@@ -41,7 +41,7 @@ func runGoCrossCompileInit() {
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		cmd.Dir = runCmdPath
 		err = cmd.Run()
-		exitOnErr(err)
+        kmgConsole.ExitOnErr(err)
 	}
 	return
 }

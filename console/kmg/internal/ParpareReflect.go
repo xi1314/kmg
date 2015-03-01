@@ -1,5 +1,5 @@
 package command
-
+/*
 import (
 	"os"
 	"path/filepath"
@@ -37,3 +37,4 @@ func (command *ParpareReflect) Execute(context *console.Context) error {
 	}
 	return nil
 }
+*/

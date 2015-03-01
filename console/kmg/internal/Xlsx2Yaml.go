@@ -1,5 +1,5 @@
 package command
-
+/*
 import (
 	"flag"
 	"fmt"
@@ -78,3 +78,4 @@ func (command *Xlsx2Yaml) formatOutput(rawArray [][][]string) (interface{}, erro
 		return nil, fmt.Errorf("not support output format: %s", command.format)
 	}
 }
+*/
