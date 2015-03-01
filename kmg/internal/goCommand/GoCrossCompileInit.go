@@ -8,6 +8,8 @@ import (
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"runtime"
+    "strings"
+    "os/exec"
 )
 
 func init() {
@@ -23,7 +25,13 @@ func runGoCrossCompileInit() {
     kmgConsole.ExitOnErr(err)
 	GOROOT := kmgc.GOROOT
 	if GOROOT == "" {
-        kmgConsole.ExitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
+        //guess GOROOT
+        out,err:=exec.Command("go","env","GOROOT").CombinedOutput()
+        kmgConsole.ExitOnErr(err)
+        GOROOT = strings.TrimSpace(string(out))
+        if GOROOT=="" {
+            kmgConsole.ExitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
+        }
 	}
 	var makeShellArgs []string
 	var makeShellName string
