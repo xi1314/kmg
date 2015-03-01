@@ -15,10 +15,10 @@ func init() {
 }
 
 func gitPush(){
-    err := kmgCmd.NewOsStdioCmdString("git add -A").Run()
+    kmgCmd.NewOsStdioCmdString("git add -A").Run()
     //kmgConsole.ExitOnErr(err)
-    err = kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
+    kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
     //kmgConsole.ExitOnErr(err)
-    err = kmgCmd.NewOsStdioCmdString("git push origin master").Run()
+    kmgCmd.NewOsStdioCmdString("git push origin master").Run()
     //kmgConsole.ExitOnErr(err)
 }
