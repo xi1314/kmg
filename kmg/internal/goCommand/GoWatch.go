@@ -1,5 +1,6 @@
 package goCommand
 
+/*
 import (
 	"fmt"
 	"os"
@@ -143,3 +144,4 @@ func (command *GoWatch) debugPrintln(o ...interface{}) {
 		fmt.Println(o...)
 	}
 }
+*/

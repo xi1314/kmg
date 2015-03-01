@@ -3,7 +3,7 @@ package goCommand
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/console"
+	//"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
@@ -88,7 +88,7 @@ func runGoTest() {
 */
 type GoTest struct {
 	gopath       string
-	context      *console.Context
+	//context      *console.Context
 	v            bool
 	dir          string
 	moduleName   string
@@ -169,7 +169,7 @@ func (command *GoTest) gotest(path string) error {
 		args = append(args, "-run", command.runArg)
 	}
 
-	cmd := kmgCmd.NewStdioCmd(command.context, "go", args...)
+	cmd := kmgCmd.NewOsStdioCmd("go", args...)
 	cmd.Dir = path
 	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
 	if err != nil {
@@ -180,7 +180,7 @@ func (command *GoTest) gotest(path string) error {
 
 func (command *GoTest) gobuild(path string) error {
 	fmt.Printf("[gobuild] path[%s]\n", path)
-	cmd := kmgCmd.NewStdioCmd(command.context, "go", "build")
+	cmd := kmgCmd.NewOsStdioCmd("go", "build")
 	cmd.Dir = path
 	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
 	if err != nil {

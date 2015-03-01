@@ -16,9 +16,6 @@ func init() {
 
 func gitPush(){
     kmgCmd.NewOsStdioCmdString("git add -A").Run()
-    //kmgConsole.ExitOnErr(err)
     kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
-    //kmgConsole.ExitOnErr(err)
     kmgCmd.NewOsStdioCmdString("git push origin master").Run()
-    //kmgConsole.ExitOnErr(err)
 }

@@ -1,5 +1,6 @@
 package beegoBundle
 
+//TODO change it with kmgConsole
 import (
 	"database/sql"
 	"flag"
