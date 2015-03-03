@@ -5,8 +5,8 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgRand"
+	//"github.com/bronze1man/kmg/kmgFile"
+	//"github.com/bronze1man/kmg/kmgRand"
 	"os"
 	"path/filepath"
 )
@@ -30,7 +30,7 @@ func gorun() {
 		return
 	}
 	pathOrPkg := os.Args[1]
-	fi, err := os.Stat(pathOrPkg)
+	_, err = os.Stat(pathOrPkg)
 	switch {
 	case os.IsNotExist(err):
 		//是package
@@ -42,8 +42,8 @@ func gorun() {
 		err = cmd.Run()
 		kmgConsole.ExitOnErr(err)
 		//run
-		pkgName := filepath.Base(pathOrPkg)
-		cmd = kmgCmd.NewOsStdioCmd("./bin/"+pkgName, os.Args[2:]...)
+		outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
+		cmd = kmgCmd.NewOsStdioCmd(outPath, os.Args[2:]...)
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()
@@ -51,31 +51,22 @@ func gorun() {
 		return
 	case err != nil:
 		kmgConsole.ExitOnErr(err)
-	case fi.IsDir():
-		kmgConsole.ExitOnErr(fmt.Errorf("TODO: support run directory"))
-	case !fi.IsDir():
-		//是文件
-		//在临时目录建一个package,并且建立一个新的GOPATH指向那个临时目录
-		addGoPath := "/tmp/kmg-gorun-gopath"
-		pkgName := "kmgFakePkg" + kmgRand.MustCryptoRandToHex(10)
-		err = kmgFile.Mkdir(addGoPath + "/src/" + pkgName)
-		kmgConsole.ExitOnErr(err)
-		err = kmgFile.CopyFile(pathOrPkg, addGoPath+"/src/"+pkgName+"/main.go")
-		kmgConsole.ExitOnErr(err)
+	default:
+		//是文件或目录,文件可以go build -i
+		//优化项: 1.是src里面的文件,可以go install? 2.可以创建一个缓存package?
+		//如果在临时目录建一个package,并且使用GOPATH指向那个临时目录,缓存会出现问题,并且效果和 go build -i 没有区别
 		//build
-		args := []string{"install", pkgName}
-		cmd := kmgCmd.NewOsStdioCmd("go", args...)
-		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath+string(os.PathListSeparator)+addGoPath)
-		kmgConsole.ExitOnErr(err)
-		err = cmd.Run()
-		kmgConsole.ExitOnErr(err)
-		//run
-		cmd = kmgCmd.NewOsStdioCmd(addGoPath+"/bin/"+pkgName, os.Args[2:]...)
+		outputPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
+		cmd := kmgCmd.NewOsStdioCmd("go", "build", "-i", "-o", outputPath, pathOrPkg)
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()
 		kmgConsole.ExitOnErr(err)
-	default:
+		//run
+		cmd = kmgCmd.NewOsStdioCmd(outputPath, os.Args[2:]...)
+		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
+		kmgConsole.ExitOnErr(err)
+		err = cmd.Run()
 		kmgConsole.ExitOnErr(err)
 	}
 }

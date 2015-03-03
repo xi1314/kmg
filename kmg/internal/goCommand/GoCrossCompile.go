@@ -23,6 +23,7 @@ func init() {
 /*
 GoCrossComplie [gofile]
 the output file will put into $project_root/bin/name_GOOS_GOARCH[.exe]
+TODO use go install
 */
 func runGoCrossCompile() {
 	command := GoCrossCompile{}
@@ -53,7 +54,7 @@ func runGoCrossCompile() {
 			fileName = fileName + ".exe"
 		}
 		outputFilePath := filepath.Join(command.outputPath, fileName)
-		cmd := kmgCmd.NewOsStdioCmd("go", "build", "-o", outputFilePath, targetFile)
+		cmd := kmgCmd.NewOsStdioCmd("go", "build", "-i", "-o", outputFilePath, targetFile)
 		kmgCmd.SetCmdEnv(cmd, "GOOS", target.GetGOOS())
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		kmgCmd.SetCmdEnv(cmd, "GOPATH", kmgc.GOPATHToString())
