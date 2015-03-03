@@ -100,3 +100,8 @@ func DateSubLocal(t1 time.Time, t2 time.Time) time.Duration {
 func IsSameDay(t1 time.Time, t2 time.Time, loc *time.Location) bool {
 	return DateSub(t1, t2, loc) == 0
 }
+
+//规则到秒,去掉毫秒什么的
+func ModBySecond(t1 time.Time) time.Time {
+	return t1.Round(time.Second)
+}
