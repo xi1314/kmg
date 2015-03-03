@@ -8,6 +8,7 @@ import (
 )
 
 var cacheExpire = errors.New("cache expire")
+var DoNotNeedCache = errors.New("do not need cache")
 
 //会在缓存超时的时候,异步更新缓存,并且返回前一个数据.
 type AsyncTtlCache struct {
@@ -24,45 +25,46 @@ func NewAsyncCache() *AsyncTtlCache {
 
 //如果缓存不存在,会同步查询
 //如果缓存过期,会异步查询,以便下次请求的时候有这个数据
-func (s *AsyncTtlCache) DoWithTtl(key string, f func() (value interface{}, ttl uint32, err error)) (value interface{}, ttl uint32, err error) {
+// 如果你把needcache设置为false,表示这个请求本次不进行缓存(应该是什么地方出现错误了,具体错误请自行处理)
+// 1.如果缓存不存在,会同步查询
+// 2.如果缓存过去,会异步查询,并返回旧的数据
+// 3.如果不要求保存数据,不会把数据保存到缓存中.
+// 		1. 如果缓存不存在,返回f.value f.ttl
+func (s *AsyncTtlCache) DoWithTtl(key string, f func() (value interface{}, ttl uint32, canSave bool)) (value interface{}, ttl uint32) {
 	entry, err := s.get(key)
 	if err == nil {
-		return entry.Value, entry.GetTtl(), nil
+		return entry.Value, entry.GetTtl()
 	}
-	updateCache := func() (value interface{}, ttl uint32, err error) {
+	updateCache := func() (value interface{}, ttl uint32) {
 		//异步更新缓存
-		entryi, err := s.singleGroup.Do(key, func() (interface{}, error) {
-			value, ttl, err := f()
-			if err != nil {
-				return nil, err
-			}
+		entryi, err := s.singleGroup.Do(key, func() (out interface{}, err error) {
+			value, ttl, canSave := f()
 			timeout := time.Now().Add(time.Duration(ttl) * time.Second)
-			return TtlCacheEntry{
+			out = TtlCacheEntry{
 				Value:   value,
 				Timeout: timeout,
-			}, nil
-		})
-
-		switch err {
-		case nil:
-			entryn := entryi.(TtlCacheEntry)
-			ttl := entryn.GetTtl()
-			if ttl > 0 {
-				s.save(key, entryn)
 			}
-			return entryn.Value, ttl, nil
-		default:
-			return nil, 0, err
+			if !canSave {
+				err = DoNotNeedCache
+			}
+			return
+		})
+		entryn := entryi.(TtlCacheEntry)
+		if err == nil {
+			s.save(key, entryn) //ttl 是0 也存进去,下次可以异步刷新
 		}
+		ttl = entryn.GetTtl()
+		return entryn.Value, ttl
 	}
 	switch err {
 	case CacheMiss:
-		return updateCache()
+		value, ttl := updateCache()
+		return value, ttl
 	case cacheExpire:
 		go updateCache()
-		return entry.Value, 0, nil
+		return entry.Value, 0
 	default:
-		return nil, 0, err
+		return nil, 0
 	}
 }
 
@@ -100,4 +102,11 @@ func (s *AsyncTtlCache) GcThread() {
 		}
 		s.lock.Unlock()
 	}
+}
+
+//里面数据的个数
+func (s *AsyncTtlCache) Len() int {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return len(s.cache)
 }

@@ -21,6 +21,7 @@ var actionMap = map[string]Command{
 		Runner: version,
 	},
 }
+var exitActionList = []func(){}
 
 func Main() {
 	actionName := ""
@@ -38,6 +39,13 @@ func Main() {
 
 	os.Args = os.Args[1:]
 	action.Runner()
+	if len(exitActionList) > 0 {
+		WaitForExit()
+		for _, action := range exitActionList {
+			action()
+		}
+		exitActionList = nil
+	}
 }
 
 func AddAction(action Command) {
@@ -47,6 +55,14 @@ func AddAction(action Command) {
 		panic("command " + action.Name + " already defined.(case insensitive)")
 	}
 	actionMap[name] = action
+}
+
+//如果你使用了这个命令,主线程不会退出,而是会等到用户或者系统发送退出命令才会退出.
+//使用命令调用时,注册退出动作,
+//如果你使用了这个东西,请不要再使用WaitForExit了
+//TODO 这个地方过于不直观
+func AddExitAction(f func()) {
+	exitActionList = append(exitActionList, f)
 }
 
 //avoid initialization loop

@@ -34,7 +34,7 @@ func GetCurrentStack(skip int) (stack *Stack) {
 			Pc:       pcs[i],
 			FuncName: f.Name(),
 			File:     file,
-			Line:     line,
+			Line:     line - 1,
 		}
 	}
 	return
