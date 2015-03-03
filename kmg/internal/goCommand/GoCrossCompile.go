@@ -31,12 +31,12 @@ func runGoCrossCompile() {
 	flag.Parse()
 
 	if len(os.Args) <= 1 {
-        kmgConsole.ExitOnErr(fmt.Errorf("need gofile parameter"))
+		kmgConsole.ExitOnErr(fmt.Errorf("need gofile parameter"))
 		return
 	}
 	targetFile := flag.Arg(0)
 	kmgc, err := kmgConfig.LoadEnvFromWd()
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 	targetName := kmgFile.GetFileBaseWithoutExt(targetFile)
 	if command.outputPath == "" {
 		command.outputPath = filepath.Join(kmgc.ProjectPath, "bin")
@@ -58,7 +58,7 @@ func runGoCrossCompile() {
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		kmgCmd.SetCmdEnv(cmd, "GOPATH", kmgc.GOPATHToString())
 		err = cmd.Run()
-        kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnErr(err)
 	}
 	return
 }

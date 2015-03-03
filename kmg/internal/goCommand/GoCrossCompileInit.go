@@ -7,9 +7,9 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
+	"os/exec"
 	"runtime"
-    "strings"
-    "os/exec"
+	"strings"
 )
 
 func init() {
@@ -22,16 +22,16 @@ func init() {
 
 func runGoCrossCompileInit() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 	GOROOT := kmgc.GOROOT
 	if GOROOT == "" {
-        //guess GOROOT
-        out,err:=exec.Command("go","env","GOROOT").CombinedOutput()
-        kmgConsole.ExitOnErr(err)
-        GOROOT = strings.TrimSpace(string(out))
-        if GOROOT=="" {
-            kmgConsole.ExitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
-        }
+		//guess GOROOT
+		out, err := exec.Command("go", "env", "GOROOT").CombinedOutput()
+		kmgConsole.ExitOnErr(err)
+		GOROOT = strings.TrimSpace(string(out))
+		if GOROOT == "" {
+			kmgConsole.ExitOnErr(fmt.Errorf("you must set $GOROOT in environment to use GoCrossComplieInit"))
+		}
 	}
 	var makeShellArgs []string
 	var makeShellName string
@@ -49,7 +49,7 @@ func runGoCrossCompileInit() {
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		cmd.Dir = runCmdPath
 		err = cmd.Run()
-        kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnErr(err)
 	}
 	return
 }

@@ -49,19 +49,19 @@ func runGoTest() {
 		if kmgConfig.IsNotFound(err) {
 			command.gopath = os.Getenv("GOPATH")
 		} else {
-            kmgConsole.ExitOnErr(err)
+			kmgConsole.ExitOnErr(err)
 		}
 	}
 	//find root path
 	root, err := command.findRootPath()
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 	command.buildContext = &build.Context{
 		GOPATH:   command.gopath,
 		Compiler: build.Default.Compiler,
 	}
 	if command.onePackage {
 		err = command.handlePath(root)
-        kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnErr(err)
 	}
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -75,7 +75,7 @@ func runGoTest() {
 		}
 		return command.handlePath(path)
 	})
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 }
 
 /*
@@ -87,7 +87,7 @@ func runGoTest() {
  -d 一个目录名,从这个目录开始递归目录测试
 */
 type GoTest struct {
-	gopath       string
+	gopath string
 	//context      *console.Context
 	v            bool
 	dir          string

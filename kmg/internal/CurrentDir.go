@@ -15,7 +15,7 @@ func init() {
 
 func runCurrentDir() {
 	wd, err := os.Getwd()
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 	_, err = os.Stdout.Write([]byte(wd))
-    kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnErr(err)
 }
