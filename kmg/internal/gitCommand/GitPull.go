@@ -14,6 +14,6 @@ func init() {
 
 }
 
-func gitPull(){
-    kmgCmd.NewOsStdioCmdString("git pull origin master").Run()
+func gitPull() {
+	kmgCmd.NewOsStdioCmdString("git pull origin master").Run()
 }

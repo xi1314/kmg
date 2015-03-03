@@ -90,7 +90,7 @@ func ReadDir(dirname string) ([]os.FileInfo, error) {
 // * mkdir if base dir not exist
 //from http://stackoverflow.com/a/21067803/1586797
 func CopyFile(src, dst string) (err error) {
-    in, err := os.Open(src)
+	in, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("[CopyFile] openSrc err[%s]", err.Error())
 	}

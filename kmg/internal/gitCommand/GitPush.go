@@ -14,8 +14,8 @@ func init() {
 
 }
 
-func gitPush(){
-    kmgCmd.NewOsStdioCmdString("git add -A").Run()
-    kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
-    kmgCmd.NewOsStdioCmdString("git push origin master").Run()
+func gitPush() {
+	kmgCmd.NewOsStdioCmdString("git add -A").Run()
+	kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
+	kmgCmd.NewOsStdioCmdString("git push origin master").Run()
 }
