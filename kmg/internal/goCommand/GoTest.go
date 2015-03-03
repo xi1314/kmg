@@ -1,9 +1,9 @@
-package command
+package goCommand
 
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/console"
+	//"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
@@ -49,19 +49,19 @@ func runGoTest() {
 		if kmgConfig.IsNotFound(err) {
 			command.gopath = os.Getenv("GOPATH")
 		} else {
-			exitOnErr(err)
+            kmgConsole.ExitOnErr(err)
 		}
 	}
 	//find root path
 	root, err := command.findRootPath()
-	exitOnErr(err)
+    kmgConsole.ExitOnErr(err)
 	command.buildContext = &build.Context{
 		GOPATH:   command.gopath,
 		Compiler: build.Default.Compiler,
 	}
 	if command.onePackage {
 		err = command.handlePath(root)
-		exitOnErr(err)
+        kmgConsole.ExitOnErr(err)
 	}
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -75,7 +75,7 @@ func runGoTest() {
 		}
 		return command.handlePath(path)
 	})
-	exitOnErr(err)
+    kmgConsole.ExitOnErr(err)
 }
 
 /*
@@ -88,7 +88,7 @@ func runGoTest() {
 */
 type GoTest struct {
 	gopath       string
-	context      *console.Context
+	//context      *console.Context
 	v            bool
 	dir          string
 	moduleName   string
@@ -169,7 +169,7 @@ func (command *GoTest) gotest(path string) error {
 		args = append(args, "-run", command.runArg)
 	}
 
-	cmd := kmgCmd.NewStdioCmd(command.context, "go", args...)
+	cmd := kmgCmd.NewOsStdioCmd("go", args...)
 	cmd.Dir = path
 	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
 	if err != nil {
@@ -180,7 +180,7 @@ func (command *GoTest) gotest(path string) error {
 
 func (command *GoTest) gobuild(path string) error {
 	fmt.Printf("[gobuild] path[%s]\n", path)
-	cmd := kmgCmd.NewStdioCmd(command.context, "go", "build")
+	cmd := kmgCmd.NewOsStdioCmd("go", "build")
 	cmd.Dir = path
 	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
 	if err != nil {

@@ -1,5 +1,5 @@
 package command
-
+/*
 import (
 	"fmt"
 	"os"
@@ -94,3 +94,4 @@ func (command *WatchCmd) debugPrintln(o ...interface{}) {
 		fmt.Println(o...)
 	}
 }
+*/

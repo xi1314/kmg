@@ -1,5 +1,5 @@
 package command
-
+/*
 import (
 	"flag"
 
@@ -36,3 +36,4 @@ func (command *Yaml2Json) Execute(context *console.Context) error {
 	}
 	return transform.Run(inputPath, outputPath)
 }
+*/
