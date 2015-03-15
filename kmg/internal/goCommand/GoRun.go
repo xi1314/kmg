@@ -54,10 +54,6 @@ func gorun() {
 		kmgConsole.ExitOnErr(err)
 		return
 	default:
-		//case fi.IsDir():
-		//    kmgConsole.ExitOnErr(fmt.Errorf("TODO kmg gorun a directory"))
-		//    return
-		//case !fi.IsDir():
 		//靠谱实现这个东西的复杂度太高,目前已有的方案不能达到目标,暂时先使用go run
 		// 如果有需要使用请go run一个package
 		//已经证实不行的方案:
@@ -65,14 +61,6 @@ func gorun() {
 		// 使用go build -i 效果和直接go run没有区别(缓存还是会出现问题)
 		//有可能的方案是:
 		// 取出指向的这个文件的所有import的包,全部install一遍,再go build,并且run(如何找到某个文件的import项?)
-
-		//outputPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
-		//cmd := kmgCmd.NewOsStdioCmd("go", "build", "-o", outputPath, pathOrPkg)
-		//err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
-		//kmgConsole.ExitOnErr(err)
-		//err = cmd.Run()
-		//kmgConsole.ExitOnErr(err)
-		//run
 		cmd := kmgCmd.NewOsStdioCmd("go", append([]string{"run"}, os.Args[1:]...)...)
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
