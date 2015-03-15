@@ -23,7 +23,6 @@ func init() {
 /*
 GoCrossComplie [gofile]
 the output file will put into $project_root/bin/name_GOOS_GOARCH[.exe]
-TODO use go install
 */
 func runGoCrossCompile() {
 	command := GoCrossCompile{}

@@ -1,7 +1,8 @@
-package kmgNet
+package kmgTfo
 
 import (
 	"golang.org/x/sys/unix"
+
 	"net"
 	"os"
 )
@@ -21,7 +22,7 @@ func TfoListen(network string, listenAddr string) (listener net.Listener, err er
 	if err != nil {
 		return nil, err
 	}
-	sa, err := IPv4TcpAddrToUnixSocksAddr(listenAddr)
+	sa, err := kmgUnix.IPv4TcpAddrToUnixSocksAddr(listenAddr)
 	if err != nil {
 		return nil, err
 	}

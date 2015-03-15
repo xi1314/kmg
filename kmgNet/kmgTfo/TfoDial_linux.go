@@ -1,6 +1,8 @@
-package kmgNet
+package kmgTfo
 
 import (
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
 	"golang.org/x/sys/unix"
 	"net"
 	"os"
@@ -33,7 +35,7 @@ func (c *tfoLazyConn) Read(b []byte) (n int, err error) {
 	}
 	if c.isClosed {
 		c.lock.Unlock()
-		return 0, ErrClosing
+		return 0, kmgNet.ErrClosing
 	}
 	c.Conn, err = net.Dial("tcp", c.nextAddr)
 	if err != nil {
@@ -52,7 +54,7 @@ func (c *tfoLazyConn) Write(b []byte) (n int, err error) {
 	}
 	if c.isClosed {
 		c.lock.Unlock()
-		return 0, ErrClosing
+		return 0, kmgNet.ErrClosing
 	}
 	if len(b) <= tfoFirstSize {
 		c.Conn, err = TfoDial(c.nextAddr, b)
@@ -81,7 +83,7 @@ func (c *tfoLazyConn) Close() error {
 	c.lock.Lock()
 	if c.isClosed {
 		c.lock.Unlock()
-		return ErrClosing
+		return kmgNet.ErrClosing
 	}
 	c.isClosed = true
 	if c.Conn != nil {
@@ -103,7 +105,7 @@ func TfoDial(nextAddr string, data []byte) (conn net.Conn, err error) {
 		return nil, err
 	}
 	defer unix.Close(s)
-	sa, err := IPv4TcpAddrToUnixSocksAddr(nextAddr)
+	sa, err := kmgUnix.IPv4TcpAddrToUnixSocksAddr(nextAddr)
 	if err != nil {
 		return nil, err
 	}

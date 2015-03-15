@@ -1,6 +1,6 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd solaris
 
-package kmgNet
+package kmgUnix
 
 import (
 	"golang.org/x/sys/unix"
