@@ -3,12 +3,10 @@ package kmgHttp
 import (
 	"bufio"
 	"bytes"
-	"crypto/tls"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
-	"sync"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {
@@ -81,49 +79,43 @@ func MustRequestFromString(reqString string) (req *http.Request) {
 	return req
 }
 
-func NewHttpsCertNotCheckClient() *http.Client {
-	return &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
+// 进行http代理,并且代理到writer上面去
+// 调用时,请修改req的参数,避免自己调用自己
+// 如果出现错误,(对方服务器连不上之类的,不会修改w,会返回一个error
+// 不跟踪redirect(跟踪redirect会导致redirect的请求的内容被返回)
+func HttpProxyToWriter(w http.ResponseWriter, req *http.Request) (err error) {
+	req.RequestURI = ""
+	if req.Proto == "" {
+		req.Proto = "HTTP/1.1"
 	}
+	if req.URL.Scheme == "" {
+		req.URL.Scheme = "http"
+	}
+	resp, err := http.DefaultTransport.RoundTrip(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	for k, values := range resp.Header {
+		for _, value := range values {
+			w.Header().Add(k, value)
+		}
+	}
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+	return nil
 }
 
-var httpsNotCheckClient *http.Client
-var httpsNotCheckClientOnce sync.Once
-
-func GetHttpsCertNotCheckClient() *http.Client {
-	httpsNotCheckClientOnce.Do(func() {
-		httpsNotCheckClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
-			},
-		}
-	})
-	return httpsNotCheckClient
-}
-
-//一个不验证证书,并且使用http代理的http客户端
-// httpProxy look like http://127.0.0.1:9876
-func MustNewTestClientWithHttpProxy(httpProxy string) *http.Client {
-	var Proxy func(*http.Request) (*url.URL, error)
-	if httpProxy != "" {
-		u, err := url.Parse(httpProxy)
-		if err != nil {
-			panic(err)
-		}
-		Proxy = http.ProxyURL(u)
+//会把request里面的东西全部都读出来(body)
+func HttpRequestClone(in *http.Request) (out *http.Request, err error) {
+	buf := &bytes.Buffer{}
+	err = in.Write(buf)
+	if err != nil {
+		return
 	}
-	return &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-			Proxy: Proxy,
-		},
+	out, err = http.ReadRequest(bufio.NewReader(buf))
+	if err != nil {
+		return
 	}
+	return
 }

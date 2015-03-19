@@ -30,7 +30,6 @@ func MustTcpRandomListen() net.Listener {
 }
 
 func SpeedString(byteNum int, dur time.Duration) string {
-
 	bytePerSecond := float64(byteNum) / (float64(dur) / float64(time.Second))
 	if bytePerSecond > 1e9 {
 		return fmt.Sprintf("%.2fGB/s", bytePerSecond/(1024*1024*1024))
@@ -44,7 +43,7 @@ func SpeedString(byteNum int, dur time.Duration) string {
 	return fmt.Sprintf("%.2fB/s", bytePerSecond)
 }
 
-func SizeString(byteNum int) string {
+func SizeString(byteNum int64) string {
 	if byteNum > 1e9 {
 		return fmt.Sprintf("%.2fGB", float64(byteNum)/(1024*1024*1024))
 	}

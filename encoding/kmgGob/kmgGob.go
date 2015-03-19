@@ -18,6 +18,13 @@ func WriteFile(path string, obj interface{}) (err error) {
 	return encoder.Encode(obj)
 }
 
+func MustWriteFile(path string, obj interface{}) {
+	err := WriteFile(path, obj)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func ReadFile(path string, obj interface{}) (err error) {
 	f, err := os.OpenFile(path, os.O_RDONLY, os.FileMode(0666))
 	if err != nil {
@@ -26,6 +33,13 @@ func ReadFile(path string, obj interface{}) (err error) {
 	defer f.Close()
 	encoder := gob.NewDecoder(f)
 	return encoder.Decode(obj)
+}
+
+func MustReadFile(path string, obj interface{}) {
+	err := ReadFile(path, obj)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Marshal(obj interface{}) (out []byte, err error) {

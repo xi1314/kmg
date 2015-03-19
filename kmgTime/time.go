@@ -7,6 +7,7 @@ import (
 
 const (
 	FormatMysql     = "2006-01-02 15:04:05"
+	FormatFileName  = "2006-01-02_15-04-05" //适合显示在文件上面的日期格式
 	FormatDateMysql = "2006-01-02"
 	Iso3339Hour     = "2006-01-02T15"
 	Iso3339Minute   = "2006-01-02T15:04"
@@ -90,6 +91,12 @@ func ToDate(t time.Time) time.Time {
 //规整到日期然后相减
 func DateSub(t1 time.Time, t2 time.Time, loc *time.Location) time.Duration {
 	return ToDate(t1.In(loc)).Sub(ToDate(t2.In(loc)))
+}
+
+//规整到日期然后相减,返回天数
+func DateSubToDay(t1 time.Time, t2 time.Time, loc *time.Location) int {
+	dur := ToDate(t1.In(loc)).Sub(ToDate(t2.In(loc)))
+	return int(dur.Hours() / 24)
 }
 
 func DateSubLocal(t1 time.Time, t2 time.Time) time.Duration {
