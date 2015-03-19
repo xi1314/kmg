@@ -36,6 +36,13 @@ func MustWriteFile(path string, content []byte) {
 func ReadFileAll(path string) (content []byte, err error) {
 	return ioutil.ReadFile(path)
 }
+func MustReadFileAll(path string) (content []byte) {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return content
+}
 
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))

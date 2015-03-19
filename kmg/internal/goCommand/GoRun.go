@@ -33,6 +33,7 @@ func gorun() {
 	_, err = os.Stat(pathOrPkg)
 	switch {
 	case os.IsNotExist(err):
+		//这个方案的实现缓存是正常的,但是也只能更新本GOPATH里面的pkg,不能更多多个GOPATH里面其他GOPATH的pkg缓存.
 		//是package
 		//build
 		args := []string{"install", pathOrPkg}
@@ -51,22 +52,21 @@ func gorun() {
 		return
 	case err != nil:
 		kmgConsole.ExitOnErr(err)
+		return
 	default:
-		//是文件或目录,文件可以go build -i
-		//优化项: 1.是src里面的文件,可以go install? 2.可以创建一个缓存package?
-		//如果在临时目录建一个package,并且使用GOPATH指向那个临时目录,缓存会出现问题,并且效果和 go build -i 没有区别
-		//build
-		outputPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
-		cmd := kmgCmd.NewOsStdioCmd("go", "build", "-i", "-o", outputPath, pathOrPkg)
+		//靠谱实现这个东西的复杂度太高,目前已有的方案不能达到目标,暂时先使用go run
+		// 如果有需要使用请go run一个package
+		//已经证实不行的方案:
+		// 在临时目录建一个package,并且使用GOPATH指向那个临时目录,缓存会出现问题,并且效果和 go build -i 没有区别
+		// 使用go build -i 效果和直接go run没有区别(缓存还是会出现问题)
+		//有可能的方案是:
+		// 取出指向的这个文件的所有import的包,全部install一遍,再go build,并且run(如何找到某个文件的import项?)
+		cmd := kmgCmd.NewOsStdioCmd("go", append([]string{"run"}, os.Args[1:]...)...)
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()
 		kmgConsole.ExitOnErr(err)
-		//run
-		cmd = kmgCmd.NewOsStdioCmd(outputPath, os.Args[2:]...)
-		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
-		kmgConsole.ExitOnErr(err)
-		err = cmd.Run()
-		kmgConsole.ExitOnErr(err)
+		return
 	}
+	kmgConsole.ExitOnErr(fmt.Errorf("unexpected run path"))
 }
