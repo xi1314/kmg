@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"crypto/tls"
 	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgTest"
-	"github.com/bronze1man/kmg/net/kmgHttp"
 	"io/ioutil"
 	"net/http"
 )

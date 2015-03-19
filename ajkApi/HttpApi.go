@@ -4,7 +4,7 @@ import (
 	"compress/flate"
 	"net/http"
 
-	"github.com/bronze1man/kmg/net/kmgHttp"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
 type HttpApiFilter func(c *HttpApiContext, fc []HttpApiFilter)
