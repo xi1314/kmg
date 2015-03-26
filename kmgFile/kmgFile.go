@@ -36,6 +36,13 @@ func MustWriteFile(path string, content []byte) {
 func ReadFileAll(path string) (content []byte, err error) {
 	return ioutil.ReadFile(path)
 }
+func MustReadFileAll(path string) (content []byte) {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return content
+}
 
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
@@ -64,6 +71,13 @@ func AppendFile(path string, content []byte) (err error) {
 	return
 }
 
+func MustAppendFile(path string, content []byte) {
+	err := AppendFile(path, content)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func FileExist(path string) (exist bool, err error) {
 	_, err = os.Stat(path)
 	if err != nil {
@@ -83,6 +97,29 @@ func RemoveExtFromFilePath(path string) string {
 //just some Knowledge,you can direct call ioutil.ReadDir
 func ReadDir(dirname string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(dirname)
+}
+
+//delete file,ignore file not exist err
+func MustDeleteFile(path string) {
+	err := os.Remove(path)
+	if os.IsNotExist(err) {
+		return
+	}
+	if err != nil {
+		panic(err)
+	}
+}
+
+//delete file or directory,ignore file not exist err
+func MustDeleteFileOrDirectory(path string) {
+	err := os.RemoveAll(path)
+	if os.IsNotExist(err) {
+		return
+	}
+	if err != nil {
+		panic(err)
+	}
+	return
 }
 
 //copy file

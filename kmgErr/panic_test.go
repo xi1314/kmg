@@ -1,11 +1,11 @@
 package kmgErr
 
 import (
-	"fmt"
-	"runtime/debug"
+	. "github.com/bronze1man/kmgTest"
 	"testing"
 )
 
+/*
 func TestPanic(ot *testing.T) {
 	defer func() {
 		r := recover()
@@ -20,4 +20,30 @@ func TestPanic(ot *testing.T) {
 
 func f1() {
 	panic(1)
+}
+*/
+
+func TestPanicToError(ot *testing.T) {
+	flag := 1
+	err := PanicToError(func() {
+		flag = 2
+	})
+	Equal(flag, 2)
+	Equal(err, nil)
+
+	err = PanicToError(func() {
+		flag = 3
+		panic(nil)
+		flag = 4
+	})
+	Equal(flag, 3)
+	Equal(err, nil)
+
+	err = PanicToError(func() {
+		panic(1)
+		flag = 6
+	})
+	Equal(flag, 3)
+	Ok(err != nil)
+	Equal(err.Error(), "1")
 }
