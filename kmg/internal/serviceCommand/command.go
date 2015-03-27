@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+//TODO kmg gorun 可以在service运行的进程里面
+//TODO 完整描述使用过程
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.SetAndStart",
@@ -49,51 +51,44 @@ func init() {
 type installRequest struct {
 	Name             string   //名字
 	ExecuteArgs      []string //执行的命令,第一个是执行命令的进程地址
-	WorkingDirectory string   //工作目录(默认是当前目录)
+	WorkingDirectory string   //工作目录(默认是当前目录) 不能在upstart系统上面运行
+	//有下列选项
+	// 'Darwin Launchd'
+	// 'Linux systemd'
+	// 'Linux Upstart'
+	// 'Linux System-V'
+	// 'Windows Service'
+	SystemName string //使用的系统(linux上面可以进行选择)
 }
 
 func setAndStartCmd() {
-	req, err := parseInstallRequest()
-	svcConfig := &service.Config{
-		Name:             req.Name,
-		Executable:       req.ExecuteArgs[0],
-		Arguments:        req.ExecuteArgs[1:],
-		WorkingDirectory: req.WorkingDirectory,
-	}
-	s, err := service.New(nil, svcConfig)
+	s, err := parseInstallRequest()
 	kmgConsole.ExitOnErr(err)
 	err = s.Install()
-	if err == nil {
-		return
+	if err != nil {
+		err = s.Uninstall()
+		kmgConsole.ExitOnErr(err)
+		err = s.Install()
+		kmgConsole.ExitOnErr(err)
 	}
-	err = s.Uninstall()
-	kmgConsole.ExitOnErr(err)
-	err = s.Install()
-	kmgConsole.ExitOnErr(err)
 	err = s.Start()
 	kmgConsole.ExitOnErr(err)
 }
 
 func installCmd() {
-	req, err := parseInstallRequest()
-	svcConfig := &service.Config{
-		Name:             req.Name,
-		Executable:       req.ExecuteArgs[0],
-		Arguments:        req.ExecuteArgs[1:],
-		WorkingDirectory: req.WorkingDirectory,
-	}
-	s, err := service.New(nil, svcConfig)
+	s, err := parseInstallRequest()
 	kmgConsole.ExitOnErr(err)
 	err = s.Install()
 	kmgConsole.ExitOnErr(err)
 }
 
-func parseInstallRequest() (req *installRequest, err error) {
-	req = &installRequest{}
+func parseInstallRequest() (s service.Service, err error) {
+	req := &installRequest{}
 	flag.StringVar(&req.Name, "name", "", "name of the service(require)")
 	var executeString string
 	flag.StringVar(&executeString, "exec", "", "command to run(require,use ' ' to separate args)")
 	flag.StringVar(&req.WorkingDirectory, "cd", "", "working directory(optional),default to currend directory")
+	flag.StringVar(&req.SystemName, "system", "", "system name")
 	flag.Parse()
 	if req.Name == "" {
 		return nil, fmt.Errorf("require name args")
@@ -110,7 +105,25 @@ func parseInstallRequest() (req *installRequest, err error) {
 			return nil, err
 		}
 	}
-	return req, nil
+	svcConfig := &service.Config{
+		Name:             req.Name,
+		Executable:       req.ExecuteArgs[0],
+		Arguments:        req.ExecuteArgs[1:],
+		WorkingDirectory: req.WorkingDirectory,
+	}
+	if req.SystemName == "" {
+		return service.New(nil, svcConfig)
+	} else {
+		avaliableListS := ""
+		for _, system := range service.AvailableSystems() {
+			avaliableListS += system.String() + ","
+			if system.String()==req.SystemName {
+				return system.New(nil, svcConfig)
+			}
+		}
+		return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", req.SystemName, avaliableListS)
+	}
+
 }
 
 func newNameCmd(fn func(s service.Service) error) func() {
