@@ -116,28 +116,10 @@ func parseInstallRequest() (s service.Service, err error) {
 			"KeepAlive": false,
 		},
 	}
-	var system service.System
-	if runtime.GOOS == "linux" && req.SystemName == "" {
-		req.SystemName = "System-V"
-	}
-	if req.SystemName == "" {
-		system = service.ChosenSystem()
-		return service.New(nil, svcConfig)
-	} else {
-		avaliableListS := ""
-		for _, thisSystem := range service.AvailableSystems() {
-			if !thisSystem.Detect() {
-				continue
-			}
-			avaliableListS += thisSystem.String() + ","
-			if thisSystem.String() == req.SystemName {
-				system = thisSystem
-			}
-		}
-		if system == nil {
-			return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", req.SystemName, avaliableListS)
-		}
-	}
+    system,err:=chooseSystem(req.SystemName)
+    if err!=nil{
+        return nil,err
+    }
 	return system.New(nil, svcConfig)
 
 }
@@ -161,7 +143,10 @@ func newNameCmd(fn func(s service.Service) error) func() {
 		svcConfig := &service.Config{
 			Name: name,
 		}
-		s, err := service.New(nil, svcConfig)
+        system,err:=chooseSystem(req.SystemName)
+        kmgConsole.ExitOnErr(err)
+
+		s, err := system.New(nil, svcConfig)
 		kmgConsole.ExitOnErr(err)
 		err = fn(s)
 		kmgConsole.ExitOnErr(err)
@@ -179,4 +164,25 @@ func kmgRestart(s service.Service) (err error) {
 	}
 	err = s.Start()
 	return err
+}
+
+func chooseSystem(SystemName string)(sys service.System,err error){
+    if runtime.GOOS == "linux" && SystemName == "" {
+        SystemName = "System-V"
+    }
+    if SystemName == "" {
+        return service.ChosenSystem(),nil
+    }
+    avaliableListS := ""
+    for _, thisSystem := range service.AvailableSystems() {
+        if !thisSystem.Detect() {
+            continue
+        }
+        avaliableListS += thisSystem.String() + ","
+        if thisSystem.String() == SystemName {
+            return thisSystem,nil
+        }
+    }
+    return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", SystemName, avaliableListS)
+
 }
