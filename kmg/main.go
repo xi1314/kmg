@@ -9,9 +9,9 @@ import (
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
-// kmg GoCrossCompile -v 'v1.3' github.com/bronze1man/kmg/kmg
+// kmg GoCrossCompile -v 'v1.4' github.com/bronze1man/kmg/kmg
 func main() {
-	kmgConsole.VERSION = "1.3"
+	kmgConsole.VERSION = "1.4"
 	kmgHttp.AddCommands()
 	kmgConsole.Main()
 }
