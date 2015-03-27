@@ -17,32 +17,32 @@ import (
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.SetAndRestart",
-		Desc:   "manage system service more easy",
+		Desc:   "install the service,and restart the service,uninstall and stop if need",
 		Runner: setAndRestartCmd,
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Install",
-		Desc:   "manage system service more easy",
+		Desc:   "install the service",
 		Runner: installCmd,
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Uninstall",
-		Desc:   "manage system service more easy",
+		Desc:   "uninstall the serivce",
 		Runner: newNameCmd(func(s service.Service) error { return s.Uninstall() }),
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Start",
-		Desc:   "manage system service more easy",
+		Desc:   "start the service",
 		Runner: newNameCmd(func(s service.Service) error { return s.Start() }),
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Stop",
-		Desc:   "manage system service more easy",
+		Desc:   "start the service",
 		Runner: newNameCmd(func(s service.Service) error { return s.Stop() }),
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Restart",
-		Desc:   "manage system service more easy",
+		Desc:   "restart the service,if the service is not running,start it.",
 		Runner: newNameCmd(kmgRestart),
 	})
 }
@@ -64,14 +64,16 @@ func setAndRestartCmd() {
 	s, err := parseInstallRequest()
 	kmgConsole.ExitOnErr(err)
 	err = s.Install()
-    fmt.Println("install",err)
 	if err != nil {
+		if !strings.Contains(err.Error(), "already exists") {
+			kmgConsole.ExitOnErr(err)
+		}
 		err = s.Uninstall()
 		kmgConsole.ExitOnErr(err)
 		err = s.Install()
 		kmgConsole.ExitOnErr(err)
 	}
-    err = kmgRestart(s)
+	err = kmgRestart(s)
 	kmgConsole.ExitOnErr(err)
 }
 
@@ -110,6 +112,9 @@ func parseInstallRequest() (s service.Service, err error) {
 		Executable:       req.ExecuteArgs[0],
 		Arguments:        req.ExecuteArgs[1:],
 		WorkingDirectory: req.WorkingDirectory,
+		Option: service.KeyValue{
+			"KeepAlive": false,
+		},
 	}
 	var system service.System
 	if runtime.GOOS == "linux" && req.SystemName == "" {
@@ -165,13 +170,13 @@ func newNameCmd(fn func(s service.Service) error) func() {
 
 // 允许 stop restart 这种用法
 func kmgRestart(s service.Service) (err error) {
-    err = s.Stop()
-    if err!=nil{
-        errS := err.Error()
-        if !(strings.Contains(errS,"Unknown instance")){
-            return err
-        }
-    }
-    err = s.Start()
-    return err
+	err = s.Stop()
+	if err != nil {
+		errS := err.Error()
+		if !(strings.Contains(errS, "Unknown instance")) {
+			return err
+		}
+	}
+	err = s.Start()
+	return err
 }
