@@ -128,7 +128,8 @@ func newNameCmd(fn func(s service.Service) error) func() {
 	return func() {
 		req := installRequest{}
 		flag.StringVar(&req.Name, "name", "", "name of the service(require)")
-		flag.Parse()
+        flag.StringVar(&req.SystemName, "system", "", "system name")
+        flag.Parse()
 		name := ""
 		switch {
 		case req.Name != "":
