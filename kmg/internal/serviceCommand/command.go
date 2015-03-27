@@ -7,6 +7,7 @@ import (
 	"github.com/kardianos/service"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -54,9 +55,9 @@ type installRequest struct {
 	WorkingDirectory string   //工作目录(默认是当前目录) 不能在upstart系统上面运行
 	//有下列选项
 	// 'Darwin Launchd'
-	// 'Linux systemd'
-	// 'Linux Upstart'
-	// 'Linux System-V'
+	// 'systemd'
+	// 'Upstart'
+	// 'System-V'
 	// 'Windows Service'
 	SystemName string //使用的系统(linux上面可以进行选择)
 }
@@ -111,18 +112,29 @@ func parseInstallRequest() (s service.Service, err error) {
 		Arguments:        req.ExecuteArgs[1:],
 		WorkingDirectory: req.WorkingDirectory,
 	}
+	var system service.System
+	if runtime.GOOS == "linux" && req.SystemName == "" {
+		req.SystemName = "System-V"
+	}
 	if req.SystemName == "" {
+		system = service.ChosenSystem()
 		return service.New(nil, svcConfig)
 	} else {
 		avaliableListS := ""
-		for _, system := range service.AvailableSystems() {
-			avaliableListS += system.String() + ","
-			if system.String()==req.SystemName {
-				return system.New(nil, svcConfig)
+		for _, thisSystem := range service.AvailableSystems() {
+			if !thisSystem.Detect() {
+				continue
+			}
+			avaliableListS += thisSystem.String() + ","
+			if thisSystem.String() == req.SystemName {
+				system = thisSystem
 			}
 		}
-		return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", req.SystemName, avaliableListS)
+		if system == nil {
+			return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", req.SystemName, avaliableListS)
+		}
 	}
+	return system.New(nil, svcConfig)
 
 }
 
