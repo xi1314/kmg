@@ -13,11 +13,12 @@ import (
 
 //TODO kmg gorun 可以在service运行的进程里面
 //TODO 完整描述使用过程
+//TODO 在osx和linux上达到一致的行为
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "Service.SetAndStart",
+		Name:   "Service.SetAndRestart",
 		Desc:   "manage system service more easy",
-		Runner: setAndStartCmd,
+		Runner: setAndRestartCmd,
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Install",
@@ -39,13 +40,10 @@ func init() {
 		Desc:   "manage system service more easy",
 		Runner: newNameCmd(func(s service.Service) error { return s.Stop() }),
 	})
-	//TODO linux restart bug,
-	//TODO bug1: you have to first start,then restart.
-	//TODO bug2: can not see the real reason.
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.Restart",
 		Desc:   "manage system service more easy",
-		Runner: newNameCmd(func(s service.Service) error { return s.Restart() }),
+		Runner: newNameCmd(kmgRestart),
 	})
 }
 
@@ -62,17 +60,18 @@ type installRequest struct {
 	SystemName string //使用的系统(linux上面可以进行选择)
 }
 
-func setAndStartCmd() {
+func setAndRestartCmd() {
 	s, err := parseInstallRequest()
 	kmgConsole.ExitOnErr(err)
 	err = s.Install()
+    fmt.Println("install",err)
 	if err != nil {
 		err = s.Uninstall()
 		kmgConsole.ExitOnErr(err)
 		err = s.Install()
 		kmgConsole.ExitOnErr(err)
 	}
-	err = s.Start()
+    err = kmgRestart(s)
 	kmgConsole.ExitOnErr(err)
 }
 
@@ -162,4 +161,17 @@ func newNameCmd(fn func(s service.Service) error) func() {
 		err = fn(s)
 		kmgConsole.ExitOnErr(err)
 	}
+}
+
+// 允许 stop restart 这种用法
+func kmgRestart(s service.Service) (err error) {
+    err = s.Stop()
+    if err!=nil{
+        errS := err.Error()
+        if !(strings.Contains(errS,"Unknown instance")){
+            return err
+        }
+    }
+    err = s.Start()
+    return err
 }
