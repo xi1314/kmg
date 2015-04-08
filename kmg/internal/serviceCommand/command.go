@@ -11,9 +11,14 @@ import (
 	"strings"
 )
 
-//TODO kmg gorun 可以在service运行的进程里面
+//TODO 统一进程输出的输出位置,默认不区分err和out.
+//TODO 添加stopanduninstall命令(停掉,并且卸载),删除或隐藏其他无用命令
+
+//TODO 添加至少一个平台的测试
+//TODO kmg gorun 可以在service运行的进程里面,目前是restart 存在bug
 //TODO 完整描述使用过程
 //TODO 在osx和linux上达到一致的行为
+
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "Service.SetAndRestart",
@@ -116,10 +121,10 @@ func parseInstallRequest() (s service.Service, err error) {
 			"KeepAlive": false,
 		},
 	}
-    system,err:=chooseSystem(req.SystemName)
-    if err!=nil{
-        return nil,err
-    }
+	system, err := chooseSystem(req.SystemName)
+	if err != nil {
+		return nil, err
+	}
 	return system.New(nil, svcConfig)
 
 }
@@ -128,8 +133,8 @@ func newNameCmd(fn func(s service.Service) error) func() {
 	return func() {
 		req := installRequest{}
 		flag.StringVar(&req.Name, "name", "", "name of the service(require)")
-        flag.StringVar(&req.SystemName, "system", "", "system name")
-        flag.Parse()
+		flag.StringVar(&req.SystemName, "system", "", "system name")
+		flag.Parse()
 		name := ""
 		switch {
 		case req.Name != "":
@@ -144,8 +149,8 @@ func newNameCmd(fn func(s service.Service) error) func() {
 		svcConfig := &service.Config{
 			Name: name,
 		}
-        system,err:=chooseSystem(req.SystemName)
-        kmgConsole.ExitOnErr(err)
+		system, err := chooseSystem(req.SystemName)
+		kmgConsole.ExitOnErr(err)
 
 		s, err := system.New(nil, svcConfig)
 		kmgConsole.ExitOnErr(err)
@@ -167,23 +172,23 @@ func kmgRestart(s service.Service) (err error) {
 	return err
 }
 
-func chooseSystem(SystemName string)(sys service.System,err error){
-    if runtime.GOOS == "linux" && SystemName == "" {
-        SystemName = "System-V"
-    }
-    if SystemName == "" {
-        return service.ChosenSystem(),nil
-    }
-    avaliableListS := ""
-    for _, thisSystem := range service.AvailableSystems() {
-        if !thisSystem.Detect() {
-            continue
-        }
-        avaliableListS += thisSystem.String() + ","
-        if thisSystem.String() == SystemName {
-            return thisSystem,nil
-        }
-    }
-    return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", SystemName, avaliableListS)
+func chooseSystem(SystemName string) (sys service.System, err error) {
+	if runtime.GOOS == "linux" && SystemName == "" {
+		SystemName = "System-V"
+	}
+	if SystemName == "" {
+		return service.ChosenSystem(), nil
+	}
+	avaliableListS := ""
+	for _, thisSystem := range service.AvailableSystems() {
+		if !thisSystem.Detect() {
+			continue
+		}
+		avaliableListS += thisSystem.String() + ","
+		if thisSystem.String() == SystemName {
+			return thisSystem, nil
+		}
+	}
+	return nil, fmt.Errorf("system [%s] not exist,avaliable:[%s]", SystemName, avaliableListS)
 
 }
