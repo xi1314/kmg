@@ -9,7 +9,7 @@ kmg golang framework
 kmg command line tools
 ==============================
 ```
-go get -u github.com/bronze1man/kmg/console/kmg
+go get -u github.com/bronze1man/kmg/kmg
 ```
 
 Notice

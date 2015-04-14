@@ -44,10 +44,12 @@ func MustReadFileAll(path string) (content []byte) {
 	return content
 }
 
+//如果这个目录已经创建过了,不报错
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
 }
 
+//如果这个目录已经创建过了,不报错
 func MustMkdirAll(dirname string) {
 	err := os.MkdirAll(dirname, os.FileMode(0777))
 	if err != nil {
@@ -55,7 +57,7 @@ func MustMkdirAll(dirname string) {
 	}
 }
 
-//保证一个文件的路径可以写入
+//保证一个文件的路径可以写入,如果这个目录已经创建过了,不报错
 func MkdirForFile(path string) (err error) {
 	path = filepath.Dir(path)
 	return os.MkdirAll(path, os.FileMode(0777))
