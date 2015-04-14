@@ -13,7 +13,7 @@ type Cmd struct {
 }
 
 //you need at least one args: the path of the command, or it will panic
-func CmdSlice(args ...string) *Cmd {
+func CmdSlice(args []string) *Cmd {
 	if len(args) == 0 {
 		panic("[CmdSlice] need the path of the command")
 	}

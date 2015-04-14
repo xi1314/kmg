@@ -2,7 +2,6 @@ package command
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,11 +62,11 @@ emailAddress = optional`))
 		"-subj", command.subject+" ca")
 	mustRunCmd("openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out csr.csr -days 18250",
 		"-subj", command.subject)
-	mustRunCmdString("openssl ca -config config.conf -batch -cert ca.crt -passin pass:1234 -keyfile ca.key -policy policy_anything -out server.crt -infiles csr.csr")
+	kmgCmd.MustRun("openssl ca -config config.conf -batch -cert ca.crt -passin pass:1234 -keyfile ca.key -policy policy_anything -out server.crt -infiles csr.csr")
 	mustRunCmd("openssl req -new -newkey rsa:2048 -nodes -keyout client.key -out csr.csr -days 18250",
 		"-subj", command.subject+" client")
-	mustRunCmdString("openssl ca -config config.conf -batch -cert ca.crt -passin pass:1234 -keyfile ca.key -policy policy_anything -out client.crt -infiles csr.csr")
-	mustRunCmdString("openssl pkcs12 -export -passout pass:1234 -inkey client.key -in client.crt -out client.pfx")
+	kmgCmd.MustRun("openssl ca -config config.conf -batch -cert ca.crt -passin pass:1234 -keyfile ca.key -policy policy_anything -out client.crt -infiles csr.csr")
+	kmgCmd.MustRun("openssl pkcs12 -export -passout pass:1234 -inkey client.key -in client.crt -out client.pfx")
 	return
 }
 
@@ -77,21 +76,9 @@ type GenerateHttpsCert struct {
 	subject    string
 }
 
-func mustRunCmdString(s string) {
-	fmt.Println(s)
-	err := kmgCmd.RunOsStdioCmdString(s)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func mustRunCmd(s string, args ...string) {
-	fmt.Println(s)
 
 	sParts := strings.Split(s, " ")
-	args = append(sParts[1:], args...)
-	err := kmgCmd.RunOsStdioCmd(sParts[0], args...)
-	if err != nil {
-		panic(err)
-	}
+	args = append(sParts, args...)
+	kmgCmd.CmdSlice(args).MustRun()
 }

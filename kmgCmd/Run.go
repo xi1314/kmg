@@ -1,7 +1,7 @@
 package kmgCmd
 
 /*
-运行命令,并且把命令输入输出和当前的输入输出接起来(bash的默认调用方式)
+运行命令,并且把命令输入输出和当前的输入输出接起来
 会回显输入的命令
 会显示输出的结果
 应该可以从命令行输入输入,但是没有使用过.
@@ -15,8 +15,8 @@ func Run(cmd string) (err error) {
 }
 
 //相比Run 不回显命令 并且使用slice作为输入方式
-func StdioSliceRun(args ...string) (err error) {
-	return CmdSlice(args...).Run()
+func StdioSliceRun(args []string) (err error) {
+	return CmdSlice(args).StdioRun()
 }
 
 func MustRun(cmd string) {

@@ -36,15 +36,14 @@ func gorun() {
 		//这个方案的实现缓存是正常的,但是也只能更新本GOPATH里面的pkg,不能更多多个GOPATH里面其他GOPATH的pkg缓存.
 		//是package
 		//build
-		args := []string{"install", pathOrPkg}
-		cmd := kmgCmd.NewOsStdioCmd("go", args...)
+		cmd := kmgCmd.CmdSlice([]string{"go", "install", pathOrPkg}).GetExecCmd()
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()
 		kmgConsole.ExitOnErr(err)
 		//run
 		outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
-		cmd = kmgCmd.NewOsStdioCmd(outPath, os.Args[2:]...)
+		cmd = kmgCmd.CmdSlice(append([]string{outPath}, os.Args[2:]...)).GetExecCmd()
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()
@@ -61,7 +60,7 @@ func gorun() {
 		// 使用go build -i 效果和直接go run没有区别(缓存还是会出现问题)
 		//有可能的方案是:
 		// 取出指向的这个文件的所有import的包,全部install一遍,再go build,并且run(如何找到某个文件的import项?)
-		cmd := kmgCmd.NewOsStdioCmd("go", append([]string{"run"}, os.Args[1:]...)...)
+		cmd := kmgCmd.CmdSlice(append([]string{"go", "run"}, os.Args[1:]...)).GetExecCmd()
 		err = kmgCmd.SetCmdEnv(cmd, "GOPATH", goPath)
 		kmgConsole.ExitOnErr(err)
 		err = cmd.Run()

@@ -53,7 +53,7 @@ func runGoCrossCompile() {
 			fileName = fileName + ".exe"
 		}
 		outputFilePath := filepath.Join(command.outputPath, fileName)
-		cmd := kmgCmd.NewOsStdioCmd("go", "build", "-i", "-o", outputFilePath, targetFile)
+		cmd := kmgCmd.CmdSlice([]string{"go", "build", "-i", "-o", outputFilePath, targetFile}).GetExecCmd()
 		kmgCmd.SetCmdEnv(cmd, "GOOS", target.GetGOOS())
 		kmgCmd.SetCmdEnv(cmd, "GOARCH", target.GetGOARCH())
 		kmgCmd.SetCmdEnv(cmd, "GOPATH", kmgc.GOPATHToString())
