@@ -122,7 +122,8 @@ func MustDeleteFileOrDirectory(path string) {
 	return
 }
 
-//copy file
+// copy file
+// can not copy directory
 // * override dst file if it exist,
 // * mkdir if base dir not exist
 //from http://stackoverflow.com/a/21067803/1586797
@@ -159,4 +160,11 @@ func CopyFile(src, dst string) (err error) {
 	//why this?
 	//err = out.Sync()
 	return
+}
+
+func MustCopyFile(src, dst string) {
+	err := CopyFile(src, dst)
+	if err != nil {
+		panic(err)
+	}
 }

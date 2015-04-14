@@ -17,7 +17,7 @@ func (nl stdoutLogWriter) LogWrite(r LogRow) {
 		fmt.Fprintln(os.Stderr, "[StdoutLogger] Marshal fail", err)
 		return
 	}
-	_, err = fmt.Printf("%s\n", b)
+	_, err = fmt.Println(string(b))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[StdoutLogger] printf fail", err)
 		return

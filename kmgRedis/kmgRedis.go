@@ -76,3 +76,11 @@ func MustGetDataWithGob(c *redis.Client, key string, inData interface{}) {
 		panic(err)
 	}
 }
+
+func MustGetAllZRange(c *redis.Client, key string) []string {
+	result, err := c.ZRange(key, 0, -1).Result()
+	if err != nil {
+		panic(err)
+	}
+	return result
+}

@@ -65,6 +65,12 @@ func AddExitAction(f func()) {
 	exitActionList = append(exitActionList, f)
 }
 
+//调用这个函数来保证使用AddExitAction方法来注册进程退出请求.
+// 使用这个来保证kmgConsole.Main一定会等待进程结束
+func UseExitActionRegister() {
+	AddExitAction(func() {})
+}
+
 //avoid initialization loop
 func init() {
 	AddAction(Command{

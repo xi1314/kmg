@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+//这个接口只需要 Close就可以了.
 type Server interface {
 	//异步开启服务器
 	Start() error
