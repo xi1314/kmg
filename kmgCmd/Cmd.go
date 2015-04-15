@@ -9,7 +9,7 @@ import (
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
 type Cmd struct {
-	commandLine []string
+	cmd *exec.Cmd
 }
 
 //you need at least one args: the path of the command, or it will panic
@@ -18,7 +18,7 @@ func CmdSlice(args []string) *Cmd {
 		panic("[CmdSlice] need the path of the command")
 	}
 	return &Cmd{
-		commandLine: args,
+		cmd: exec.Command(args[0], args[1:]...),
 	}
 }
 
@@ -28,19 +28,34 @@ func CmdString(cmd string) *Cmd {
 	}
 	args := strings.Split(cmd, " ")
 	return &Cmd{
-		commandLine: args,
+		cmd: exec.Command(args[0], args[1:]...),
 	}
 }
 
 func CmdBash(cmd string) *Cmd {
-	return &Cmd{
-		commandLine: []string{"bash", "-c", cmd},
+	return CmdSlice([]string{"bash", "-c", cmd})
+}
+
+func (c *Cmd) MustSetEnv(key string, value string) *Cmd {
+	err := SetCmdEnv(c.cmd, key, value)
+	if err != nil {
+		panic(err)
 	}
+	return c
+}
+
+func (c *Cmd) SetDir(path string) *Cmd {
+	c.cmd.Dir = path
+	return c
+}
+
+func (c *Cmd) PrintCmdLine() {
+	fmt.Println(">", c.cmd.Path, strings.Join(c.cmd.Args, " "))
 }
 
 //回显命令,并且运行,并且和标准输入输出接起来
 func (c *Cmd) Run() error {
-	fmt.Println(">", strings.Join(c.commandLine, " "))
+	c.PrintCmdLine()
 	cmd := c.GetExecCmd()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -50,12 +65,12 @@ func (c *Cmd) Run() error {
 
 //get the os/exec.Cmd
 func (c *Cmd) GetExecCmd() *exec.Cmd {
-	return exec.Command(c.commandLine[0], c.commandLine[1:]...)
+	return c.cmd
 }
 
 //回显命令,并且运行,返回运行的输出结果.并且把输出结果放在
 func (c *Cmd) RunAndReturnOutput() (b []byte, err error) {
-	fmt.Println(">", strings.Join(c.commandLine, " "))
+	c.PrintCmdLine()
 	cmd := c.GetExecCmd()
 	b, err = cmd.CombinedOutput()
 	os.Stdout.Write(b)

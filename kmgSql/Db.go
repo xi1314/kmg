@@ -3,8 +3,8 @@ package kmgSql
 import (
 	"database/sql"
 	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	_ "github.com/go-sql-driver/mysql"
 	"sync"
-	_"github.com/go-sql-driver/mysql"
 )
 
 //a wrap of database/sql.Db
