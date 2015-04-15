@@ -1,27 +1,40 @@
 package kmgSql
 
 import (
-	"testing"
-	//	."github.com/bronze1man/kmg/kmgTest"
-	"fmt"
-	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 	"github.com/bronze1man/kmg/kmgDebug"
+	. "github.com/bronze1man/kmg/kmgTest"
+	"testing"
 )
 
 func TestConnectToDb(t *testing.T) {
 	db := GetDb()
-	config := GetDbConfigFromConfig(defaultParameter.Parameter()).GetDsn()
-	kmgDebug.Println(config)
-	kmgDebug.Println(db)
-	_, err := db.GetTableData("AdminUser")
-	//fmt.Printf("%#v",defaultParameter.Parameter())
-	//	kmgDebug.Println(defaultParameter.Parameter())
-	//	for key, value := range row {
+	err := db.Ping()
+	Equal(err, nil)
+}
+
+func TestQuery(t *testing.T) {
+	//	rows, err := Query("SELECT * FROM AdminUser WHERE Id=?", 1)
+	//	handleError(err)
+	//	for key, value := range rows {
 	//		kmgDebug.Println(key, value)
 	//	}
-	if err != nil {
-		fmt.Errorf("%v", err)
-		kmgDebug.Println(err)
+	//	handleError(err)
+	//	one, err := QueryOne("SELECT * FROM AdminUser WHERE Id=?", "1")
+	//	handleError(err)
+	//	kmgDebug.Println(one)
+	//	_,err = Exec("DELETE FROM ArticleList where Id=?","1")
+	//	handleError(err)
+	row := map[string]string{
+		"Title":  "Degas",
+		"Source": "123",
 	}
-	//	fmt.Printf("%v", len(row))
+	id, err := Insert("ArticleList", row)
+	handleError(err)
+	kmgDebug.Println(id)
+}
+
+func handleError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

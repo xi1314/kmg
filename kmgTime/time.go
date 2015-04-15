@@ -23,6 +23,7 @@ var ParseFormatGuessList = []string{
 	Iso3339Minute,
 	Iso3339Second,
 }
+var DefaultTimeZone = BeijingZone
 
 func ParseAutoInLocal(sTime string) (t time.Time, err error) {
 	return ParseAutoInLocation(sTime, time.Local)
@@ -59,6 +60,15 @@ func MustFromMysqlFormat(timeString string) time.Time {
 
 func MustFromMysqlFormatInLocation(timeString string, loc *time.Location) time.Time {
 	t, err := time.ParseInLocation(FormatMysql, timeString, loc)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+//使用默认时区解释
+func MustFromMysqlFormatDefaultTZ(timeString string) time.Time {
+	t, err := time.ParseInLocation(FormatMysql, timeString, DefaultTimeZone)
 	if err != nil {
 		panic(err)
 	}

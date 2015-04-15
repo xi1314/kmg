@@ -5,6 +5,7 @@ import (
 	//"github.com/bronze1man/kmg/kmgReflect"
 	"github.com/bronze1man/kmg/kmgTime"
 	//"github.com/bronze1man/kmg/kmgType"
+	"github.com/bronze1man/kmg/kmgReflect"
 	"math"
 	"reflect"
 	"strconv"
@@ -67,11 +68,17 @@ func StringToTime(traner Transformer, in reflect.Value, out reflect.Value) (err 
 	return
 }
 
-func PtrToPtr(t Transformer, in reflect.Value, out reflect.Value) (err error) {
-	t.Tran(in.Elem(), out.Elem())
-	return
+func TimeToString(traner Transformer, in reflect.Value, out reflect.Value) (err error) {
+	t := in.Interface().(time.Time)
+	out.SetString(t.In(kmgTime.DefaultTimeZone).Format(kmgTime.FormatMysql))
+	return nil
 }
 
+func PtrToPtr(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	return t.Tran(in.Elem(), out.Elem())
+}
+
+//假设map的key类型是string,值类型不限
 func MapToStruct(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	oKey := reflect.New(reflect.TypeOf("")).Elem()
 	out.Set(reflect.New(out.Type()).Elem())
@@ -95,6 +102,28 @@ func MapToStruct(t Transformer, in reflect.Value, out reflect.Value) (err error)
 	}
 	return
 }
+
+//假设map的key类型是string,值类型不限
+func StructToMap(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	oValType := out.Type().Elem()
+	oKey := reflect.New(reflect.TypeOf("")).Elem()
+	if out.IsNil() {
+		out.Set(reflect.New(out.Type()).Elem())
+	}
+	fieldMap := kmgReflect.StructGetAllFieldMap(in.Type())
+	for key := range fieldMap {
+		iVal := in.FieldByName(key)
+		oVal := reflect.New(oValType).Elem()
+		err = t.Tran(iVal, oVal)
+		if err != nil {
+			return
+		}
+		oKey.SetString(key)
+		out.SetMapIndex(oKey, oVal)
+	}
+	return nil
+}
+
 func SliceToSlice(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	len := in.Len()
 	out.Set(reflect.MakeSlice(out.Type(), len, len))
@@ -197,4 +226,13 @@ func NonePtrToPtr(t Transformer, in reflect.Value, out reflect.Value) (err error
 }
 func InterfaceToNoneInterface(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	return t.Tran(in.Elem(), out)
+}
+func NoneInterfaceToInterface(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	return t.Tran(in, out.Elem())
+}
+
+func IntToString(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	s := strconv.FormatInt(in.Int(), 10)
+	out.SetString(s)
+	return nil
 }

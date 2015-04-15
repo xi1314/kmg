@@ -3,8 +3,8 @@ package typeTransform
 import (
 	"fmt"
 	"reflect"
-	"time"
 
+	"github.com/bronze1man/kmg/kmgTime"
 	"github.com/bronze1man/kmg/kmgType"
 )
 
@@ -26,6 +26,39 @@ const (
 	Array
 	Uint
 )
+
+func (k Kind) String() string {
+	switch k {
+	case Invalid:
+		return "Invalid"
+	case String:
+		return "String"
+	case Int:
+		return "Int"
+	case Float:
+		return "Float"
+	case Ptr:
+		return "Ptr"
+	case Bool:
+		return "Bool"
+	case Time:
+		return "Time"
+	case Interface:
+		return "Interface"
+	case Map:
+		return "Map"
+	case Struct:
+		return "Struct"
+	case Slice:
+		return "Slice"
+	case Array:
+		return "Array"
+	case Uint:
+		return "Uint"
+	default:
+		return fmt.Sprintf("Kind: not defined %d", k)
+	}
+}
 
 type TransformerFunc func(traner Transformer, in reflect.Value, out reflect.Value) (err error)
 type Transformer map[Kind]map[Kind]TransformerFunc
@@ -92,25 +125,33 @@ func GetReflectKind(in reflect.Value) Kind {
 
 var DefaultTransformer = Transformer{
 	Map: map[Kind]TransformerFunc{
-		Map:    MapToMap,
-		Struct: MapToStruct,
-		Ptr:    NonePtrToPtr,
+		Map:       MapToMap,
+		Struct:    MapToStruct,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
 	},
 	String: map[Kind]TransformerFunc{
-		String: StringToString,
-		Int:    StringToInt,
-		Uint:   StringToUint,
-		Float:  StringToFloat,
-		Bool:   StringToBool,
-		Time:   NewStringToTimeFunc(time.Local),
-		Ptr:    NonePtrToPtr,
+		String:    StringToString,
+		Int:       StringToInt,
+		Uint:      StringToUint,
+		Float:     StringToFloat,
+		Bool:      StringToBool,
+		Time:      NewStringToTimeFunc(kmgTime.DefaultTimeZone),
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
 	},
 	Ptr: map[Kind]TransformerFunc{
 		Ptr: PtrToPtr, //TODO reference to self..
 	},
+	Struct: map[Kind]TransformerFunc{
+		Map:       StructToMap,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
+	},
 	Slice: map[Kind]TransformerFunc{
-		Slice: SliceToSlice,
-		Ptr:   NonePtrToPtr,
+		Slice:     SliceToSlice,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
 	},
 	Interface: map[Kind]TransformerFunc{
 		String: InterfaceToNoneInterface,
@@ -123,12 +164,20 @@ var DefaultTransformer = Transformer{
 		Ptr:    InterfaceToNoneInterface,
 	},
 	Int: map[Kind]TransformerFunc{
-		Int: IntToInt,
-		Ptr: NonePtrToPtr,
+		String:    IntToString,
+		Int:       IntToInt,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
 	},
 	Float: map[Kind]TransformerFunc{
-		Int:   FloatToInt,
-		Float: FloatToFloat,
-		Ptr:   NonePtrToPtr,
+		Int:       FloatToInt,
+		Float:     FloatToFloat,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
+	},
+	Time: map[Kind]TransformerFunc{
+		String:    TimeToString,
+		Ptr:       NonePtrToPtr,
+		Interface: NoneInterfaceToInterface,
 	},
 }
