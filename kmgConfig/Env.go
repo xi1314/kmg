@@ -29,6 +29,9 @@ type Env struct {
 	GOROOT string
 	//should come from dir of ".kmg.yml"
 	ProjectPath string
+
+	//make command
+	Make string
 }
 
 func (context *Env) GOPATHToString() string {
