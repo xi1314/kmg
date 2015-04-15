@@ -168,23 +168,17 @@ func (command *GoTest) gotest(path string) error {
 	if command.runArg != "" {
 		args = append(args, "-run", command.runArg)
 	}
-
-	cmd := kmgCmd.CmdSlice(append([]string{"go"}, args...)).GetExecCmd()
-	cmd.Dir = path
-	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
-	if err != nil {
-		return err
-	}
-	return cmd.Run()
+	return kmgCmd.CmdSlice(append([]string{"go"}, args...)).
+	MustSetEnv("GOPATH", command.gopath).
+	SetDir(path).
+	StdioRun()
 }
 
 func (command *GoTest) gobuild(path string) error {
 	fmt.Printf("[gobuild] path[%s]\n", path)
-	cmd := kmgCmd.CmdSlice([]string{"go", "build"}).GetExecCmd()
-	cmd.Dir = path
-	err := kmgCmd.SetCmdEnv(cmd, "GOPATH", command.gopath)
-	if err != nil {
-		return err
-	}
-	return cmd.Run()
+	err := kmgCmd.CmdSlice([]string{"go", "build"}).
+	MustSetEnv("GOPATH", command.gopath).
+	SetDir(path).
+	StdioRun()
+	return err
 }

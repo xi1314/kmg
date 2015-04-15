@@ -56,11 +56,10 @@ func (c *Cmd) PrintCmdLine() {
 //回显命令,并且运行,并且和标准输入输出接起来
 func (c *Cmd) Run() error {
 	c.PrintCmdLine()
-	cmd := c.GetExecCmd()
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	c.cmd.Stdin = os.Stdin
+	c.cmd.Stdout = os.Stdout
+	c.cmd.Stderr = os.Stderr
+	return c.cmd.Run()
 }
 
 //get the os/exec.Cmd
@@ -68,22 +67,20 @@ func (c *Cmd) GetExecCmd() *exec.Cmd {
 	return c.cmd
 }
 
-//回显命令,并且运行,返回运行的输出结果.并且把输出结果放在
+//回显命令,并且运行,返回运行的输出结果.并且把输出结果放在stdout中
 func (c *Cmd) RunAndReturnOutput() (b []byte, err error) {
 	c.PrintCmdLine()
-	cmd := c.GetExecCmd()
-	b, err = cmd.CombinedOutput()
+	b, err = c.cmd.CombinedOutput()
 	os.Stdout.Write(b)
 	return b, err
 }
 
 //不回显命令,运行,并且返回运行的输出结果
 func (c *Cmd) StdioRun() error {
-	cmd := c.GetExecCmd()
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	c.cmd.Stdin = os.Stdin
+	c.cmd.Stdout = os.Stdout
+	c.cmd.Stderr = os.Stderr
+	return c.cmd.Run()
 }
 
 //回显命令,并且运行,并且忽略输出结果
