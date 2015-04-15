@@ -44,7 +44,7 @@ func runGoCrossCompileInit() {
 		makeShellArgs = []string{"--no-clean"}
 	}
 	for _, target := range kmgc.CrossCompileTarget {
-		err = kmgCmd.CmdSlice(append([]string{makeShellName}, makeShellArgs...) ).
+		err = kmgCmd.CmdSlice(append([]string{makeShellName}, makeShellArgs...)).
 			MustSetEnv("GOOS", target.GetGOOS()).
 			MustSetEnv("GOARCH", target.GetGOARCH()).
 			SetDir(runCmdPath).

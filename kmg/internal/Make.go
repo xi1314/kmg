@@ -20,11 +20,11 @@ func init() {
 func makeCmd() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
 	kmgConsole.ExitOnErr(err)
-	if kmgc.Make==""{
-		kmgConsole.ExitOnStderr("Please defined a Make in .kmg.yml file to use kmg make")
+	if kmgc.Make == "" {
+		kmgConsole.ExitOnStderr("Please defined a Make command in .kmg.yml file to use kmg make")
 		return
 	}
-	args:=strings.Split(kmgc.Make," ")
-	err=kmgCmd.CmdSlice(append(args,os.Args[1:]...)).Run()
+	args := strings.Split(kmgc.Make, " ")
+	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).Run()
 	kmgConsole.ExitOnErr(err)
 }

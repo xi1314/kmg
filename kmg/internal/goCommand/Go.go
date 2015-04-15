@@ -23,6 +23,6 @@ func GoCommand() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
 	kmgConsole.ExitOnErr(err)
 	err = kmgCmd.CmdSlice(append([]string{"go"}, os.Args[1:]...)).
-		MustSetEnv("GOPATH",kmgc.GOPATHToString()).StdioRun()
+		MustSetEnv("GOPATH", kmgc.GOPATHToString()).StdioRun()
 	kmgConsole.ExitOnErr(err)
 }

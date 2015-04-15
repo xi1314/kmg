@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
+	"sync"
 )
 
 //if you init it like &Context{xxx},please call Init()
@@ -69,6 +71,9 @@ func (context *Env) Init() {
 		context.GOPATH = []string{context.ProjectPath}
 	}
 }
+func (context *Env) PathInProject(relPath string) string {
+	return filepath.Join(context.ProjectPath, relPath)
+}
 func FindFromPath(p string) (context *Env, err error) {
 	p, err = filepath.Abs(p)
 	if err != nil {
@@ -122,4 +127,18 @@ func (e NotFoundError) Error() string {
 func IsNotFound(err error) (ok bool) {
 	_, ok = err.(NotFoundError)
 	return
+}
+
+var envOnce sync.Once
+var env *Env
+
+func DefaultEnv() *Env {
+	envOnce.Do(func() {
+		var err error
+		env, err = LoadEnvFromWd()
+		if err != nil {
+			panic(fmt.Errorf("can not getEnv,do you forget create a .kmg.yml at project root? err: %s", err))
+		}
+	})
+	return env
 }
