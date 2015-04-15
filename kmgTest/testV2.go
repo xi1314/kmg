@@ -4,14 +4,12 @@ import (
 	"fmt"
 )
 
-//please use github.com/bronze1man/kmgTest
 func Ok(expectTrue bool) {
 	if !expectTrue {
 		panic("ok fail")
 	}
 }
 
-//please use github.com/bronze1man/kmgTest
 func Equal(get interface{}, expect interface{}) {
 	if isEqual(expect, get) {
 		return

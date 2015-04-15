@@ -14,7 +14,7 @@ type DbConfig struct {
 }
 
 func (config *DbConfig) GetDsn() string {
-	return fmt.Sprintf("%s:%s@%s/%s?charset=utf8&timeout=5s",
+	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8&timeout=5s",
 		config.Username,
 		config.Password,
 		config.Host,

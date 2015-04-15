@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"strings"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {
@@ -118,4 +120,29 @@ func HttpRequestClone(in *http.Request) (out *http.Request, err error) {
 		return
 	}
 	return
+}
+
+func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string) {
+	err := AddFileToHttpPathToServeMux(http.DefaultServeMux, httpPath, localFilePath)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFilePath string) error {
+	fi, err := os.Stat(localFilePath)
+	if err != nil {
+		return err
+	}
+	if fi.IsDir() {
+		if !strings.HasSuffix(httpPath, "/") {
+			httpPath += "/"
+		}
+		mux.Handle(httpPath, http.StripPrefix(httpPath, http.FileServer(http.Dir(localFilePath))))
+	} else {
+		mux.HandleFunc(httpPath, func(w http.ResponseWriter, req *http.Request) {
+			http.ServeFile(w, req, localFilePath)
+		})
+	}
+	return nil
 }

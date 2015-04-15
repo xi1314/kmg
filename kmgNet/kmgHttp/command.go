@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func AddCommands() {
+func AddCommand() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "FileHttpServer",
 		Runner: runFileHttpServer,

@@ -8,31 +8,40 @@ import (
 	"github.com/bronze1man/kmg/kmgDebug" //TODO 移除这个依赖?
 )
 
+// @deprecated
 type TestingTB interface {
 	FailNow()
 }
 
+// @deprecated
 type TestingTBAware interface {
 	SetTestingTB(T TestingTB)
 }
 
+// @deprecated
 type TestTools struct {
 	TestingTB
 }
 
+// @deprecated
 func NewTestTools(T TestingTB) *TestTools {
 	return &TestTools{TestingTB: T}
 }
 
+// @deprecated
 func (tools *TestTools) SetTestingTB(T TestingTB) {
 	tools.TestingTB = T
 }
+
+// @deprecated
 func (tools *TestTools) Ok(expectTrue bool) {
 	if !expectTrue {
 		tools.assertFail("ok fail", 2)
 	}
 	return
 }
+
+// @deprecated
 func (tools *TestTools) Equal(get interface{}, expect interface{}) {
 	if isEqual(expect, get) {
 		return

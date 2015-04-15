@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+//提供一个漂亮的调试显示接口
 func Println(objList ...interface{}) {
 	outList := make([]interface{}, len(objList))
 	for i := range objList {

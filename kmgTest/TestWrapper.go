@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// @deprecated
 //use T for error report,automatic call every function start with Test
 //function start with Test must not have input arguments,output arguments.
 func TestWarpper(T TestingTB, testObject TestingTBAware) {
