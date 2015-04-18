@@ -13,24 +13,8 @@ func TestConnectToDb(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-	//	rows, err := Query("SELECT * FROM AdminUser WHERE Id=?", 1)
-	//	handleError(err)
-	//	for key, value := range rows {
-	//		kmgDebug.Println(key, value)
-	//	}
-	//	handleError(err)
-	//	one, err := QueryOne("SELECT * FROM AdminUser WHERE Id=?", "1")
-	//	handleError(err)
-	//	kmgDebug.Println(one)
-	//	_,err = Exec("DELETE FROM ArticleList where Id=?","1")
-	//	handleError(err)
-	row := map[string]string{
-		"Title":  "Degas",
-		"Source": "123",
-	}
-	id, err := Insert("ArticleList", row)
-	handleError(err)
-	kmgDebug.Println(id)
+	err := DeleteById("AdminUser","Id","3")
+	kmgDebug.Println(err)
 }
 
 func handleError(err error) {

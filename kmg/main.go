@@ -11,6 +11,6 @@ import (
 
 // kmg make BuildAndUploadKmg
 func main() {
-	kmgHttp.AddCommand()
+	kmgHttp.AddCommandList()
 	kmgConsole.Main()
 }

@@ -75,8 +75,43 @@ func Insert(tableName string, row map[string]string) (lastInsertId int, error er
 	return lastInsertId, err
 }
 
-//func UpdateById(tableName string, row map[string]string, primaryKeyName string) {
-//}
+func UpdateById(tableName string, row map[string]string, primaryKeyName string) error {
+	keyList := []string{}
+	valueList := []string{}
+	var idValue string
+	for key, value := range row {
+		if primaryKeyName == key {
+			idValue = value
+			continue
+		}
+		keyList = append(keyList, "`"+key+"`=?")
+		valueList = append(valueList, value)
+	}
+	valueList = append(valueList, idValue)
+	updateStr := strings.Join(keyList, ",")
+	//sql例子 UPDATE AdminUser SET username=?,password=? where id = 1;
+	sql := fmt.Sprintf("UPDATE `%s` SET %s where `%s` = ?", tableName, updateStr, primaryKeyName)
+	_, err := Exec(sql, valueList...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, error error) {
+	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
+	output, error = QueryOne(sql, value)
+	if error != nil {
+		return nil, error
+	}
+	return output, error
+}
+
+func DeleteById(tableName string, fieldName string, value string) error {
+	sql := fmt.Sprintf("DELETE FROM `%s` WHERE `%s`=?", tableName, fieldName)
+	_, err := Exec(sql, value)
+	return err
+}
 
 //func Replace(query string, args ...string) (sql.Result, error) {
 //}
