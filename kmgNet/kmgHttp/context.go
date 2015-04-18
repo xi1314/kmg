@@ -1,44 +1,69 @@
 package kmgHttp
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 )
 
 //该对象上的方法不应该被并发调用.
 type Context struct {
-	Req *http.Request
-	W   http.ResponseWriter
+	Method       string
+	Request      map[string]string
+	Response     string
+	RedirectUrl  string
+	ResponseCode int
+}
+
+func NewContextFromHttpRequest(req *http.Request) *Context {
+	return &Context{
+		Method: req.Method,
+		Request: func() map[string]string {
+			m := map[string]string{}
+			err := req.ParseForm()
+			if err != nil {
+				return m
+			}
+			for key, value := range req.Form {
+				m[key] = value[0] //TODO 这里没有处理同一个 Key 多个 Value 的情况
+			}
+			return m
+		}(),
+		ResponseCode: 200,
+	}
 }
 
 //根据key返回输入参数,包括post和url的query的数据,如果没有,或者不是整数返回0 返回类型为int
 func (c *Context) InNum(key string) int {
-	v := c.Req.FormValue(key)
-	if v == "" {
+	value, ok := c.Request[key]
+	if !ok {
 		return 0
 	}
-	out, err := strconv.Atoi(v)
+	num, err := strconv.Atoi(value)
 	if err != nil {
 		return 0
 	}
-	return out
+	return num
 }
 
 //根据key返回输入参数,包括post和url的query的数据,如果没有返回"" 类型为string
 func (c *Context) InStr(key string) string {
-	return c.Req.FormValue(key)
+	value, ok := c.Request[key]
+	if !ok {
+		return ""
+	}
+	return value
 }
 
 //TODO 如何处理错误
 func (c *Context) MustPost() {
-
 }
 
 func (c *Context) IsGet() bool {
-	return c.Req.Method == "GET"
+	return c.Method == "GET"
 }
 func (c *Context) IsPost() bool {
-	return c.Req.Method == "POST"
+	return c.Method == "POST"
 }
 
 //TODO 如何处理错误
@@ -52,12 +77,38 @@ func (c *Context) MustInStr(key string) string {
 }
 
 func (c *Context) Redirect(url string) {
-	http.Redirect(c.W, c.Req, url, 302)
-	return
+	c.RedirectUrl = url
+	c.ResponseCode = 302
 }
 
-func (c *Context) WriteString(s string) (int, error) {
-	return c.W.Write([]byte(s))
+func (c *Context) NotFound(msg string) {
+	c.Response = msg
+	c.ResponseCode = 404
+}
+
+func (c *Context) Error(msg string) {
+
+}
+
+func (c *Context) WriteString(s string) {
+	c.Response += s
+}
+
+func (c *Context) WriteJson(obj interface{}) {
+	json, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	c.Response += string(json)
+}
+
+func (ctx *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
+	if ctx.RedirectUrl != "" {
+		http.Redirect(w, req, ctx.RedirectUrl, ctx.ResponseCode)
+		return
+	}
+	w.WriteHeader(ctx.ResponseCode)
+	w.Write([]byte(ctx.Response))
 }
 
 /*

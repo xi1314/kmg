@@ -1,6 +1,8 @@
 package kmgSql
 
-import "github.com/bronze1man/kmg/typeTransform"
+import (
+	"github.com/bronze1man/kmg/typeTransform"
+)
 
 type OrmObject interface {
 	GetIdFieldName() string
@@ -22,4 +24,12 @@ func OrmToRow(obj OrmObject) (row map[string]string, err error) {
 		return nil, err
 	}
 	return row, err
+}
+
+func OrmPersist(obj OrmObject) (lastInsertId int, err error) {
+	row, err := OrmToRow(obj)
+	if err != nil {
+		return 0, err
+	}
+	return ReplaceById(obj.GetTableName(), row, obj.GetIdFieldName())
 }

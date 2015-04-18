@@ -3,10 +3,12 @@ package kmgSql
 import (
 	"database/sql"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
+	"strconv"
 	"strings"
 )
 
-func Query(query string, args ...string) (output []map[string]string, error error) {
+func Query(query string, args ...string) (output []map[string]string, err error) {
 	rows, err := GetDb().Query(query, argsStringToInterface(args...)...)
 	if err != nil {
 		return nil, err
@@ -40,23 +42,23 @@ func Query(query string, args ...string) (output []map[string]string, error erro
 	return
 }
 
-func QueryOne(query string, args ...string) (output map[string]string, error error) {
-	list, error := Query(query, args...)
-	if error != nil {
-		return nil, error
+func QueryOne(query string, args ...string) (output map[string]string, err error) {
+	list, err := Query(query, args...)
+	if err != nil {
+		return nil, err
 	}
 	if len(list) <= 0 {
-		return nil, error
+		return nil, err
 	}
 	output = list[0]
-	return output, error
+	return output, err
 }
 
 func Exec(query string, args ...string) (sql.Result, error) {
 	return GetDb().Exec(query, argsStringToInterface(args...)...)
 }
 
-func Insert(tableName string, row map[string]string) (lastInsertId int, error error) {
+func Insert(tableName string, row map[string]string) (lastInsertId int, err error) {
 	keyList := []string{}
 	valueList := []string{}
 	for key, value := range row {
@@ -87,6 +89,9 @@ func UpdateById(tableName string, row map[string]string, primaryKeyName string) 
 		keyList = append(keyList, "`"+key+"`=?")
 		valueList = append(valueList, value)
 	}
+	if idValue == "" {
+		return fmt.Errorf("%s no set", primaryKeyName)
+	}
 	valueList = append(valueList, idValue)
 	updateStr := strings.Join(keyList, ",")
 	//sql例子 UPDATE AdminUser SET username=?,password=? where id = 1;
@@ -98,13 +103,29 @@ func UpdateById(tableName string, row map[string]string, primaryKeyName string) 
 	return nil
 }
 
-func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, error error) {
-	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
-	output, error = QueryOne(sql, value)
-	if error != nil {
-		return nil, error
+func ReplaceById(tableName string, row map[string]string, primaryKeyName string) (lastInsertId int, err error) {
+	var one map[string]string
+	if idValue, ok := row[primaryKeyName]; ok {
+		one, _ = GetOneWhere(tableName, primaryKeyName, idValue)
 	}
-	return output, error
+	if one == nil {
+		return Insert(tableName, row)
+	}
+	err = UpdateById(tableName, row, primaryKeyName)
+	lastInsertId, err = strconv.Atoi(one[primaryKeyName])
+	if err != nil {
+		lastInsertId = 0
+	}
+	return lastInsertId, err
+}
+
+func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, err error) {
+	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
+	output, err = QueryOne(sql, value)
+	if err != nil {
+		return nil, err
+	}
+	return output, err
 }
 
 func DeleteById(tableName string, fieldName string, value string) error {
@@ -113,8 +134,10 @@ func DeleteById(tableName string, fieldName string, value string) error {
 	return err
 }
 
-//func Replace(query string, args ...string) (sql.Result, error) {
-//}
+func GetAllInTable(tableName string) (output []map[string]string, err error) {
+	output, err = Query("SELECT * FROM `" + tableName + "`")
+	return output, err
+}
 
 func argsStringToInterface(args ...string) []interface{} {
 	_args := []interface{}{}
@@ -122,4 +145,13 @@ func argsStringToInterface(args ...string) []interface{} {
 		_args = append(_args, value)
 	}
 	return _args
+}
+
+func RunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
+	output, paramList := selectCommand.GetPrepareParameter()
+	list, error := Query(output, paramList[0])
+	if error != nil {
+		panic(error)
+	}
+	return list
 }

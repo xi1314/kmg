@@ -42,7 +42,7 @@ func (e *PanicErr) Error() string {
 }
 
 // 把panic转换成err返回,
-// panic(nil)会导致返回nil(没有错误)(这个无法解决)
+// panic(nil)会导致返回nil(没有错误)(这个目前没有找到靠谱的方法解决)
 func PanicToError(f func()) (err error) {
 	defer func() {
 		out := recover()

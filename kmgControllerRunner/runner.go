@@ -1,6 +1,7 @@
 package kmgControllerRunner
 
 import (
+	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net/http"
 	"reflect"
@@ -35,15 +36,25 @@ var HttpHandler = http.HandlerFunc(HttpHandlerFunc)
 
 //httpHandler
 func HttpHandlerFunc(w http.ResponseWriter, req *http.Request) {
-	ctx := &kmgHttp.Context{W: w, Req: req}
+	ctx := kmgHttp.NewContextFromHttpRequest(req) //TODO 这里忽略了错误，此处应该如何处理错误
 	apiName := ctx.InStr("n")
 	if apiName == "" && EnterPointApiName != "" {
 		apiName = EnterPointApiName
 	}
 	apiFunc, ok := controllerObjMap[apiName]
 	if !ok {
-		ctx.WriteString("api not found")
+		ctx.NotFound("api not found")
+		ctx.WriteToResponseWriter(w, req)
 		return
 	}
-	apiFunc(ctx)
+	err := kmgErr.PanicToError(func() {
+		apiFunc(ctx)
+	})
+	if err != nil {
+		ctx.Response = err.Error()
+		ctx.ResponseCode = 500
+		ctx.WriteToResponseWriter(w, req)
+		return
+	}
+	ctx.WriteToResponseWriter(w, req)
 }

@@ -18,6 +18,7 @@ type T struct {
 	Ptr2    *T2
 	Array1  [5]string
 }
+
 type T2 struct {
 	A string
 	B string
