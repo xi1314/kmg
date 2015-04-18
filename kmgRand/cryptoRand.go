@@ -29,15 +29,25 @@ func MustCryptoRandToHex(length int) string {
 const alphaNumMap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 func MustCryptoRandToAlphaNum(length int) string {
+	return MustCryptoRandFromByteList(length, alphaNumMap)
+}
+
+const realableAlphaNumMap = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+func MustCryptoRandToReadableAlphaNum(length int) string {
+	return MustCryptoRandFromByteList(length, realableAlphaNumMap)
+}
+
+func MustCryptoRandFromByteList(length int, list string) string {
 	var bytes = make([]byte, 2*length)
 	var outBytes = make([]byte, length)
 	_, err := rand.Read(bytes)
 	if err != nil {
 		panic(err)
 	}
-	mapLen := len(alphaNumMap)
+	mapLen := len(list)
 	for i := 0; i < length; i++ {
-		outBytes[i] = alphaNumMap[(int(bytes[2*i])*256+int(bytes[2*i+1]))%(mapLen)]
+		outBytes[i] = list[(int(bytes[2*i])*256+int(bytes[2*i+1]))%(mapLen)]
 	}
 	return string(outBytes)
 }
