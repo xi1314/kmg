@@ -2,6 +2,7 @@ package kmgHttp
 
 import (
 	"encoding/json"
+	"github.com/bronze1man/kmg/kmgSession"
 	"net/http"
 	"strconv"
 )
@@ -10,12 +11,15 @@ import (
 type Context struct {
 	Method       string
 	Request      map[string]string
+	Session      *kmgSession.Session
 	Response     string
 	RedirectUrl  string
 	ResponseCode int
+	Req          *http.Request
+	W            http.ResponseWriter
 }
 
-func NewContextFromHttpRequest(req *http.Request) *Context {
+func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	return &Context{
 		Method: req.Method,
 		Request: func() map[string]string {
@@ -29,7 +33,9 @@ func NewContextFromHttpRequest(req *http.Request) *Context {
 			}
 			return m
 		}(),
+		Session:      kmgSession.GetSession(w, req),
 		ResponseCode: 200,
+		Req:          req,
 	}
 }
 
@@ -86,8 +92,8 @@ func (c *Context) NotFound(msg string) {
 	c.ResponseCode = 404
 }
 
-func (c *Context) Error(msg string) {
-
+func (c *Context) Error(err error) {
+	c.Response += err.Error()
 }
 
 func (c *Context) WriteString(s string) {
@@ -102,13 +108,13 @@ func (c *Context) WriteJson(obj interface{}) {
 	c.Response += string(json)
 }
 
-func (ctx *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
-	if ctx.RedirectUrl != "" {
-		http.Redirect(w, req, ctx.RedirectUrl, ctx.ResponseCode)
+func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
+	if c.RedirectUrl != "" {
+		http.Redirect(w, req, c.RedirectUrl, c.ResponseCode)
 		return
 	}
-	w.WriteHeader(ctx.ResponseCode)
-	w.Write([]byte(ctx.Response))
+	w.WriteHeader(c.ResponseCode)
+	w.Write([]byte(c.Response))
 }
 
 /*

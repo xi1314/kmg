@@ -16,7 +16,7 @@ func clearController() {
 	controllerObjMap = map[string]func(ctx *kmgHttp.Context){}
 }
 
-//注册controller
+//注册controller,请先注册后使用,该函数不能并发调用,不能在http开始处理之后再注册(data race问题)
 func RegisterController(obj interface{}) {
 	v := reflect.ValueOf(obj)
 	t := v.Type()
@@ -36,7 +36,31 @@ var HttpHandler = http.HandlerFunc(HttpHandlerFunc)
 
 //httpHandler
 func HttpHandlerFunc(w http.ResponseWriter, req *http.Request) {
-	ctx := kmgHttp.NewContextFromHttpRequest(req) //TODO 这里忽略了错误，此处应该如何处理错误
+	ctx := kmgHttp.NewContextFromHttp(w, req) //TODO 这里忽略了错误，此处应该如何处理错误
+	HttpProcessorList[0](ctx, HttpProcessorList[1:])
+	ctx.WriteToResponseWriter(w, req)
+}
+
+type HttpProcessor func(ctx *kmgHttp.Context, processorList []HttpProcessor)
+
+var HttpProcessorList = []HttpProcessor{
+	PanicHandler,
+	Dispatcher,
+}
+
+func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
+	err := kmgErr.PanicToError(func() {
+		processorList[0](ctx, processorList[1:])
+	})
+	if err != nil {
+		ctx.Response = err.Error()
+		ctx.ResponseCode = 500
+		return
+	}
+	return
+}
+
+func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 	apiName := ctx.InStr("n")
 	if apiName == "" && EnterPointApiName != "" {
 		apiName = EnterPointApiName
@@ -44,17 +68,8 @@ func HttpHandlerFunc(w http.ResponseWriter, req *http.Request) {
 	apiFunc, ok := controllerObjMap[apiName]
 	if !ok {
 		ctx.NotFound("api not found")
-		ctx.WriteToResponseWriter(w, req)
 		return
 	}
-	err := kmgErr.PanicToError(func() {
-		apiFunc(ctx)
-	})
-	if err != nil {
-		ctx.Response = err.Error()
-		ctx.ResponseCode = 500
-		ctx.WriteToResponseWriter(w, req)
-		return
-	}
-	ctx.WriteToResponseWriter(w, req)
+	apiFunc(ctx)
+	return
 }

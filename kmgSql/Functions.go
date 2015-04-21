@@ -121,11 +121,7 @@ func ReplaceById(tableName string, row map[string]string, primaryKeyName string)
 
 func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, err error) {
 	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
-	output, err = QueryOne(sql, value)
-	if err != nil {
-		return nil, err
-	}
-	return output, err
+	return QueryOne(sql, value)
 }
 
 func DeleteById(tableName string, fieldName string, value string) error {
@@ -149,7 +145,7 @@ func argsStringToInterface(args ...string) []interface{} {
 
 func RunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
 	output, paramList := selectCommand.GetPrepareParameter()
-	list, error := Query(output, paramList[0])
+	list, error := Query(output, paramList...)
 	if error != nil {
 		panic(error)
 	}

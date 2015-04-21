@@ -32,8 +32,11 @@ type Env struct {
 	//should come from dir of ".kmg.yml"
 	ProjectPath string
 
-	//make command
+	//make command,使用kmg make可以运行这个命令
 	Make string
+
+	//当前是否是测试
+	IsTest bool
 }
 
 func (context *Env) GOPATHToString() string {

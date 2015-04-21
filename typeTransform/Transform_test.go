@@ -17,6 +17,7 @@ func TestManager(ot *testing.T) {
 	}
 	ArrStruct := []T1{}
 	StringSlice := []string{}
+	mapStringString := map[string]string{}
 	testCaseTable := []struct {
 		in  interface{}
 		out interface{}
@@ -77,6 +78,19 @@ func TestManager(ot *testing.T) {
 			[]string{
 				"1",
 				"2",
+			},
+		},
+		{ // 5
+			struct {
+				A int
+				a int
+			}{
+				A: 1,
+				a: 1,
+			},
+			&mapStringString,
+			map[string]string{
+				"A": "1",
 			},
 		},
 	}
