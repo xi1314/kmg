@@ -2,7 +2,7 @@ package kmgSql
 
 import (
 	"database/sql"
-	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	"github.com/bronze1man/kmg/kmgConfig"
 	_ "github.com/go-sql-driver/mysql"
 	"sync"
 )
@@ -17,7 +17,7 @@ var db *Db
 
 func GetDb() *Db {
 	dbOnce.Do(func() {
-		odb, err := sql.Open("mysql", GetDbConfigFromConfig(defaultParameter.Parameter()).GetDsn())
+		odb, err := sql.Open("mysql", GetDbConfigFromConfig(kmgConfig.DefaultParameter()).GetDsn())
 		if err != nil {
 			panic(err)
 		}

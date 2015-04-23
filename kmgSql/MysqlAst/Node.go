@@ -44,6 +44,7 @@ func (n StringPrepareNodeImpl) GetPrepareParameter() (string, []string) {
 }
 func (n StringPrepareNodeImpl) Copy() PreparedNode {
 	s := StringPrepareNodeImpl{}
+	s.ParameterList = make([]string, len(n.ParameterList))
 	copy(s.ParameterList, n.ParameterList)
 	s.Text = n.Text
 	return s

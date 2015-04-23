@@ -23,6 +23,15 @@ func Transform(in interface{}, out interface{}) (err error) {
 	return DefaultTransformer.Transform(in, out)
 }
 
+func MustTransformToMap(in interface{}) (m map[string]string) {
+	m = map[string]string{}
+	err := DefaultTransformer.Transform(in, &m)
+	if err != nil {
+		panic(err)
+	}
+	return m
+}
+
 func MapToMap(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	out.Set(reflect.MakeMap(out.Type()))
 	for _, key := range in.MapKeys() {
@@ -111,7 +120,11 @@ func StructToMap(t Transformer, in reflect.Value, out reflect.Value) (err error)
 		out.Set(reflect.New(out.Type()).Elem())
 	}
 	fieldMap := kmgReflect.StructGetAllFieldMap(in.Type())
-	for key := range fieldMap {
+	for key, field := range fieldMap {
+		if field.PkgPath != "" {
+			//忽略没有导出的字段
+			continue
+		}
 		iVal := in.FieldByName(key)
 		oVal := reflect.New(oValType).Elem()
 		err = t.Tran(iVal, oVal)

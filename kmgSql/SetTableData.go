@@ -8,21 +8,35 @@ import (
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 )
 
+func MustSetTableDataYaml(yaml string) {
+	err := GetDb().SetTablesDataYaml(yaml)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// @deprecated
 func (db *Db) MustSetTablesDataYaml(yaml string) {
 	err := db.SetTablesDataYaml(yaml)
 	if err != nil {
 		panic(err)
 	}
 }
+
+// @deprecated
 func (db *Db) SetTablesDataYaml(yaml string) (err error) {
 	data := make(map[string][]map[string]string)
 	err = kmgYaml.Unmarshal([]byte(yaml), &data)
 	if err != nil {
 		return err
 	}
+	if len(data) == 0 {
+		return fmt.Errorf("[SetTablesDataYaml] try to set tables with no data,wrong format?")
+	}
 	return db.SetTablesData(data)
 }
 
+// @deprecated
 // Set some tables data in this database.
 // mostly for test
 // not guarantee next increment id will be!!

@@ -2,6 +2,7 @@ package kmgCmd
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgConsole"
 	"os"
 	"os/exec"
 	"strings"
@@ -60,6 +61,11 @@ func (c *Cmd) Run() error {
 	c.cmd.Stdout = os.Stdout
 	c.cmd.Stderr = os.Stderr
 	return c.cmd.Run()
+}
+
+func (c *Cmd) ProxyRun() {
+	err := c.Run()
+	kmgConsole.ExitOnErr(err)
 }
 
 //get the os/exec.Cmd

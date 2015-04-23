@@ -6,8 +6,10 @@ import (
 	"errors"
 )
 
+// @deprecated
 var GenUUIDErrors = errors.New("gen uuid fail")
 
+// @deprecated
 func GenUUID() (string, error) {
 	uuid := make([]byte, 16)
 	n, err := rand.Read(uuid)
@@ -17,6 +19,7 @@ func GenUUID() (string, error) {
 	return hex.EncodeToString(uuid), nil
 }
 
+// @deprecated
 func MustGenUUID() string {
 	val, err := GenUUID()
 	if err != nil {

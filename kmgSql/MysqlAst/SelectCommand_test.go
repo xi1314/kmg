@@ -31,6 +31,11 @@ func TestAndWhereConditionAddPrepare(t *testing.T) {
 	text, parameterList := s1.GetPrepareParameter()
 	Equal(text, "SELECT * FROM Table1 WHERE (a=1) AND (d=?)")
 	Equal(parameterList, []string{"c"})
+
+	s2 := s1.Copy()
+	text, parameterList = s2.GetPrepareParameter()
+	Equal(text, "SELECT * FROM Table1 WHERE (a=1) AND (d=?)")
+	Equal(parameterList, []string{"c"})
 }
 
 func TestOrWhereConditionAddPrepare(t *testing.T) {

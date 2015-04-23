@@ -1,19 +1,28 @@
 package kmgHttp
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
+	. "github.com/bronze1man/kmg/kmgTest"
 	"testing"
 )
 
 func TestAddParameterToUrl(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
-	u, err := AddParameterToUrl("http://foo.com/", map[string]string{
-		"a": "b",
-		"b": "c",
-		"c": "d",
-	})
-	t.Equal(err, nil)
-	t.Equal(u, "http://foo.com/?a=b&b=c&c=d")
+	u, err := AddParameterToUrl("http://foo.com/", "a", "b")
+	Equal(err, nil)
+	Equal(u, "http://foo.com/?a=b")
+
+	u, err = AddParameterToUrl("/?n=a&n1=b&n2=c&a=c", "a", "b")
+	Equal(err, nil)
+	Equal(u, "/?a=c&a=b&n=a&n1=b&n2=c")
+}
+
+func TestSetParameterToUrl(ot *testing.T) {
+	u, err := SetParameterToUrl("http://foo.com/", "a", "b")
+	Equal(err, nil)
+	Equal(u, "http://foo.com/?a=b")
+
+	u, err = SetParameterToUrl("/?n=a&n1=b&n2=c&a=c&b=d", "a", "b")
+	Equal(err, nil)
+	Equal(u, "/?a=b&b=d&n=a&n1=b&n2=c")
 }
 
 /*
