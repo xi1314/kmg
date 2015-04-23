@@ -538,6 +538,14 @@ func TestUnmarshalWithFalseSetterIgnoresValue(ot *testing.T) {
 	*/
 }
 
+func TestUnmarshalTypeNotMatch(t *testing.T) {
+	data := `t1:
+     k1: v1`
+	out := map[string][]map[string]string{}
+	err := Unmarshal([]byte(data), &out)
+	kmgTest.Ok(err != nil)
+}
+
 //var data []byte
 //func init() {
 //	var err error

@@ -1,14 +1,14 @@
 package kmgPage
 
 import (
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgSql"
 	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
 	"math"
-	"net/url"
 	"strconv"
 )
 
-type kmgPage struct {
+type KmgPage struct {
 	ItemPerPage int                 // 每页数据量
 	ShowPageNum int                 // 显示分页的页面的时候，显示出来的页数 如 10，11，12，13，14，15 就是显示了6个页
 	PageKeyName string              // 页面参数的名字
@@ -19,14 +19,23 @@ type kmgPage struct {
 	TotalPage   int                 // 共有多少个页面
 }
 
-func (page *kmgPage) CreateFromSelectCommand(selectCommand MysqlAst.SelectCommand, baseUrl string, itemPerPage int) *kmgPage {
-	page.init()
-	page.BaseUrl = baseUrl
-	page.ItemPerPage = itemPerPage
-	return page.runSelectCommand(selectCommand)
+type CreateFromSelectCommandRequest struct {
+	Select      *MysqlAst.SelectCommand
+	Url         string
+	ItemPerPage int
+	CurrentPage int
 }
 
-func (page *kmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *kmgPage {
+func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
+	page := &KmgPage{}
+	page.BaseUrl = req.Url
+	page.ItemPerPage = req.ItemPerPage
+	page.CurrentPage = req.CurrentPage
+	page.init()
+	return page.runSelectCommand(req.Select)
+}
+
+func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
 	page.init()
 	page.BaseUrl = baseUrl
 	page.ItemPerPage = itemPerPage
@@ -34,27 +43,29 @@ func (page *kmgPage) CreateFromData(data []map[string]string, baseUrl string, it
 	return page
 }
 
-func (page *kmgPage) runSelectCommand(selectCommand MysqlAst.SelectCommand) *kmgPage {
+func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *KmgPage {
 	if page.BaseUrl == "" {
 		panic("runSelectCommand need baseUrl parameter")
 	}
 	output, parameterList := selectCommand.GetPrepareParameter()
-	countData, err := kmgSql.Query("SELECT COUNT(*) AS c FROM ("+output+") as View", parameterList[0])
+	countData, err := kmgSql.QueryOne("SELECT COUNT(*) AS c FROM ("+output+") as View", parameterList...)
 	if err != nil {
 		panic(err)
 	}
-	page.TotalItem, err = strconv.Atoi(countData[0]["c"])
+	page.TotalItem, err = strconv.Atoi(countData["c"])
 	if err != nil {
 		panic(err)
 	}
 	dataSelect := selectCommand.Copy()
-	dataSelect = dataSelect.Limit(string(page.GetMysqlOffset()) + "," + string(page.ItemPerPage))
-	page.Data = kmgSql.RunSelectCommand(dataSelect)
+	dataSelect = dataSelect.Limit(strconv.Itoa(page.GetMysqlOffset()) + "," + strconv.Itoa(page.ItemPerPage))
+	page.Data = kmgSql.MustRunSelectCommand(dataSelect)
 	return page
 }
 
-func (page *kmgPage) init() {
-	page.ItemPerPage = 10
+func (page *KmgPage) init() {
+	if page.ItemPerPage == 0 {
+		page.ItemPerPage = 10
+	}
 	page.ShowPageNum = 10
 	page.PageKeyName = "page"
 	if page.CurrentPage == 0 {
@@ -68,7 +79,7 @@ func (page *kmgPage) init() {
 	}
 }
 
-func (page *kmgPage) GetTotalPage() int {
+func (page *KmgPage) GetTotalPage() int {
 	totalPage := int(math.Ceil(float64(page.TotalItem) / float64(page.ItemPerPage)))
 	if totalPage <= 0 {
 		totalPage = 1
@@ -77,28 +88,28 @@ func (page *kmgPage) GetTotalPage() int {
 }
 
 // 一共有多少项
-func (page *kmgPage) GetTotalItem() int {
+func (page *KmgPage) GetTotalItem() int {
 	return page.TotalItem
 }
 
 // 是否有向前的按钮
-func (page *kmgPage) IsBeforePageActive() bool {
+func (page *KmgPage) IsBeforePageActive() bool {
 	return page.CurrentPage-1 >= 1
 }
 
 // 是否有后向的按钮
-func (page *kmgPage) IsAfterPageActive() bool {
+func (page *KmgPage) IsAfterPageActive() bool {
 	return page.CurrentPage+1 <= page.GetTotalPage()
 }
 
 // MySQL 数据库的偏移量
-func (page *kmgPage) GetMysqlOffset() int {
+func (page *KmgPage) GetMysqlOffset() int {
 	ret := (page.CurrentPage - 1) * page.ItemPerPage
 	return ret
 }
 
 // 前一页的 Url
-func (page *kmgPage) GetBeforePageUrl() string {
+func (page *KmgPage) GetBeforePageUrl() string {
 	pageNumber := page.CurrentPage - 1
 	if pageNumber < 1 {
 		pageNumber = 1
@@ -107,7 +118,7 @@ func (page *kmgPage) GetBeforePageUrl() string {
 }
 
 // 后一页的 Url
-func (page *kmgPage) GetAfterPageUrl() string {
+func (page *KmgPage) GetAfterPageUrl() string {
 	pageNumber := page.CurrentPage + 1
 	if pageNumber > page.GetTotalPage() {
 		pageNumber = page.GetTotalPage()
@@ -116,7 +127,7 @@ func (page *kmgPage) GetAfterPageUrl() string {
 }
 
 // 中间显示的分页的数据
-func (page *kmgPage) GetShowPageArray() []urlParam {
+func (page *KmgPage) GetShowPageArray() []UrlParam {
 	// 页面比显示数据量还少，快速通道
 	if page.GetTotalPage() <= page.ShowPageNum {
 		return page.getShowPageArrayFromNum(1, page.GetTotalPage())
@@ -134,15 +145,15 @@ func (page *kmgPage) GetShowPageArray() []urlParam {
 	return page.getShowPageArrayFromNum(start, end)
 }
 
-type urlParam struct {
+type UrlParam struct {
 	IsCurrent bool
 	PageNum   int
 	Url       string
 }
 
-func (page *kmgPage) getShowPageArrayFromNum(start int, end int) []urlParam {
-	var output []urlParam
-	var param urlParam
+func (page *KmgPage) getShowPageArrayFromNum(start int, end int) []UrlParam {
+	var output []UrlParam
+	var param UrlParam
 	for i := start; i < end; i++ {
 		url := page.GetUrlWithPage(i)
 		param.IsCurrent = (i == page.CurrentPage)
@@ -154,8 +165,6 @@ func (page *kmgPage) getShowPageArrayFromNum(start int, end int) []urlParam {
 }
 
 // 获取页面的 Url
-func (page *kmgPage) GetUrlWithPage(pageNum int) string {
-	v := url.Values{}
-	v.Set(page.PageKeyName, string(pageNum))
-	return page.BaseUrl + "?" + v.Encode()
+func (page *KmgPage) GetUrlWithPage(pageNum int) string {
+	return kmgHttp.MustSetParameterToUrl(page.BaseUrl, page.PageKeyName, strconv.Itoa(pageNum))
 }

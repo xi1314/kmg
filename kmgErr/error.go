@@ -60,6 +60,27 @@ func PanicToError(f func()) (err error) {
 	return nil
 }
 
+func PanicToErrorAndLog(f func()) (err error) {
+	defer func() {
+		out := recover()
+		if out == nil {
+			err = nil
+			return
+		}
+
+		err1, ok := out.(error)
+		if ok {
+			err = err1
+			LogErrorWithStack(err)
+			return
+		}
+		err = &PanicErr{PanicObj: out}
+		LogErrorWithStack(err)
+	}()
+	f()
+	return nil
+}
+
 // 要求这个函数在规定的时间内完成
 // 要么在这个时间范围内完成,要么返回错误
 // 会在新线程中执行函数

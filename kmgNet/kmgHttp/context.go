@@ -10,6 +10,7 @@ import (
 //该对象上的方法不应该被并发调用.
 type Context struct {
 	Method       string
+	RequestUrl   string
 	Request      map[string]string
 	Session      *kmgSession.Session
 	Response     string
@@ -33,6 +34,7 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 			}
 			return m
 		}(),
+		RequestUrl:   req.URL.String(),
 		Session:      kmgSession.GetSession(w, req),
 		ResponseCode: 200,
 		Req:          req,
@@ -115,6 +117,10 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 	}
 	w.WriteHeader(c.ResponseCode)
 	w.Write([]byte(c.Response))
+}
+
+func (c *Context) CurrentUrl() string {
+	return c.RequestUrl
 }
 
 /*

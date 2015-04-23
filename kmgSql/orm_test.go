@@ -84,16 +84,16 @@ func (t *KmgSqlTestType) GetIdFieldName() string {
 	return "Id"
 }
 func (t *KmgSqlTestType) GetTableName() string {
-	return testTableName
+	return "kmgSql_test_table"
 }
 
 func setTestOrmTable() {
-	_, err := Exec("DROP TABLE IF EXISTS `" + testTableName + "`")
+	_, err := Exec("DROP TABLE IF EXISTS `kmgSql_test_table`")
 	Equal(err, nil)
-	_, err = Exec("CREATE TABLE `" + testTableName + "` ( `Id` int(11) NOT NULL AUTO_INCREMENT, `Name` varchar(255) COLLATE utf8_bin DEFAULT NULL, `Time` datetime NOT NULL,`TimeDate` datetime NOT NULL,PRIMARY KEY (`Id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin")
+	_, err = Exec("CREATE TABLE `kmgSql_test_table` ( `Id` int(11) NOT NULL AUTO_INCREMENT, `Name` varchar(255) COLLATE utf8_bin DEFAULT NULL, `Time` datetime NOT NULL,`TimeDate` datetime NOT NULL,PRIMARY KEY (`Id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin")
 	Equal(err, nil)
 	err = GetDb().SetTablesDataYaml(`
-` + testTableName + `:
+kmgSql_test_table:
   - Id: 1
     Name: Tom
     Time: "2015-01-12 09:23:59"

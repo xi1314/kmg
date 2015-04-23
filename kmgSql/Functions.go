@@ -8,10 +8,18 @@ import (
 	"strings"
 )
 
+func MustQuery(query string, args ...string) []map[string]string {
+	out, err := Query(query, args...)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
 func Query(query string, args ...string) (output []map[string]string, err error) {
 	rows, err := GetDb().Query(query, argsStringToInterface(args...)...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[Query] sql: [%s] data: [%s] err:[%s]", query, strings.Join(args, ","), err.Error())
 	}
 	defer rows.Close()
 	columns, err := rows.Columns()
@@ -42,6 +50,14 @@ func Query(query string, args ...string) (output []map[string]string, err error)
 	return
 }
 
+func MustQueryOne(query string, args ...string) map[string]string {
+	out, err := QueryOne(query, args...)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
 func QueryOne(query string, args ...string) (output map[string]string, err error) {
 	list, err := Query(query, args...)
 	if err != nil {
@@ -54,8 +70,27 @@ func QueryOne(query string, args ...string) (output map[string]string, err error
 	return output, err
 }
 
+func MustExec(query string, args ...string) {
+	_, err := Exec(query, args...)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Exec(query string, args ...string) (sql.Result, error) {
-	return GetDb().Exec(query, argsStringToInterface(args...)...)
+	ret, err := GetDb().Exec(query, argsStringToInterface(args...)...)
+	if err != nil {
+		return nil, fmt.Errorf("[Exec] sql: [%s] data: [%s] err:[%s]", query, strings.Join(args, ","), err.Error())
+	}
+	return ret, err
+}
+
+func MustInsert(tableName string, row map[string]string) (lastInsertId int) {
+	lastInsertId, err := Insert(tableName, row)
+	if err != nil {
+		panic(err)
+	}
+	return lastInsertId
 }
 
 func Insert(tableName string, row map[string]string) (lastInsertId int, err error) {
@@ -77,7 +112,14 @@ func Insert(tableName string, row map[string]string) (lastInsertId int, err erro
 	return lastInsertId, err
 }
 
-func UpdateById(tableName string, row map[string]string, primaryKeyName string) error {
+func MustUpdateById(tableName string, primaryKeyName string, row map[string]string) {
+	err := UpdateById(tableName, primaryKeyName, row)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func UpdateById(tableName string, primaryKeyName string, row map[string]string) error {
 	keyList := []string{}
 	valueList := []string{}
 	var idValue string
@@ -103,7 +145,15 @@ func UpdateById(tableName string, row map[string]string, primaryKeyName string) 
 	return nil
 }
 
-func ReplaceById(tableName string, row map[string]string, primaryKeyName string) (lastInsertId int, err error) {
+func MustReplaceById(tableName string, primaryKeyName string, row map[string]string) (lastInsertId int) {
+	lastInsertId, err := ReplaceById(tableName, primaryKeyName, row)
+	if err != nil {
+		panic(err)
+	}
+	return lastInsertId
+}
+
+func ReplaceById(tableName string, primaryKeyName string, row map[string]string) (lastInsertId int, err error) {
 	var one map[string]string
 	if idValue, ok := row[primaryKeyName]; ok {
 		one, _ = GetOneWhere(tableName, primaryKeyName, idValue)
@@ -111,7 +161,7 @@ func ReplaceById(tableName string, row map[string]string, primaryKeyName string)
 	if one == nil {
 		return Insert(tableName, row)
 	}
-	err = UpdateById(tableName, row, primaryKeyName)
+	err = UpdateById(tableName, primaryKeyName, row)
 	lastInsertId, err = strconv.Atoi(one[primaryKeyName])
 	if err != nil {
 		lastInsertId = 0
@@ -119,9 +169,24 @@ func ReplaceById(tableName string, row map[string]string, primaryKeyName string)
 	return lastInsertId, err
 }
 
+func MustGetOneWhere(tableName string, fieldName string, value string) (output map[string]string) {
+	output, err := GetOneWhere(tableName, fieldName, value)
+	if err != nil {
+		panic(err)
+	}
+	return output
+}
+
 func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, err error) {
 	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
 	return QueryOne(sql, value)
+}
+
+func MustDeleteById(tableName string, fieldName string, value string) {
+	err := DeleteById(tableName, fieldName, value)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func DeleteById(tableName string, fieldName string, value string) error {
@@ -130,9 +195,26 @@ func DeleteById(tableName string, fieldName string, value string) error {
 	return err
 }
 
+func MustGetAllInTable(tableName string) (output []map[string]string) {
+	output, err := GetAllInTable(tableName)
+	if err != nil {
+		panic(err)
+	}
+	return output
+}
+
 func GetAllInTable(tableName string) (output []map[string]string, err error) {
 	output, err = Query("SELECT * FROM `" + tableName + "`")
 	return output, err
+}
+
+func MustRunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
+	output, paramList := selectCommand.GetPrepareParameter()
+	list, error := Query(output, paramList...)
+	if error != nil {
+		panic(error)
+	}
+	return list
 }
 
 func argsStringToInterface(args ...string) []interface{} {
@@ -141,13 +223,4 @@ func argsStringToInterface(args ...string) []interface{} {
 		_args = append(_args, value)
 	}
 	return _args
-}
-
-func RunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
-	output, paramList := selectCommand.GetPrepareParameter()
-	list, error := Query(output, paramList...)
-	if error != nil {
-		panic(error)
-	}
-	return list
 }

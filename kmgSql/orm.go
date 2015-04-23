@@ -31,5 +31,5 @@ func OrmPersist(obj OrmObject) (lastInsertId int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	return ReplaceById(obj.GetTableName(), row, obj.GetIdFieldName())
+	return ReplaceById(obj.GetTableName(), obj.GetIdFieldName(), row)
 }

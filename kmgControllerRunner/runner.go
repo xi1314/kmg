@@ -23,6 +23,9 @@ func RegisterController(obj interface{}) {
 	objName := t.PkgPath() + "." + t.Name()
 	objName = strings.Replace(objName, "/", ".", -1)
 	for i := 0; i < t.NumMethod(); i++ {
+		if t.Method(i).PkgPath != "" {
+			continue
+		}
 		mv := v.Method(i)
 		mvt := mv.Type()
 		if mvt.AssignableTo(controllerFuncType) {
@@ -49,7 +52,7 @@ var HttpProcessorList = []HttpProcessor{
 }
 
 func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
-	err := kmgErr.PanicToError(func() {
+	err := kmgErr.PanicToErrorAndLog(func() {
 		processorList[0](ctx, processorList[1:])
 	})
 	if err != nil {

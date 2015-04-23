@@ -34,3 +34,7 @@ func (t TestRegisterControllerT) WorkPage1(ctx *kmgHttp.Context) {
 func (t TestRegisterControllerT) WorkPage2(ctx *kmgHttp.Context) {
 	testCallMethod = append(testCallMethod, "WorkPage2")
 }
+
+func (t TestRegisterControllerT) workPage2(ctx *kmgHttp.Context) {
+	testCallMethod = append(testCallMethod, "workPage2")
+}

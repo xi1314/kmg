@@ -1,8 +1,9 @@
 package kmgHTMLPurifier_test
 
 import (
-	"fmt"
 	"github.com/bronze1man/kmg/kmgHTMLPurifier"
+	"github.com/bronze1man/kmg/kmgTest"
+	"strings"
 	"testing"
 )
 
@@ -14,7 +15,6 @@ func TestHTMLPurifier(t *testing.T) {
 	}
 	for _, content := range input {
 		output := kmgHTMLPurifier.HTMLPurifier(content)
-		fmt.Println("Input====>" + content)
-		fmt.Println("Output====>" + output)
+		kmgTest.Ok(len(strings.Split(output, "alert")) < 2)
 	}
 }
