@@ -44,13 +44,13 @@ func SpeedString(byteNum int, dur time.Duration) string {
 }
 
 func SizeString(byteNum int64) string {
-	if byteNum > 1e9 || byteNum < -1e9{
+	if byteNum > 1e9 || byteNum < -1e9 {
 		return fmt.Sprintf("%.2fGB", float64(byteNum)/(1024*1024*1024))
 	}
-	if byteNum > 1e6 || byteNum < -1e6{
+	if byteNum > 1e6 || byteNum < -1e6 {
 		return fmt.Sprintf("%.2fMB", float64(byteNum)/(1024*1024))
 	}
-	if byteNum > 1e3 || byteNum < -1e3{
+	if byteNum > 1e3 || byteNum < -1e3 {
 		return fmt.Sprintf("%.2fKB", float64(byteNum)/(1024))
 	}
 	return fmt.Sprintf("%dB", byteNum)

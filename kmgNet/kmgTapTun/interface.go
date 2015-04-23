@@ -31,9 +31,9 @@ type Interface interface {
 func SetP2PIpAndUp(ifac Interface, srcIp string, destIp string) error {
 	switch runtime.GOOS {
 	case "darwin":
-		return kmgCmd.StdioSliceRun( []string{"ifconfig", ifac.Name(), srcIp, destIp, "up"})
+		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, destIp, "up"})
 	case "linux":
-		return kmgCmd.StdioSliceRun( []string{"ifconfig", ifac.Name(), srcIp, "pointopoint", destIp, "up"})
+		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, "pointopoint", destIp, "up"})
 	default:
 		return ErrPlatformNotSupport
 	}
@@ -41,5 +41,5 @@ func SetP2PIpAndUp(ifac Interface, srcIp string, destIp string) error {
 
 //set mtu on a device
 func SetMtu(ifac Interface, mtu int) error {
-	return kmgCmd.StdioSliceRun( []string{"ifconfig", ifac.Name(), "mtu", strconv.Itoa(mtu)} )
+	return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), "mtu", strconv.Itoa(mtu)})
 }

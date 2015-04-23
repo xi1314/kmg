@@ -10,9 +10,10 @@ import (
 var VERSION = "1.0"
 
 type Command struct {
-	Name   string
-	Desc   string
-	Runner func()
+	Name   string //名称,不区分大小写
+	Desc   string //暂时没有用到
+	Runner func() //运行这个命令的函数
+	Hidden bool   //隐藏这个命令,使其在帮助列表里面不显示
 }
 
 var actionMap = map[string]Command{
@@ -87,6 +88,9 @@ func help() {
 	}
 	sort.Sort(tActionList(actionList))
 	for i := 0; i < len(actionList); i++ {
+		if actionList[i].Hidden {
+			continue
+		}
 		fmt.Println("\t", actionList[i].Name)
 	}
 }

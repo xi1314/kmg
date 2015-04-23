@@ -10,11 +10,12 @@ import (
 
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "Make",
-		Desc:   "run a project defined command",
+		Name: "Make",
+		Desc: `run a project defined command
+保证在项目根目录下运行
+使用普通空格分割方法定义命令`,
 		Runner: makeCmd,
 	})
-
 }
 
 func makeCmd() {
@@ -25,6 +26,8 @@ func makeCmd() {
 		return
 	}
 	args := strings.Split(kmgc.Make, " ")
-	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).Run()
+	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
+		SetDir(kmgc.ProjectPath).
+		Run()
 	kmgConsole.ExitOnErr(err)
 }
