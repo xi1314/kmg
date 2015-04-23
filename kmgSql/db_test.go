@@ -13,7 +13,7 @@ func TestConnectToDb(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-	err := DeleteById("AdminUser","Id","3")
+	err := DeleteById("AdminUser", "Id", "3")
 	kmgDebug.Println(err)
 }
 
