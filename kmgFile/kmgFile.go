@@ -2,6 +2,7 @@ package kmgFile
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgRand"
 	"io"
 	"io/ioutil"
 	"os"
@@ -177,4 +178,14 @@ func MustCopyFile(src, dst string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func MustChangeToTmpPath() string {
+	folder := "/tmp/kmg/" + kmgRand.MustCryptoRandToHex(6)
+	MustMkdirAll(folder)
+	err := os.Chdir(folder)
+	if err != nil {
+		panic(err)
+	}
+	return folder
 }
