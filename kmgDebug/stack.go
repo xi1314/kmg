@@ -39,3 +39,9 @@ func GetCurrentStack(skip int) (stack *Stack) {
 	}
 	return
 }
+
+func GetAllStack() []byte {
+	buf := make([]byte, 32*1024)
+	runtime.Stack(buf, true)
+	return buf
+}

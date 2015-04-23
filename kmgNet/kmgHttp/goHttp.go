@@ -134,6 +134,9 @@ func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFileP
 	if err != nil {
 		return err
 	}
+	if !strings.HasPrefix(httpPath, "/") {
+		httpPath = "/" + httpPath
+	}
 	if fi.IsDir() {
 		if !strings.HasSuffix(httpPath, "/") {
 			httpPath += "/"

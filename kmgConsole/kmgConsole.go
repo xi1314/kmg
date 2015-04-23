@@ -5,6 +5,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+	//	"runtime/debug"
+	//	"github.com/bronze1man/kmg/kmgDebug"
 )
 
 var VERSION = "1.0"
@@ -39,6 +41,22 @@ func Main() {
 	}
 
 	os.Args = os.Args[1:]
+	//搞这个是为了在panic的时候,仍然可以把输出搞到其他地方去,但是此处复杂度很高,很容易不稳定,具体效果有待确定.
+	/*
+		defer func(){
+			r:=recover()
+			if r!=nil{
+				fmt.Println("panic:",r)
+				os.Stderr.Write(kmgDebug.GetAllStack())
+			}
+			if len(exitActionList) > 0 {
+				for _, action := range exitActionList {
+					action()
+				}
+				exitActionList = nil
+			}
+		}()
+	*/
 	action.Runner()
 	if len(exitActionList) > 0 {
 		WaitForExit()

@@ -1,6 +1,7 @@
 package kmgControllerRunner
 
 import (
+	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net/http"
 	"reflect"
@@ -15,13 +16,16 @@ func clearController() {
 	controllerObjMap = map[string]func(ctx *kmgHttp.Context){}
 }
 
-//注册controller
+//注册controller,请先注册后使用,该函数不能并发调用,不能在http开始处理之后再注册(data race问题)
 func RegisterController(obj interface{}) {
 	v := reflect.ValueOf(obj)
 	t := v.Type()
 	objName := t.PkgPath() + "." + t.Name()
 	objName = strings.Replace(objName, "/", ".", -1)
 	for i := 0; i < t.NumMethod(); i++ {
+		if t.Method(i).PkgPath != "" {
+			continue
+		}
 		mv := v.Method(i)
 		mvt := mv.Type()
 		if mvt.AssignableTo(controllerFuncType) {
@@ -35,15 +39,40 @@ var HttpHandler = http.HandlerFunc(HttpHandlerFunc)
 
 //httpHandler
 func HttpHandlerFunc(w http.ResponseWriter, req *http.Request) {
-	ctx := &kmgHttp.Context{W: w, Req: req}
+	ctx := kmgHttp.NewContextFromHttp(w, req) //TODO 这里忽略了错误，此处应该如何处理错误
+	HttpProcessorList[0](ctx, HttpProcessorList[1:])
+	ctx.WriteToResponseWriter(w, req)
+}
+
+type HttpProcessor func(ctx *kmgHttp.Context, processorList []HttpProcessor)
+
+var HttpProcessorList = []HttpProcessor{
+	PanicHandler,
+	Dispatcher,
+}
+
+func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
+	err := kmgErr.PanicToErrorAndLog(func() {
+		processorList[0](ctx, processorList[1:])
+	})
+	if err != nil {
+		ctx.Response = err.Error()
+		ctx.ResponseCode = 500
+		return
+	}
+	return
+}
+
+func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 	apiName := ctx.InStr("n")
 	if apiName == "" && EnterPointApiName != "" {
 		apiName = EnterPointApiName
 	}
 	apiFunc, ok := controllerObjMap[apiName]
 	if !ok {
-		ctx.WriteString("api not found")
+		ctx.NotFound("api not found")
 		return
 	}
 	apiFunc(ctx)
+	return
 }

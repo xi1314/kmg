@@ -79,6 +79,14 @@ func UnmarshalNoType(r []byte) (interface{}, error) {
 	return obj, nil
 }
 
+func MustUnmarshalToMap(r []byte) (obj map[string]interface{}) {
+	err := json.Unmarshal(r, &obj)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
 // for debug to inspect content in obj
 func MustMarshalIndentToString(obj interface{}) string {
 	output, err := json.MarshalIndent(obj, "", "  ")

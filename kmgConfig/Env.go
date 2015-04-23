@@ -15,25 +15,22 @@ import (
 type Env struct {
 	GOPATH             []string
 	CrossCompileTarget []CompileTarget
-
-	//default to $ProjectPath/app
-	AppPath string
 	//default to $ProjectPath/config
 	ConfigPath string
 	//default to $AppPath/data
 	DataPath string
 	//default to $AppPath/tmp
 	TmpPath string
-	//default to ./app/log
+	//default to $AppPath/log
 	LogPath string
-
 	//should come from environment
 	GOROOT string
 	//should come from dir of ".kmg.yml"
 	ProjectPath string
-
-	//make command
+	//make command,使用kmg make可以运行这个命令
 	Make string
+	//当前是否是测试
+	IsTest bool
 }
 
 func (context *Env) GOPATHToString() string {
@@ -52,20 +49,17 @@ func (context *Env) Init() {
 	if context.GOROOT == "" {
 		context.GOROOT = os.Getenv("GOROOT")
 	}
-	if context.AppPath == "" {
-		context.AppPath = filepath.Join(context.ProjectPath, "app")
-	}
 	if context.DataPath == "" {
-		context.DataPath = filepath.Join(context.AppPath, "data")
+		context.DataPath = filepath.Join(context.ProjectPath, "data")
 	}
 	if context.TmpPath == "" {
-		context.TmpPath = filepath.Join(context.AppPath, "tmp")
+		context.TmpPath = filepath.Join(context.ProjectPath, "tmp")
 	}
 	if context.ConfigPath == "" {
-		context.ConfigPath = filepath.Join(context.AppPath, "config")
+		context.ConfigPath = filepath.Join(context.ProjectPath, "config")
 	}
 	if context.LogPath == "" {
-		context.LogPath = filepath.Join(context.AppPath, "log")
+		context.LogPath = filepath.Join(context.ProjectPath, "log")
 	}
 	if len(context.GOPATH) == 0 {
 		context.GOPATH = []string{context.ProjectPath}

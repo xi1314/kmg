@@ -23,6 +23,11 @@ func MustRun(cmd string) {
 	CmdString(cmd).MustRun()
 }
 
+//代理运行命令,同run,出现错误时
+func ProxyRun(cmd string) {
+	CmdString(cmd).ProxyRun()
+}
+
 //相比MustRun 如果进程返回值不是0,不报错
 func MustRunNotExistStatusCheck(cmd string) {
 	CmdString(cmd).MustRunAndNotExitStatusCheck()

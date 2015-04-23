@@ -63,6 +63,14 @@ func MkdirForFile(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
 }
 
+func MustMkdirForFile(path string) {
+	path = filepath.Dir(path)
+	err := os.MkdirAll(path, os.FileMode(0777))
+	if err != nil {
+		panic(err)
+	}
+}
+
 func AppendFile(path string, content []byte) (err error) {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0777))
 	if err != nil {

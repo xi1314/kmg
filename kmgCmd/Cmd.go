@@ -2,6 +2,7 @@ package kmgCmd
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgConsole"
 	"os"
 	"os/exec"
 	"strings"
@@ -50,7 +51,7 @@ func (c *Cmd) SetDir(path string) *Cmd {
 }
 
 func (c *Cmd) PrintCmdLine() {
-	fmt.Println(">", c.cmd.Path, strings.Join(c.cmd.Args, " "))
+	fmt.Println(">", strings.Join(c.cmd.Args, " "))
 }
 
 //回显命令,并且运行,并且和标准输入输出接起来
@@ -60,6 +61,11 @@ func (c *Cmd) Run() error {
 	c.cmd.Stdout = os.Stdout
 	c.cmd.Stderr = os.Stderr
 	return c.cmd.Run()
+}
+
+func (c *Cmd) ProxyRun() {
+	err := c.Run()
+	kmgConsole.ExitOnErr(err)
 }
 
 //get the os/exec.Cmd

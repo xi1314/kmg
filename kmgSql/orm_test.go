@@ -36,6 +36,43 @@ func TestOrmToRow(t *testing.T) {
 	Equal(m["Time"], "2001-01-01 01:01:01")
 }
 
+func TestOrmPersistUpdate(t *testing.T) {
+	setTestOrmTable()
+	obj, err := OrmFromRow(&KmgSqlTestType{}, map[string]string{
+		"Id":   "1",
+		"Name": "Jack",
+	})
+	Equal(err, nil)
+	id, err := OrmPersist(obj)
+	Equal(err, nil)
+	Equal(id, 1)
+	one, err := GetOneWhere(obj.GetTableName(), obj.GetIdFieldName(), "1")
+	Equal(err, nil)
+	obj, err = OrmFromRow(&KmgSqlTestType{}, one)
+	Equal(err, nil)
+	objTest := obj.(*KmgSqlTestType)
+	Equal(objTest.Name, "Jack")
+	Equal(objTest.Id, 1)
+}
+
+func TestOrmPersistInsert(t *testing.T) {
+	setTestOrmTable()
+	obj, err := OrmFromRow(&KmgSqlTestType{}, map[string]string{
+		"Name": "Lucy",
+	})
+	Equal(err, nil)
+	id, err := OrmPersist(obj)
+	Equal(err, nil)
+	Equal(id, 2)
+	one, err := GetOneWhere(obj.GetTableName(), "Name", "Lucy")
+	Equal(err, nil)
+	obj, err = OrmFromRow(&KmgSqlTestType{}, one)
+	Equal(err, nil)
+	objTest := obj.(*KmgSqlTestType)
+	Equal(objTest.Name, "Lucy")
+	Equal(objTest.Id, 2)
+}
+
 type KmgSqlTestType struct {
 	Id       int
 	Name     string
@@ -47,5 +84,19 @@ func (t *KmgSqlTestType) GetIdFieldName() string {
 	return "Id"
 }
 func (t *KmgSqlTestType) GetTableName() string {
-	return "tbf_test"
+	return "kmgSql_test_table"
+}
+
+func setTestOrmTable() {
+	_, err := Exec("DROP TABLE IF EXISTS `kmgSql_test_table`")
+	Equal(err, nil)
+	_, err = Exec("CREATE TABLE `kmgSql_test_table` ( `Id` int(11) NOT NULL AUTO_INCREMENT, `Name` varchar(255) COLLATE utf8_bin DEFAULT NULL, `Time` datetime NOT NULL,`TimeDate` datetime NOT NULL,PRIMARY KEY (`Id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin")
+	Equal(err, nil)
+	err = GetDb().SetTablesDataYaml(`
+kmgSql_test_table:
+  - Id: 1
+    Name: Tom
+    Time: "2015-01-12 09:23:59"
+`)
+	Equal(err, nil)
 }

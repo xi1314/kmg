@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	//"fmt"
 )
 
 //全局定义(包含所有的package)
