@@ -88,31 +88,6 @@ func (tools *TestTools) assertFail(msg string, skip int) {
 	tools.TestingTB.FailNow()
 }
 
-func isEqual(a interface{}, b interface{}) bool {
-	//不要加a==b这种快速通道,会出现 panic comparing uncomparable type []models.RoleId 的问题
-	if reflect.DeepEqual(a, b) {
-		return true
-	}
-	rva := reflect.ValueOf(a)
-	rvb := reflect.ValueOf(b)
-	//every nil is same stuff...
-	if isNil(rva) && isNil(rvb) {
-		return true
-	}
-	return false
-}
-
-func isNil(rv reflect.Value) bool {
-	switch rv.Kind() {
-	case reflect.Invalid:
-		return true
-	case reflect.Chan, reflect.Func, reflect.Map, reflect.Interface, reflect.Ptr, reflect.Slice:
-		return rv.IsNil()
-	default:
-		return false
-	}
-}
-
 // @deprecated
 //use T for error report,automatic call every function start with Test
 //function start with Test must not have input arguments,output arguments.
