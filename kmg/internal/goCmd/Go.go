@@ -13,7 +13,6 @@ func init() {
 		Desc:   "run go command in current project",
 		Runner: GoCommand,
 	})
-
 }
 
 // run go command in current project
