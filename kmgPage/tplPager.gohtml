@@ -1,0 +1,45 @@
+@{
+    import (
+        "net/url"
+    )
+    var kmgPage *KmgPage
+}
+<ul class="pagination">
+    <li class="disabled">
+        <a href="">
+            共 @kmgPage.TotalPage 页
+        </a>
+    </li>
+    <li class="@if !kmgPage.IsBeforePageActive(){ @:disabled } >
+        <a href="@kmgPage.GetBeforePageUrl()">&laquo;</a>
+    </li>
+    @for _,opt := range kmgPage.GetShowPageArray() {
+        <li class="@if opt.IsCurrent {
+                @:active
+            }">
+        <a href="@opt.Url">@opt.PageNum
+            <span class="sr-only">(current)</span></a>
+        </li>
+    }
+    <li class="@if !kmgPage.IsAfterPageActive() {
+        @:disabled
+        }">
+        <a href="@kmgPage.GetAfterPageUrl()">&raquo;</a>
+    </li>
+    <li>
+        <form action="@kmgPage.BaseUrl" method="GET" style="position: relative;margin-left:10px;float:left;">
+            @{  array,err := url.ParseRequestURI(kmgPage.BaseUrl)
+                if err != nil {
+
+                }
+            }
+            @for key,value := range array.Query() {
+                <input type="hidden" name="@key" value="@value"/>
+            }
+            <input type="text" class="form-control"
+                   style="width:30px;height: 29px;padding: 2px 2px;display:inline;text-align:center;position: relative;top:1px;"
+                   name="@kmgPage.PageKeyName" value="@kmgPage.CurrentPage"/>
+            <input type="submit" class="btn btn-primary" style="padding: 5px 12px" value="跳转至该页"/>
+        </form>
+    </li>
+</ul>
