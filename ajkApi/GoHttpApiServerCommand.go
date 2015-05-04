@@ -7,11 +7,11 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	//"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/sessionStore"
-	"github.com/bronze1man/kmg/sessionStore/memcacheProvider"
+	//"github.com/bronze1man/kmg/sessionStore/memcacheProvider"
 )
 
 var AdditionHttpHandler []HttpHandlerConfig
@@ -45,7 +45,8 @@ func RunGoHttpApiServerCmd() {
 	jsonHttpHandler := &JsonHttpHandler{
 		ApiManager: DefaultApiManager,
 		SessionStoreManager: &sessionStore.Manager{
-			Provider: memcacheProvider.New(defaultParameter.Parameter().MemcacheHostList...),
+			Provider: sessionStore.NewMemoryProvider(),
+			//Provider: memcacheProvider.New(kmgConfig.DefaultParameter().MemcacheHostList...),
 		},
 	}
 	http.Handle("/api", &HttpApiFilterManager{

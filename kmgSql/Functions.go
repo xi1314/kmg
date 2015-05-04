@@ -217,6 +217,10 @@ func MustRunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map
 	return list
 }
 
+func Ping() (err error) {
+	return GetDb().Ping()
+}
+
 func argsStringToInterface(args ...string) []interface{} {
 	_args := []interface{}{}
 	for _, value := range args {

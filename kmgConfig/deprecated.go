@@ -8,6 +8,8 @@ import (
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 )
 
+// @deprecated
+// 你应该在你自己的package里面管理你的数据库配置,并且把这个数据库配置注册到 kmgSql.DefaultDbConfig
 type Parameter struct {
 	DatabaseUsername   string
 	DatabasePassword   string
@@ -24,6 +26,7 @@ type Parameter struct {
 var parameterOnce sync.Once
 var parameter *Parameter
 
+// @deprecated
 func DefaultParameter() *Parameter {
 	parameterOnce.Do(func() {
 		parameter = &Parameter{}

@@ -6,8 +6,6 @@ import (
 	"github.com/bronze1man/kmg/kmgSql"
 
 	"time"
-
-	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
 )
 
 type tBeegoOrmKey struct{}
@@ -15,7 +13,7 @@ type tBeegoOrmKey struct{}
 var beegoOrmKey tBeegoOrmKey = tBeegoOrmKey{}
 
 func InitOrm() {
-	orm.RegisterDataBase("default", "mysql", kmgSql.GetDbConfigFromConfig(defaultParameter.Parameter()).GetDsn())
+	orm.RegisterDataBase("default", "mysql", kmgSql.GetDefaultDbConfig().GetDsn())
 	orm.SetDataBaseTZ("default", time.UTC)
 }
 

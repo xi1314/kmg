@@ -2,7 +2,6 @@ package kmgSql
 
 import (
 	"database/sql"
-	"github.com/bronze1man/kmg/kmgConfig"
 	_ "github.com/go-sql-driver/mysql"
 	"sync"
 )
@@ -12,16 +11,18 @@ type Db struct {
 	*sql.DB
 }
 
-var dbOnce sync.Once
+var dbLock sync.Mutex
 var db *Db
 
 func GetDb() *Db {
-	dbOnce.Do(func() {
-		odb, err := sql.Open("mysql", GetDbConfigFromConfig(kmgConfig.DefaultParameter()).GetDsn())
+	dbLock.Lock()
+	defer dbLock.Unlock()
+	if db == nil {
+		odb, err := sql.Open("mysql", defaultDbConfig.GetDsn())
 		if err != nil {
 			panic(err)
 		}
 		db = &Db{DB: odb}
-	})
+	}
 	return db
 }

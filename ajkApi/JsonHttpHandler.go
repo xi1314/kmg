@@ -60,13 +60,13 @@ func (handler *JsonHttpHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 	session, err := handler.SessionStoreManager.Load(rawInput.Guid)
 	if err != nil {
 		err = fmt.Errorf("[session.load] %s", err.Error())
+		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error()})
 		return
 	}
 	err = handler.ApiManager.RpcCall(session, rawInput.Name, func(meta *ApiFuncMeta) error {
 		apiOutput, err = structRpcCall(meta, rawInput)
 		return err
 	})
-
 	if err != nil {
 		handler.returnOutput(w, &JsonHttpOutput{Err: err.Error(), Guid: session.Id})
 		return

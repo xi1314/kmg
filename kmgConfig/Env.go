@@ -18,15 +18,15 @@ type Env struct {
 	CrossCompileTarget []CompileTarget
 	//default to $ProjectPath/config
 	ConfigPath string
-	//default to $AppPath/data
+	//default to $ProjectPath/data
 	DataPath string
-	//default to $AppPath/tmp
+	//default to $ProjectPath/tmp
 	TmpPath string
-	//default to $AppPath/log
+	//default to $ProjectPath/log
 	LogPath string
 	//should come from environment 此参数可以配置
 	GOROOT string
-	//should come from dir of ".kmg.yml" 此参数不能配置
+	//the dir of ".kmg.yml" 此参数不能配置
 	ProjectPath string
 	//make command,使用kmg make可以运行这个命令
 	Make string
@@ -74,6 +74,9 @@ func (context *Env) Init() {
 }
 func (context *Env) PathInProject(relPath string) string {
 	return filepath.Join(context.ProjectPath, relPath)
+}
+func (context *Env) PathInConfig(relPath string) string {
+	return filepath.Join(context.ConfigPath, relPath)
 }
 
 func FindFromPath(p string) (context *Env, err error) {
