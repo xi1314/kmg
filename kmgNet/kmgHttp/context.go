@@ -2,7 +2,13 @@ package kmgHttp
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgRand"
 	"github.com/bronze1man/kmg/kmgSession"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 )
@@ -12,6 +18,7 @@ type Context struct {
 	Method       string
 	RequestUrl   string
 	Request      map[string]string
+	RequestFile  map[string]*multipart.FileHeader
 	Session      *kmgSession.Session
 	Response     string
 	RedirectUrl  string
@@ -21,23 +28,54 @@ type Context struct {
 }
 
 func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
-	return &Context{
-		Method: req.Method,
-		Request: func() map[string]string {
-			m := map[string]string{}
-			err := req.ParseForm()
-			if err != nil {
-				return m
-			}
-			for key, value := range req.Form {
-				m[key] = value[0] //TODO 这里没有处理同一个 Key 多个 Value 的情况
-			}
-			return m
-		}(),
+	context := &Context{
+		Method:       req.Method,
+		Request:      map[string]string{},
+		RequestFile:  map[string]*multipart.FileHeader{},
 		RequestUrl:   req.URL.String(),
 		Session:      kmgSession.GetSession(w, req),
 		ResponseCode: 200,
 		Req:          req,
+	}
+	err := req.ParseForm()
+	if err != nil {
+		panic(err)
+	}
+	for key, value := range req.Form {
+		context.Request[key] = value[0] //TODO 这里没有处理同一个 key 多个 value 的情况
+	}
+	contentType := req.Header.Get("Content-Type")
+	if contentType == "" {
+		return context
+	}
+	contentType, _, err = mime.ParseMediaType(contentType)
+	if err != nil {
+		panic(err)
+	}
+	if contentType != "multipart/form-data" {
+		return context
+	}
+	err = req.ParseMultipartForm(kmgConfig.DefaultEnv().HttpRequestMaxMemory)
+	if err != nil {
+		panic(err)
+	}
+	for key, value := range req.MultipartForm.File {
+		context.RequestFile[key] = value[0]
+	}
+	for key, value := range req.MultipartForm.Value {
+		context.Request[key] = value[0]
+	}
+	return context
+}
+
+//返回一个新的测试上下文,这个上下文的所有参数都是空的
+func NewTestContext() *Context {
+	return &Context{
+		RequestUrl:   "/testContext",
+		Request:      map[string]string{},
+		RequestFile:  map[string]*multipart.FileHeader{},
+		ResponseCode: 200,
+		Session:      kmgSession.GetSessionById("test_" + kmgRand.MustCryptoRandToAlphaNum(20)),
 	}
 }
 
@@ -63,8 +101,10 @@ func (c *Context) InStr(key string) string {
 	return value
 }
 
-//TODO 如何处理错误
 func (c *Context) MustPost() {
+	if !c.IsPost() {
+		panic(errors.New("Need post"))
+	}
 }
 
 func (c *Context) IsGet() bool {
@@ -74,14 +114,77 @@ func (c *Context) IsPost() bool {
 	return c.Method == "POST"
 }
 
-//TODO 如何处理错误
 func (c *Context) MustInNum(key string) int {
-	return 0
+	s := c.InNum(key)
+	if s == 0 {
+		panic(fmt.Errorf("Need %s parameter", key))
+	}
+	return s
 }
 
-//TODO 如何处理错误
 func (c *Context) MustInStr(key string) string {
-	return ""
+	s := c.InStr(key)
+	if s == "" {
+		panic(fmt.Errorf("Need %s parameter", key))
+	}
+	return s
+}
+
+func (c *Context) MustInJson(key string, obj interface{}) {
+	s := c.MustInStr(key)
+	err := json.Unmarshal([]byte(s), obj)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+func (c *Context) InFile(key string) *multipart.FileHeader {
+	if file, ok := c.RequestFile[key]; ok {
+		return file
+	}
+	return &multipart.FileHeader{}
+}
+
+func (c *Context) SetInStr(key string, value string) *Context {
+	c.Request[key] = value
+	return c
+}
+
+func (c *Context) SetRequest(data map[string]string) *Context {
+	c.Request = data
+	return c
+}
+
+func (c *Context) SetPost() *Context {
+	c.Method = "POST"
+	return c
+}
+
+//向Session里面设置一个字符串
+func (c *Context) SessionSetStr(key string, value string) *Context {
+	c.Session.Set(key, value)
+	return c
+}
+
+//从Session里面获取一个字符串
+func (c *Context) SessionGetStr(key string) string {
+	return c.Session.Get(key)
+}
+
+//清除Session里面的内容.
+//更换Session的Id.
+func (c *Context) SessionClear() *Context {
+	c.Session.Clear()
+	//TODO 重启初始化SessionId
+	return c
+}
+
+//仅把Session传递过去的上下文,其他东西都恢复默认值
+func (c *Context) NewTestContextWithSession() *Context {
+	nc := NewTestContext()
+	nc.Session = c.Session
+	return nc
 }
 
 func (c *Context) Redirect(url string) {
@@ -121,6 +224,14 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 
 func (c *Context) CurrentUrl() string {
 	return c.RequestUrl
+}
+
+func (c *Context) GetResponseCode() int {
+	return c.ResponseCode
+}
+
+func (c *Context) GetResponseContent() []byte {
+	return []byte(c.Response)
 }
 
 /*

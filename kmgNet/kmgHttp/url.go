@@ -2,6 +2,7 @@ package kmgHttp
 
 import (
 	"net/url"
+	"strings"
 )
 
 // @deprecated
@@ -33,4 +34,39 @@ func MustSetParameterToUrl(urls string, key string, value string) (urlout string
 		panic(err)
 	}
 	return u
+}
+
+func MustSetParameterMapToUrl(urls string, row map[string]string) (urlout string) {
+	u, err := url.Parse(urls)
+	if err != nil {
+		panic(err)
+	}
+	q := u.Query()
+	for key, value := range row {
+		q.Set(key, value)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func GetDomainName(url string) (domainName string, protocol string) {
+	protocolList := []string{
+		"http://",
+		"https://",
+		"file://",
+		"ftp://",
+	}
+	for _, p := range protocolList {
+		if strings.HasPrefix(url, p) {
+			protocol = p
+			break
+		}
+	}
+	if protocol == "" {
+		return
+	}
+	domainName = strings.Replace(url, protocol, "", -1)
+	list := strings.Split(domainName, "/")
+	domainName = list[0]
+	return
 }

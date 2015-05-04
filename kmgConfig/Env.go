@@ -31,6 +31,8 @@ type Env struct {
 	Make string
 	//当前是否是测试
 	IsTest bool
+	//Http 请求最大内存占用 默认100M
+	HttpRequestMaxMemory int64
 }
 
 func (context *Env) GOPATHToString() string {
@@ -63,6 +65,9 @@ func (context *Env) Init() {
 	}
 	if len(context.GOPATH) == 0 {
 		context.GOPATH = []string{context.ProjectPath}
+	}
+	if context.HttpRequestMaxMemory == 0 {
+		context.HttpRequestMaxMemory = 100 << 20
 	}
 }
 func (context *Env) PathInProject(relPath string) string {

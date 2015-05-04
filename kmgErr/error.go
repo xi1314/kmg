@@ -88,3 +88,7 @@ func PanicToErrorAndLog(f func()) (err error) {
 func ErrInTime(dur time.Duration, f func()) (err error) {
 	return nil
 }
+
+func Client(reason string, http_code int) {
+
+}

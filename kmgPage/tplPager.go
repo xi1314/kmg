@@ -12,8 +12,11 @@ func tplPager(kmgPage *KmgPage) string {
 	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.TotalPage))
 	_buffer.WriteString(" 页\n        </a>\n    </li>\n    <li class=\"")
 	if !kmgPage.IsBeforePageActive() {
+
+		_buffer.WriteString("disabled")
+
 	}
-	_buffer.WriteString(">\n        <a href=\"")
+	_buffer.WriteString("\" >\n        <a href=\"")
 	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.GetBeforePageUrl()))
 	_buffer.WriteString("\">&laquo;</a>\n    </li>\n    ")
 	for _, opt := range kmgPage.GetShowPageArray() {
@@ -61,7 +64,7 @@ func tplPager(kmgPage *KmgPage) string {
 	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.PageKeyName))
 	_buffer.WriteString("\" value=\"")
 	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.CurrentPage))
-	_buffer.WriteString("\"/>\n            <input type=\"submit\" class=\"btn btn-primary\" style=\"padding: 5px 12px\" value=\"跳转至该页\"/>\n        </form>\n    </li>\n</ul>\n ")
+	_buffer.WriteString("\"/>\n            <input type=\"submit\" class=\"btn btn-primary\" style=\"padding: 5px 12px\" value=\"跳转至该页\"/>\n        </form>\n    </li>\n</ul>")
 
 	return _buffer.String()
 }

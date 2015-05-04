@@ -10,7 +10,9 @@
             共 @kmgPage.TotalPage 页
         </a>
     </li>
-    <li class="@if !kmgPage.IsBeforePageActive(){ @:disabled } >
+    <li class="@if !kmgPage.IsBeforePageActive(){
+        @:disabled
+        }" >
         <a href="@kmgPage.GetBeforePageUrl()">&laquo;</a>
     </li>
     @for _,opt := range kmgPage.GetShowPageArray() {

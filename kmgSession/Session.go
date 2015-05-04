@@ -9,6 +9,7 @@ import (
 type Session struct {
 	Id   string
 	Data map[string]string
+	lock sync.RWMutex //此处不用锁会违反map的线性化写入的规则.
 }
 
 var SessionIdName string = "KmgSessionId"
@@ -65,7 +66,15 @@ func GetSession(w http.ResponseWriter, req *http.Request) *Session {
 	return session
 }
 
+func (s *Session) Clear() {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.Data = map[string]string{}
+}
+
 func (s *Session) Set(k string, v string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	s.Data[k] = v
 }
 

@@ -4,7 +4,6 @@ import (
 	"github.com/bronze1man/kmg/kmgSql"
 	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
 	"github.com/bronze1man/kmg/kmgTest"
-	"strings"
 	"testing"
 )
 
@@ -18,24 +17,10 @@ func test_init() []map[string]string {
 }
 
 func TestPagination(ot *testing.T) {
-	var page KmgPage
-	data_init := test_init()
-	data := page.CreateFromData(data_init, "http://sig.com", 1)
-	kmgTest.Equal(data.BaseUrl, "http://sig.com")
-	kmgTest.Equal(data.ItemPerPage, 1)
-	kmgTest.Equal(data.CurrentPage, 1)
-	kmgTest.Equal(data.TotalItem, 3)
-	kmgTest.Equal(page.GetTotalPage(), 3)
-	kmgTest.Ok(page.IsAfterPageActive())
-	kmgTest.Ok(!page.IsBeforePageActive())
-}
-
-func TestGetUrlWithPage(ot *testing.T) {
-	var page KmgPage
-	data_init := test_init()
-	data := page.CreateFromData(data_init, "http://sig.com?home=eqw", 1)
-	kmgTest.Ok(len(Splite(data.GetUrlWithPage(2), "?")) == 2)
-	//	fmt.Println(len(Splite(data.GetUrlWithPage(2),"?")))
+	page := &KmgPage{}
+	page.TotalItem = 10
+	page.ItemPerPage = 2
+	kmgTest.Equal(page.GetTotalPage(), 5)
 }
 
 func TestKmgPageWithDb(ot *testing.T) {
@@ -61,8 +46,4 @@ kmgSql_test_table:
 		Url:    "/?n=a",
 	})
 	kmgTest.Equal(len(pager.Data), 4)
-}
-
-func Splite(s, sep string) []string {
-	return strings.Split(s, sep)
 }

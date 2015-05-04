@@ -35,13 +35,13 @@ func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
 	return page.runSelectCommand(req.Select)
 }
 
-func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
-	page.init()
-	page.BaseUrl = baseUrl
-	page.ItemPerPage = itemPerPage
-	page.TotalItem = len(data)
-	return page
-}
+//func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
+//	page.init()
+//	page.BaseUrl = baseUrl
+//	page.ItemPerPage = itemPerPage
+//	page.TotalItem = len(data)
+//	return page
+//}
 
 func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *KmgPage {
 	if page.BaseUrl == "" {
@@ -64,7 +64,7 @@ func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *Km
 
 func (page *KmgPage) init() {
 	if page.ItemPerPage == 0 {
-		page.ItemPerPage = 10
+		page.ItemPerPage = 5
 	}
 	page.ShowPageNum = 10
 	page.PageKeyName = "page"
@@ -74,9 +74,10 @@ func (page *KmgPage) init() {
 	if page.CurrentPage < 1 {
 		page.CurrentPage = 1
 	}
-	if page.CurrentPage > page.GetTotalPage() {
-		page.CurrentPage = page.GetTotalPage()
-	}
+	//	if page.CurrentPage > page.GetTotalPage() {
+	//		page.CurrentPage = page.GetTotalPage()
+	//	}
+
 }
 
 func (page *KmgPage) GetTotalPage() int {
@@ -86,6 +87,7 @@ func (page *KmgPage) GetTotalPage() int {
 	}
 	return totalPage
 }
+
 func (page *KmgPage) HtmlRender() string {
 	return tplPager(page)
 }
@@ -157,12 +159,12 @@ type UrlParam struct {
 func (page *KmgPage) getShowPageArrayFromNum(start int, end int) []UrlParam {
 	var output []UrlParam
 	var param UrlParam
-	for i := start; i < end; i++ {
+	for i := start; i <= end; i++ {
 		url := page.GetUrlWithPage(i)
 		param.IsCurrent = (i == page.CurrentPage)
 		param.PageNum = i
 		param.Url = url
-		output[i] = param
+		output = append(output, param)
 	}
 	return output
 }

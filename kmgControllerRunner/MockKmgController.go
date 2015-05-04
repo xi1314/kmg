@@ -1,35 +1,59 @@
 package kmgControllerRunner
 
 import (
+	"bytes"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
+	"os"
+	"path/filepath"
 )
 
-func CallApiWithHttp(uri string, c *kmgHttp.Context) (output string, err error) {
+func CallApiByHttp(uri string, c *kmgHttp.Context) string {
+	return CallApiByHttpWithUploadFile(uri, c, map[string]string{})
+}
+
+func CallApiByHttpWithUploadFile(uri string, c *kmgHttp.Context, uploadFileList map[string]string) string {
 	server := httptest.NewServer(HttpHandler)
 	defer server.Close()
 	var response *http.Response
+	var err error
 	uri = server.URL + uri
 	if c.Method == "GET" {
 		response, err = http.Get(uri)
+		handleErr(err)
 	} else {
-		postData := url.Values{}
-		for key, value := range c.Request {
-			postData.Set(key, value)
+		buf := &bytes.Buffer{}
+		formDataWriter := multipart.NewWriter(buf)
+		defer formDataWriter.Close()
+		for key, fullFilePath := range uploadFileList {
+			formFilePart, err := formDataWriter.CreateFormFile(key, filepath.Base(fullFilePath))
+			handleErr(err)
+			file, err := os.Open(fullFilePath)
+			defer file.Close()
+			handleErr(err)
+			_, err = io.Copy(formFilePart, file)
+			handleErr(err)
 		}
-		response, err = http.PostForm(uri, postData)
+		for key, value := range c.Request {
+			formDataWriter.WriteField(key, value)
+		}
+		contentType := formDataWriter.FormDataContentType()
+		formDataWriter.Close()
+		response, err = http.Post(uri, contentType, buf)
+		handleErr(err)
 	}
-	if err != nil {
-		return "", err
-	}
-	_b, err := ioutil.ReadAll(response.Body)
+	respContent, err := ioutil.ReadAll(response.Body)
 	response.Body.Close()
-	content := string(_b)
+	handleErr(err)
+	return string(respContent)
+}
+
+func handleErr(err error) {
 	if err != nil {
-		return "", err
+		panic(err)
 	}
-	return content, nil
 }

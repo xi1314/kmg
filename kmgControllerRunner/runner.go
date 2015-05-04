@@ -44,6 +44,10 @@ func HttpHandlerFunc(w http.ResponseWriter, req *http.Request) {
 	ctx.WriteToResponseWriter(w, req)
 }
 
+func ContextHandle(ctx *kmgHttp.Context) {
+	HttpProcessorList[0](ctx, HttpProcessorList[1:])
+}
+
 type HttpProcessor func(ctx *kmgHttp.Context, processorList []HttpProcessor)
 
 var HttpProcessorList = []HttpProcessor{
