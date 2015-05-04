@@ -33,3 +33,7 @@ func PortFromAddrString(addr string) (int, error) {
 	}
 	return portI, nil
 }
+
+func JoinHostPortInt(host string, port int) string {
+	return net.JoinHostPort(host, strconv.Itoa(port))
+}

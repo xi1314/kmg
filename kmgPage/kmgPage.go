@@ -86,6 +86,9 @@ func (page *KmgPage) GetTotalPage() int {
 	}
 	return totalPage
 }
+func (page *KmgPage) HtmlRender() string {
+	return tplPager(page)
+}
 
 // 一共有多少项
 func (page *KmgPage) GetTotalItem() int {

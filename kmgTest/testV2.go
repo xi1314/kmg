@@ -2,6 +2,8 @@ package kmgTest
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgReflect"
+	"reflect"
 )
 
 func Ok(expectTrue bool) {
@@ -45,4 +47,18 @@ func valueDetail(value interface{}) string {
 
 type tStringer interface {
 	String() string
+}
+
+func isEqual(a interface{}, b interface{}) bool {
+	//不要加a==b这种快速通道,会出现 panic comparing uncomparable type []models.RoleId 的问题
+	if reflect.DeepEqual(a, b) {
+		return true
+	}
+	rva := reflect.ValueOf(a)
+	rvb := reflect.ValueOf(b)
+	//every nil is same stuff...
+	if kmgReflect.IsNil(rva) && kmgReflect.IsNil(rvb) {
+		return true
+	}
+	return false
 }
