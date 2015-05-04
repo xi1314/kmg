@@ -141,7 +141,7 @@ func MustDeleteFileOrDirectory(path string) {
 func CopyFile(src, dst string) (err error) {
 	in, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("[CopyFile] openSrc err[%s]", err.Error())
+		return err
 	}
 	defer in.Close()
 	out, err := os.Create(dst)
@@ -175,6 +175,18 @@ func CopyFile(src, dst string) (err error) {
 
 func MustCopyFile(src, dst string) {
 	err := CopyFile(src, dst)
+	if err != nil {
+		panic(err)
+	}
+}
+
+//拷贝文件,把文件从src拷贝到dst
+// 如果源文件不存在,不报错
+func MustCopyFileIgnoreNotExist(src, dst string) {
+	err := CopyFile(src, dst)
+	if os.IsNotExist(err) {
+		return
+	}
 	if err != nil {
 		panic(err)
 	}

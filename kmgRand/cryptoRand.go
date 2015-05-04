@@ -38,6 +38,12 @@ func MustCryptoRandToReadableAlphaNum(length int) string {
 	return MustCryptoRandFromByteList(length, realableAlphaNumMap)
 }
 
+const numMap = "0123456789"
+
+func MustCryptoRandToNum(length int) string {
+	return MustCryptoRandFromByteList(length, numMap)
+}
+
 func MustCryptoRandFromByteList(length int, list string) string {
 	var bytes = make([]byte, 2*length)
 	var outBytes = make([]byte, length)
