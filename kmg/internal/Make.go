@@ -31,12 +31,14 @@ func makeCmd() {
 		return
 	}
 	os.Chdir(kmgc.ProjectPath)
-	kmgFile.MustMkdirAll("log/run")
+	logDir := filepath.Join(kmgc.LogPath, "run")
+	kmgFile.MustMkdirAll(logDir)
 	args := strings.Split(kmgc.Make, " ")
-	thisLogFilePath := "log/run/" + time.Now().Format(kmgTime.FormatFileName) + ".log"
+	thisLogFilePath := filepath.Join(logDir, time.Now().Format(kmgTime.FormatFileName)+".log")
 	kmgFile.MustWriteFile(thisLogFilePath, []byte{})
-	kmgFile.MustDeleteFile("log/run/last.log")
-	kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " log/run/last.log")
+	lastLogPath := filepath.Join(logDir, "last.log")
+	kmgFile.MustDeleteFile(lastLogPath)
+	kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " " + lastLogPath)
 	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
 		SetDir(kmgc.ProjectPath).
 		RunAndTeeOutputToFile(thisLogFilePath)
