@@ -4,10 +4,11 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
-	"os"
-	"strings"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTime"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -32,8 +33,12 @@ func makeCmd() {
 	os.Chdir(kmgc.ProjectPath)
 	kmgFile.MustMkdirAll("log/run")
 	args := strings.Split(kmgc.Make, " ")
+	thisLogFilePath := "log/run/" + time.Now().Format(kmgTime.FormatFileName) + ".log"
+	kmgFile.MustWriteFile(thisLogFilePath, []byte{})
+	kmgFile.MustDeleteFile("log/run/last.log")
+	kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " log/run/last.log")
 	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
 		SetDir(kmgc.ProjectPath).
-		RunAndTeeOutputToFile("log/run/" + time.Now().Format(kmgTime.FormatFileName) + ".log")
+		RunAndTeeOutputToFile(thisLogFilePath)
 	kmgConsole.ExitOnErr(err)
 }

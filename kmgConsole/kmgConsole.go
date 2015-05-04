@@ -18,25 +18,26 @@ type Command struct {
 	Hidden bool   //隐藏这个命令,使其在帮助列表里面不显示
 }
 
-var actionMap = map[string]Command{
-	"version": Command{
-		Name:   "Version",
-		Runner: version,
-	},
+//一组命令
+type CommandGroup struct {
+	commandMap map[string]Command
 }
-var exitActionList = []func(){}
 
-func Main() {
+func NewCommandGroup() *CommandGroup {
+	return &CommandGroup{commandMap: map[string]Command{}}
+}
+
+func (g *CommandGroup) Main() {
 	actionName := ""
 	if len(os.Args) >= 2 {
 		actionName = os.Args[1]
 	}
 	lowerActionName := strings.ToLower(actionName)
 
-	action, exist := actionMap[lowerActionName]
+	action, exist := g.commandMap[lowerActionName]
 	if !exist {
 		fmt.Println("command [" + actionName + "] not found.(case insensitive)")
-		help()
+		g.Help()
 		return
 	}
 
@@ -67,41 +68,29 @@ func Main() {
 	}
 }
 
-func AddAction(action Command) {
+/*
+var actionMap = map[string]Command{
+	"version": Command{
+		Name:   "Version",
+		Runner: version,
+	},
+}
+*/
+
+func (g *CommandGroup) AddCommand(action Command) *CommandGroup {
 	name := strings.ToLower(action.Name)
-	_, exist := actionMap[name]
+	_, exist := g.commandMap[name]
 	if exist {
 		panic("command " + action.Name + " already defined.(case insensitive)")
 	}
-	actionMap[name] = action
+	g.commandMap[name] = action
+	return g
 }
 
-//如果你使用了这个命令,主线程不会退出,而是会等到用户或者系统发送退出命令才会退出.
-//使用命令调用时,注册退出动作,
-//如果你使用了这个东西,请不要再使用WaitForExit了
-//TODO 这个地方过于不直观
-func AddExitAction(f func()) {
-	exitActionList = append(exitActionList, f)
-}
-
-//调用这个函数来保证使用AddExitAction方法来注册进程退出请求.
-// 使用这个来保证kmgConsole.Main一定会等待进程结束
-func UseExitActionRegister() {
-	AddExitAction(func() {})
-}
-
-//avoid initialization loop
-func init() {
-	AddAction(Command{
-		Name:   "Help",
-		Runner: help,
-	})
-}
-
-func help() {
+func (g *CommandGroup) Help() {
 	fmt.Println("Usage: ")
-	actionList := make([]Command, 0, len(actionMap))
-	for _, command := range actionMap {
+	actionList := make([]Command, 0, len(g.commandMap))
+	for _, command := range g.commandMap {
 		actionList = append(actionList, command)
 	}
 	sort.Sort(tActionList(actionList))
@@ -111,6 +100,25 @@ func help() {
 		}
 		fmt.Println("\t", actionList[i].Name)
 	}
+}
+
+var DefaultCommandGroup = NewCommandGroup()
+
+func Main() {
+	DefaultCommandGroup.AddCommand(Command{
+		Name:   "version",
+		Runner: version,
+	})
+	DefaultCommandGroup.AddCommand(Command{
+		Name:   "help",
+		Runner: DefaultCommandGroup.Help,
+	})
+	DefaultCommandGroup.Main()
+}
+
+func AddCommand(action Command) *CommandGroup {
+	DefaultCommandGroup.AddCommand(action)
+	return DefaultCommandGroup
 }
 
 func version() {

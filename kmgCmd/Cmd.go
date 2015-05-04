@@ -3,10 +3,10 @@ package kmgCmd
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgConsole"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
-	"io"
 )
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
@@ -56,7 +56,7 @@ func (c *Cmd) PrintCmdLine() {
 }
 
 func (c *Cmd) FprintCmdLine(w io.Writer) {
-	fmt.Fprintln(w,">", strings.Join(c.cmd.Args, " "))
+	fmt.Fprintln(w, ">", strings.Join(c.cmd.Args, " "))
 }
 
 //回显命令,并且运行,并且和标准输入输出接起来
@@ -86,12 +86,12 @@ func (c *Cmd) RunAndReturnOutput() (b []byte, err error) {
 	return b, err
 }
 
-func (c *Cmd) RunAndTeeOutputToFile(path string)(err error){
+func (c *Cmd) RunAndTeeOutputToFile(path string) (err error) {
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(0777))
-	if err!=nil {
+	if err != nil {
 		return err
 	}
-	w:=io.MultiWriter(f,os.Stdout)
+	w := io.MultiWriter(f, os.Stdout)
 	c.FprintCmdLine(w)
 	c.cmd.Stdout = w
 	c.cmd.Stderr = w
