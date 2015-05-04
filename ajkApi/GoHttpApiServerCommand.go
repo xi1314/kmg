@@ -7,8 +7,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/bronze1man/kmg/console"
 	"github.com/bronze1man/kmg/kmgConfig/defaultParameter"
+	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/sessionStore"
 	"github.com/bronze1man/kmg/sessionStore/memcacheProvider"
@@ -30,16 +30,12 @@ type GoHttpApiServerCommand struct {
 	tcpListenAddr string
 }
 
-func (command *GoHttpApiServerCommand) GetNameConfig() *console.NameConfig {
-	return &console.NameConfig{Name: "GoHttpApiServer", Short: `start a golang http api server `}
-}
-func (command *GoHttpApiServerCommand) ConfigFlagSet(f *flag.FlagSet) {
-	f.StringVar(&command.http, "http", ":18080", "listen http port of the server")
-	f.StringVar(&command.https, "https", "", "listen https port of the server")
-	f.BoolVar(&command.randPort, "randPort", false, "if can not listen on default port ,will listen on random port")
-}
-
-func (command *GoHttpApiServerCommand) Execute(context *console.Context) error {
+func RunGoHttpApiServerCmd() {
+	command := &GoHttpApiServerCommand{}
+	flag.StringVar(&command.http, "http", ":18080", "listen http port of the server")
+	flag.StringVar(&command.https, "https", "", "listen https port of the server")
+	flag.BoolVar(&command.randPort, "randPort", false, "if can not listen on default port ,will listen on random port")
+	flag.Parse()
 	if command.https != "" {
 		command.isHttps = true
 		command.tcpListenAddr = command.https
@@ -67,18 +63,17 @@ func (command *GoHttpApiServerCommand) Execute(context *console.Context) error {
 		http.Handle(handlerConfig.Path, handlerConfig.Handler)
 	}
 	l, err := command.listen()
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(context.Stdout, "Listen on %s\n", l.Addr().String())
+	kmgConsole.ExitOnErr(err)
+	fmt.Printf("Listen on %s\n", l.Addr().String())
 	if command.isHttps {
 		tlsConfig, err := kmgCrypto.CreateTlsConfig()
 		if err != nil {
-			return fmt.Errorf("fail at kmgTls.CreateTlsConfig,error:%s", err.Error())
+			kmgConsole.ExitOnErr(fmt.Errorf("fail at kmgTls.CreateTlsConfig,error:%s", err.Error()))
 		}
 		l = tls.NewListener(l, tlsConfig)
 	}
-	return http.Serve(l, nil)
+	err = http.Serve(l, nil)
+	kmgConsole.ExitOnErr(err)
 }
 
 //first try addr,if err happened try random address.

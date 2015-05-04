@@ -5,9 +5,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
-	"fmt"
-	"io"
-	"os"
 )
 
 func Sha256Hex(data []byte) string {

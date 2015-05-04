@@ -7,6 +7,7 @@ import (
 
 	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
+	"github.com/bronze1man/kmg/kmgFile"
 	"sync"
 )
 
@@ -23,9 +24,9 @@ type Env struct {
 	TmpPath string
 	//default to $AppPath/log
 	LogPath string
-	//should come from environment
+	//should come from environment 此参数可以配置
 	GOROOT string
-	//should come from dir of ".kmg.yml"
+	//should come from dir of ".kmg.yml" 此参数不能配置
 	ProjectPath string
 	//make command,使用kmg make可以运行这个命令
 	Make string
@@ -43,10 +44,7 @@ func (context *Env) GOPATHToString() string {
 }
 func (context *Env) Init() {
 	for i, p := range context.GOPATH {
-		if filepath.IsAbs(p) {
-			continue
-		}
-		context.GOPATH[i] = filepath.Join(context.ProjectPath, p)
+		context.GOPATH[i] = kmgFile.FullPathOnPath(context.ProjectPath, p)
 	}
 	if context.GOROOT == "" {
 		context.GOROOT = os.Getenv("GOROOT")
@@ -54,15 +52,19 @@ func (context *Env) Init() {
 	if context.DataPath == "" {
 		context.DataPath = filepath.Join(context.ProjectPath, "data")
 	}
+	context.DataPath = kmgFile.FullPathOnPath(context.ProjectPath, context.DataPath)
 	if context.TmpPath == "" {
 		context.TmpPath = filepath.Join(context.ProjectPath, "tmp")
 	}
+	context.TmpPath = kmgFile.FullPathOnPath(context.ProjectPath, context.TmpPath)
 	if context.ConfigPath == "" {
 		context.ConfigPath = filepath.Join(context.ProjectPath, "config")
 	}
+	context.ConfigPath = kmgFile.FullPathOnPath(context.ProjectPath, context.ConfigPath)
 	if context.LogPath == "" {
 		context.LogPath = filepath.Join(context.ProjectPath, "log")
 	}
+	context.LogPath = kmgFile.FullPathOnPath(context.ProjectPath, context.LogPath)
 	if len(context.GOPATH) == 0 {
 		context.GOPATH = []string{context.ProjectPath}
 	}
@@ -73,6 +75,7 @@ func (context *Env) Init() {
 func (context *Env) PathInProject(relPath string) string {
 	return filepath.Join(context.ProjectPath, relPath)
 }
+
 func FindFromPath(p string) (context *Env, err error) {
 	p, err = filepath.Abs(p)
 	if err != nil {

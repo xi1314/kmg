@@ -36,17 +36,25 @@ func MustSetParameterToUrl(urls string, key string, value string) (urlout string
 	return u
 }
 
-func MustSetParameterMapToUrl(urls string, row map[string]string) (urlout string) {
+func SetParameterMapToUrl(urls string, row map[string]string) (urlout string, err error) {
 	u, err := url.Parse(urls)
 	if err != nil {
-		panic(err)
+		return
 	}
 	q := u.Query()
 	for key, value := range row {
 		q.Set(key, value)
 	}
 	u.RawQuery = q.Encode()
-	return u.String()
+	return u.String(), nil
+}
+
+func MustSetParameterMapToUrl(urls string, row map[string]string) (urlout string) {
+	u, err := SetParameterMapToUrl(urls, row)
+	if err != nil {
+		panic(err)
+	}
+	return u
 }
 
 func GetDomainName(url string) (domainName string, protocol string) {

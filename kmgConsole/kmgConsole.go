@@ -9,7 +9,7 @@ import (
 	//	"github.com/bronze1man/kmg/kmgDebug"
 )
 
-var VERSION = "1.0"
+var VERSION = ""
 
 type Command struct {
 	Name   string //名称,不区分大小写
@@ -102,13 +102,22 @@ func (g *CommandGroup) Help() {
 	}
 }
 
+func (g *CommandGroup) AddCommandWithName(name string, runner func()) *CommandGroup {
+	return g.AddCommand(Command{
+		Name:   name,
+		Runner: runner,
+	})
+}
+
 var DefaultCommandGroup = NewCommandGroup()
 
 func Main() {
-	DefaultCommandGroup.AddCommand(Command{
-		Name:   "version",
-		Runner: version,
-	})
+	if VERSION != "" {
+		DefaultCommandGroup.AddCommand(Command{
+			Name:   "version",
+			Runner: version,
+		})
+	}
 	DefaultCommandGroup.AddCommand(Command{
 		Name:   "help",
 		Runner: DefaultCommandGroup.Help,
@@ -117,8 +126,11 @@ func Main() {
 }
 
 func AddCommand(action Command) *CommandGroup {
-	DefaultCommandGroup.AddCommand(action)
-	return DefaultCommandGroup
+	return DefaultCommandGroup.AddCommand(action)
+}
+
+func AddCommandWithName(name string, runner func()) *CommandGroup {
+	return DefaultCommandGroup.AddCommandWithName(name, runner)
 }
 
 func version() {
