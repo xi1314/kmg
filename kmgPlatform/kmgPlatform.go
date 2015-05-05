@@ -15,8 +15,18 @@ func (p Platform) String() string {
 	return p.Os + "-" + p.Arch
 }
 
+func (p Platform) HasBash() bool {
+	switch p.Os {
+	case "linux", "darwin":
+		return true
+	default:
+		return false
+	}
+}
+
 var LinuxAmd64 = Platform{Os: "linux", Arch: "amd64"}
 var DarwinAmd64 = Platform{Os: "darwin", Arch: "amd64"}
+var WindowsAmd64 = Platform{Os: "windows", Arch: "amd64"}
 
 //编译这个软件的平台
 func GetCompiledPlatform() Platform {

@@ -57,6 +57,7 @@ func MustSetParameterMapToUrl(urls string, row map[string]string) (urlout string
 	return u
 }
 
+// @deprecated
 func GetDomainName(url string) (domainName string, protocol string) {
 	protocolList := []string{
 		"http://",

@@ -78,6 +78,9 @@ func (context *Env) PathInProject(relPath string) string {
 func (context *Env) PathInConfig(relPath string) string {
 	return filepath.Join(context.ConfigPath, relPath)
 }
+func (context *Env) PathInTmp(relPath string) string {
+	return filepath.Join(context.TmpPath, relPath)
+}
 
 func FindFromPath(p string) (context *Env, err error) {
 	p, err = filepath.Abs(p)

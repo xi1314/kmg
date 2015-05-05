@@ -39,3 +39,18 @@ func FlateMustUnCompress(inb []byte) (outb []byte) {
 	}
 	return outb
 }
+
+func FlateUnCompress(inb []byte) (outb []byte, err error) {
+	buf := bytes.NewBuffer(inb)
+	reader := flate.NewReader(buf)
+	outb, err = ioutil.ReadAll(reader)
+	if err != nil {
+		reader.Close()
+		return nil, err
+	}
+	err = reader.Close()
+	if err != nil {
+		return
+	}
+	return outb, nil
+}

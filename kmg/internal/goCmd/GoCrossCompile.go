@@ -28,6 +28,7 @@ func runGoCrossCompile() {
 	command := GoCrossCompile{}
 	flag.StringVar(&command.outputPath, "o", "", "output file dir(file name come from source file name),default to $project_root/bin")
 	flag.StringVar(&command.version, "v", "", "version string in output file name")
+	flag.StringVar(&command.platform, "platform", "", "platform(default use .kmg.yml config)")
 	flag.Parse()
 
 	if len(os.Args) <= 1 {
@@ -41,7 +42,13 @@ func runGoCrossCompile() {
 	if command.outputPath == "" {
 		command.outputPath = filepath.Join(kmgc.ProjectPath, "bin")
 	}
-	for _, target := range kmgc.CrossCompileTarget {
+	targetList := []kmgConfig.CompileTarget{}
+	if command.platform == "" {
+		targetList = kmgc.CrossCompileTarget
+	} else {
+		targetList = []kmgConfig.CompileTarget{kmgConfig.CompileTarget(command.platform)}
+	}
+	for _, target := range targetList {
 		fileName := ""
 		if command.version == "" {
 			fileName = targetName + "_" + target.GetGOOS() + "_" + target.GetGOARCH()
@@ -66,4 +73,5 @@ func runGoCrossCompile() {
 type GoCrossCompile struct {
 	outputPath string
 	version    string
+	platform   string
 }

@@ -6,7 +6,9 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	//"strings"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCompress"
 	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
 	"os"
 )
@@ -48,13 +50,21 @@ func installCmd() {
 	* 如果上一种情况发生,当前bash不能执行go version,因为当前bash有路径查询缓存(暂时无解了..)
 */
 func installGolang() {
+	p := kmgPlatform.GetCompiledPlatform()
+	if p.Compatible(kmgPlatform.WindowsAmd64) {
+		contentB, err := kmgHttp.UrlGetContent("http://kmgtools.qiniudn.com/v1/go1.4.2.windows-amd64.zip")
+		kmgConsole.ExitOnErr(err)
+		err = kmgCompress.ZipUncompressFromBytesToDir(contentB, `c:\golang`)
+		kmgConsole.ExitOnErr(err)
+		kmgFile.CopyFile(`c:\golang\bin\go.exe`, `c:\windows\system32\go.exe`)
+		return
+	}
 	kmgFile.MustChangeToTmpPath()
 	if !kmgCmd.MustIsRoot() {
 		fmt.Println("you need to be root to install golang")
 		return
 	}
 
-	p := kmgPlatform.GetCompiledPlatform()
 	packageName := ""
 
 	switch {
