@@ -66,3 +66,31 @@ func ComputeHashFromFile(filename string) (etag string, err error) {
 	etag = base64.URLEncoding.EncodeToString(sha1Buf)
 	return
 }
+
+func ComputeHashFromBytes(b []byte) (etag string) {
+	f := bytes.NewReader(b)
+	blockCnt := hashBlockCount(int64(len(b)))
+	sha1Buf := make([]byte, 0, 21)
+
+	var err error
+	if blockCnt <= 1 { // file size <= 4M
+		sha1Buf = append(sha1Buf, 0x16)
+		sha1Buf, err = calSha1(sha1Buf, f)
+		if err != nil {
+			panic(err)
+		}
+	} else { // file size > 4M
+		sha1Buf = append(sha1Buf, 0x96)
+		sha1BlockBuf := make([]byte, 0, blockCnt*20)
+		for i := 0; i < blockCnt; i++ {
+			body := io.LimitReader(f, hash_BLOCK_SIZE)
+			sha1BlockBuf, err = calSha1(sha1BlockBuf, body)
+			if err != nil {
+				panic(err)
+			}
+		}
+		sha1Buf, _ = calSha1(sha1Buf, bytes.NewReader(sha1BlockBuf))
+	}
+	etag = base64.URLEncoding.EncodeToString(sha1Buf)
+	return
+}

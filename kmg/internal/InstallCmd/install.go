@@ -54,9 +54,14 @@ func installGolang() {
 	if p.Compatible(kmgPlatform.WindowsAmd64) {
 		contentB, err := kmgHttp.UrlGetContent("http://kmgtools.qiniudn.com/v1/go1.4.2.windows-amd64.zip")
 		kmgConsole.ExitOnErr(err)
-		err = kmgCompress.ZipUncompressFromBytesToDir(contentB, `c:\golang`)
+		err = kmgCompress.ZipUncompressFromBytesToDir(contentB, `c:\go`, "go")
 		kmgConsole.ExitOnErr(err)
-		kmgFile.CopyFile(`c:\golang\bin\go.exe`, `c:\windows\system32\go.exe`)
+		err = kmgFile.CopyFile(`c:\go\bin\go.exe`, `c:\windows\system32\go.exe`)
+		kmgConsole.ExitOnErr(err)
+		err = kmgFile.CopyFile(`c:\go\bin\godoc.exe`, `c:\windows\system32\godoc.exe`)
+		kmgConsole.ExitOnErr(err)
+		err = kmgFile.CopyFile(`c:\go\bin\gofmt.exe`, `c:\windows\system32\gofmt.exe`)
+		kmgConsole.ExitOnErr(err)
 		return
 	}
 	kmgFile.MustChangeToTmpPath()

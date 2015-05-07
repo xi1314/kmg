@@ -9,6 +9,10 @@ package kmgCmd
 传入一个字符串是命令, 不允许参数中包含空格,如果命令有复杂参数请使用 RunOsStdioCmd
 不支持bash语法, 不能在里面使用bash的各种连接符之类的.
 只能写一条命令
+
+不支持下列用法:
+	ls 'a b' //不允许参数中包含空格.
+	echo 1 > /dev/null //不支持bash语法,会输出 1 > /dev/null
 */
 func Run(cmd string) (err error) {
 	return CmdString(cmd).Run()

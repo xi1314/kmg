@@ -50,6 +50,8 @@ type stringWrapError string
 func (err stringWrapError) Error() string {
 	return string(err)
 }
+
+// @deprecated
 func New(s string) error {
 	return stringWrapError(s)
 }

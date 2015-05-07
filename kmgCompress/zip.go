@@ -8,9 +8,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func ZipUncompressFromBytesToDir(zipB []byte, dir string) (err error) {
+func ZipUncompressFromBytesToDir(zipB []byte, dir string, trimPrefix string) (err error) {
 	buf := bytes.NewReader(zipB)
 	reader, err := zip.NewReader(buf, int64(len(zipB)))
 	if err != nil {
@@ -18,7 +19,8 @@ func ZipUncompressFromBytesToDir(zipB []byte, dir string) (err error) {
 		return
 	}
 	for _, file := range reader.File {
-		fullPath := filepath.Join(dir, file.Name)
+
+		fullPath := filepath.Join(dir, strings.TrimPrefix(file.Name, trimPrefix))
 		if file.FileInfo().IsDir() {
 			err = kmgFile.Mkdir(fullPath)
 			if err != nil {

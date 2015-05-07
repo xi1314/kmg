@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func CryptoRandBytes(length int) []byte {
+func MustCryptoRandBytes(length int) []byte {
 	buf := make([]byte, length)
 	_, err := rand.Read(buf)
 	if err != nil {
