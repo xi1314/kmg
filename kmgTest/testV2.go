@@ -2,6 +2,7 @@ package kmgTest
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgDebug"
 	"github.com/bronze1man/kmg/kmgReflect"
 	"reflect"
 )
@@ -17,6 +18,14 @@ func Equal(get interface{}, expect interface{}) {
 		return
 	}
 	msg := fmt.Sprintf("\tget1: %s\n\texpect2: %s", valueDetail(get), valueDetail(expect))
+	panic(msg)
+}
+
+func EqualMsg(get interface{}, expect interface{}, objList ...interface{}) {
+	if isEqual(expect, get) {
+		return
+	}
+	msg := fmt.Sprintf("\tget1: %s\n\texpect2: %s\n%s", valueDetail(get), valueDetail(expect), kmgDebug.Sprintln(objList...))
 	panic(msg)
 }
 
