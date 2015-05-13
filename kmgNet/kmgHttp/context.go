@@ -1,12 +1,13 @@
 package kmgHttp
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgRand"
 	"github.com/bronze1man/kmg/kmgSession"
+	"io"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -15,17 +16,23 @@ import (
 
 //该对象上的方法不应该被并发调用.
 type Context struct {
-	Method       string
-	RequestUrl   string
-	Request      map[string]string
-	RequestFile  map[string]*multipart.FileHeader
-	Session      *kmgSession.Session
-	Response     string
-	RedirectUrl  string
-	ResponseCode int
-	Req          *http.Request
-	W            http.ResponseWriter
+	Method           string
+	RequestUrl       string
+	Request          map[string]string
+	RequestFile      map[string]*multipart.FileHeader
+	Session          *kmgSession.Session
+	Response         string
+	ResponseFileName string
+	ResponseFile     *bytes.Buffer
+	RedirectUrl      string
+	ResponseCode     int
+	Req              *http.Request
+	W                http.ResponseWriter
 }
+
+const (
+	defaultMaxMemory = 32 << 20 // 32 MB
+)
 
 func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	context := &Context{
@@ -55,7 +62,7 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	if contentType != "multipart/form-data" {
 		return context
 	}
-	err = req.ParseMultipartForm(kmgConfig.DefaultEnv().HttpRequestMaxMemory)
+	err = req.ParseMultipartForm(defaultMaxMemory)
 	if err != nil {
 		panic(err)
 	}
@@ -205,6 +212,11 @@ func (c *Context) WriteString(s string) {
 	c.Response += s
 }
 
+func (c *Context) WriteAttachmentFile(file *bytes.Buffer, fileName string) {
+	c.ResponseFile = file
+	c.ResponseFileName = fileName
+}
+
 func (c *Context) WriteJson(obj interface{}) {
 	json, err := json.Marshal(obj)
 	if err != nil {
@@ -218,8 +230,20 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 		http.Redirect(w, req, c.RedirectUrl, c.ResponseCode)
 		return
 	}
+	if c.Response != "" {
+		w.WriteHeader(c.ResponseCode)
+		w.Write([]byte(c.Response))
+		return
+	}
+	if c.ResponseFile == nil {
+		return
+	}
+	w.Header().Set("Content-Disposition", "attachment;filename="+c.ResponseFileName)
 	w.WriteHeader(c.ResponseCode)
-	w.Write([]byte(c.Response))
+	_, err := io.Copy(w, c.ResponseFile)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (c *Context) CurrentUrl() string {

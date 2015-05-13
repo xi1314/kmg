@@ -38,6 +38,7 @@ func CallApiByHttpWithUploadFile(uri string, c *kmgHttp.Context, uploadFileList 
 			_, err = io.Copy(formFilePart, file)
 			handleErr(err)
 		}
+
 		for key, value := range c.Request {
 			formDataWriter.WriteField(key, value)
 		}

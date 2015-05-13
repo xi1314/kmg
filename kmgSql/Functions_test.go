@@ -6,6 +6,7 @@ import (
 )
 
 func TestConnectToDb(t *testing.T) {
+	SetDefaultDbConfig(MustGetTestConfig().Db)
 	db := GetDb()
 	err := db.Ping()
 	Equal(err, nil)

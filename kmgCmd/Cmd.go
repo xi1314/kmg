@@ -2,7 +2,6 @@ package kmgCmd
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
 	"io"
 	"os"
 	"os/exec"
@@ -68,9 +67,15 @@ func (c *Cmd) Run() error {
 	return c.cmd.Run()
 }
 
+//如果代理运行失败,当前进程会退出
 func (c *Cmd) ProxyRun() {
 	err := c.Run()
-	kmgConsole.ExitOnErr(err)
+	if err != nil {
+		//不使用 kmgConsole.ExitOnErr ,以避免依赖循环
+		os.Stderr.Write([]byte(err.Error()))
+		os.Exit(2)
+		return
+	}
 }
 
 //get the os/exec.Cmd

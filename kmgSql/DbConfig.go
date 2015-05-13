@@ -19,7 +19,7 @@ func (config *DbConfig) GetDsn() string {
 		config.DbName)
 }
 
-func (config *DbConfig) GetDsnWithoutDbname() string {
+func (config *DbConfig) GetDsnWithoutDbName() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:3306)/?charset=utf8&timeout=5s",
 		config.Username,
 		config.Password,
