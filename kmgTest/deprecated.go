@@ -53,6 +53,8 @@ func (tools *TestTools) Equal(get interface{}, expect interface{}) {
 	}
 	tools.assertFail(msg, 2)
 }
+
+// @deprecated
 func (tools *TestTools) EqualMsg(get interface{}, expect interface{}, format string, args ...interface{}) {
 	if isEqual(expect, get) {
 		return
