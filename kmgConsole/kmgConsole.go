@@ -11,6 +11,8 @@ import (
 
 var VERSION = ""
 
+//保证在Command里面第一个是这个Command传入的名字,第二个及后面的是这个Command传入参数.
+// 保证 os.Args 长度至少1个.
 type Command struct {
 	Name   string //名称,不区分大小写
 	Desc   string //暂时没有用到

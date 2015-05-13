@@ -1,4 +1,4 @@
-package internal
+package SubCommand
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
@@ -20,10 +20,24 @@ func makeCmd() {
 		kmgConsole.ExitOnStderr("Please defined a Make command in .kmg.yml file to use kmg make")
 		return
 	}
+	if len(os.Args) >= 2 && kmgc.MakeSubCommandMap != nil {
+		for cmdName, cmdString := range kmgc.MakeSubCommandMap {
+			if strings.EqualFold(cmdName, os.Args[1]) {
+				args := strings.Split(cmdString, " ")
+				os.Args = os.Args[1:]
+				runCommand(kmgc, args)
+				return
+			}
+		}
+	}
+	args := strings.Split(kmgc.Make, " ")
+	runCommand(kmgc, args)
+}
+
+func runCommand(kmgc *kmgConfig.Env, args []string) {
 	os.Chdir(kmgc.ProjectPath)
 	logDir := filepath.Join(kmgc.LogPath, "run")
 	kmgFile.MustMkdirAll(logDir)
-	args := strings.Split(kmgc.Make, " ")
 	thisLogFilePath := filepath.Join(logDir, time.Now().Format(kmgTime.FormatFileName)+".log")
 	kmgFile.MustWriteFile(thisLogFilePath, []byte{})
 	if !kmgPlatform.GetCompiledPlatform().Compatible(kmgPlatform.WindowsAmd64) {
@@ -31,7 +45,7 @@ func makeCmd() {
 		kmgFile.MustDeleteFile(lastLogPath)
 		kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " " + lastLogPath)
 	}
-	err = kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
+	err := kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
 		SetDir(kmgc.ProjectPath).
 		RunAndTeeOutputToFile(thisLogFilePath)
 	kmgConsole.ExitOnErr(err)

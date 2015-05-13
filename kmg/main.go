@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/bronze1man/kmg/kmg/internal"
-	"github.com/bronze1man/kmg/kmg/internal/InstallCmd"
-	"github.com/bronze1man/kmg/kmg/internal/gitCmd"
-	"github.com/bronze1man/kmg/kmg/internal/goCmd"
-	"github.com/bronze1man/kmg/kmg/internal/serviceCmd"
+	"github.com/bronze1man/kmg/kmg/SubCommand"
+	"github.com/bronze1man/kmg/kmg/SubCommand/InstallCmd"
+	"github.com/bronze1man/kmg/kmg/SubCommand/gitCmd"
+	"github.com/bronze1man/kmg/kmg/SubCommand/goCmd"
+	"github.com/bronze1man/kmg/kmg/SubCommand/serviceCmd"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
@@ -13,14 +13,14 @@ import (
 // kmg make upload
 func main() {
 	kmgHttp.AddCommandList()
-	internal.AddCommandList()
+	SubCommand.AddCommandList()
 	InstallCmd.AddCommandList()
 	gitCmd.AddCommandList()
 	goCmd.AddCommandList()
 	serviceCmd.AddCommandList()
 
-	internal.AddSelfInstallCommand()
-	internal.AddSelfUpdate()
+	SubCommand.AddSelfInstallCommand()
+	SubCommand.AddSelfUpdate()
 
 	kmgConsole.Main()
 }

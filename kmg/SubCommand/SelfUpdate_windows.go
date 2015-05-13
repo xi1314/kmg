@@ -1,4 +1,4 @@
-package internal
+package SubCommand
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"

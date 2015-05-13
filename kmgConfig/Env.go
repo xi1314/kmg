@@ -28,8 +28,11 @@ type Env struct {
 	GOROOT string
 	//the dir of ".kmg.yml" 此参数不能配置
 	ProjectPath string
-	//make command,使用kmg make可以运行这个命令
+	//make command,使用kmg make可以运行这个命令 kmg make 的默认命令
 	Make string
+	//make subCommand的表,注册在这个里面的子命令会覆盖Make里面配置的命令,主要用于make时,方便解决依赖报错问题.
+	// 注意: 可能是nil
+	MakeSubCommandMap map[string]string
 	//当前是否是测试
 	IsTest bool
 }
