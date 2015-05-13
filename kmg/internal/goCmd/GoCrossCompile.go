@@ -1,4 +1,4 @@
-package goCommand
+package goCmd
 
 import (
 	"flag"
@@ -11,14 +11,6 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"os"
 )
-
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GoCrossCompile",
-		Desc:   "cross compile target in current project",
-		Runner: runGoCrossCompile,
-	})
-}
 
 /*
 GoCrossComplie [gofile]

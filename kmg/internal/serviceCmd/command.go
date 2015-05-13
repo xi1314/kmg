@@ -15,7 +15,7 @@ import (
 //TODO 完整描述使用过程
 //TODO 在osx和linux上达到一致的行为
 
-func init() {
+func AddCommandList() {
 	cmdGroup := kmgConsole.NewCommandGroup().
 		AddCommand(kmgConsole.Command{
 		Name:   "setAndRestart",

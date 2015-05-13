@@ -1,4 +1,4 @@
-package goCommand
+package goCmd
 
 import (
 	"fmt"
@@ -11,14 +11,6 @@ import (
 	"runtime"
 	"strings"
 )
-
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GoCrossCompileInit",
-		Desc:   "cross compile init target in current project",
-		Runner: runGoCrossCompileInit,
-	})
-}
 
 func runGoCrossCompileInit() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()

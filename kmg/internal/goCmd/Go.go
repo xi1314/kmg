@@ -1,4 +1,4 @@
-package goCommand
+package goCmd
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
@@ -6,14 +6,6 @@ import (
 	"github.com/bronze1man/kmg/kmgConsole"
 	"os"
 )
-
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "Go",
-		Desc:   "run go command in current project",
-		Runner: GoCommand,
-	})
-}
 
 // run go command in current project
 // 1.go build -i github.com/xxx/xxx use to get fastest speed of build.

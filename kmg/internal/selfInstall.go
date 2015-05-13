@@ -5,7 +5,7 @@ import (
 	"github.com/bronze1man/kmg/kmgConsole"
 )
 
-func init() {
+func AddSelfInstallCommand() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "_SelfInstall",
 		Desc:   "install kmg in this computer(should call in install bash)",

@@ -1,4 +1,4 @@
-package goCommand
+package goCmd
 
 import (
 	"fmt"
@@ -13,14 +13,6 @@ import (
 	"os"
 	"path/filepath"
 )
-
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GoRun",
-		Desc:   "run go run in current project and use go install to speed up build",
-		Runner: gorun,
-	})
-}
 
 func gorun() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()

@@ -1,21 +1,11 @@
-package goCommand
+package gitCmd
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgConsole"
 )
 
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GitPush",
-		Desc:   "add,commit,push this git resp",
-		Runner: gitPush,
-	})
-
-}
-
 func gitPush() {
-	kmgCmd.NewOsStdioCmdString("git add -A").Run()
-	kmgCmd.NewOsStdioCmdString("git commit -am'save'").Run()
-	kmgCmd.NewOsStdioCmdString("git push origin master").Run()
+	kmgCmd.ProxyRun("git add -A")
+	kmgCmd.ProxyRun("git commit -am'save'")
+	kmgCmd.ProxyRun("git push origin master")
 }

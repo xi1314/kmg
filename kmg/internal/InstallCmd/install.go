@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func init() {
+func AddCommandList() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "install",
 		Desc:   "install tool",
@@ -80,7 +80,10 @@ func installGolang() {
 	default:
 		kmgConsole.ExitOnErr(fmt.Errorf("not support platform [%s]", p))
 	}
-	kmgCmd.ProxyRun("wget http://kmgtools.qiniudn.com/v1/" + packageName)
+	contentB, err := kmgHttp.UrlGetContent("http://kmgtools.qiniudn.com/v1/" + packageName)
+	kmgConsole.ExitOnErr(err)
+
+	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)
 	kmgCmd.ProxyRun("cp -rf go /usr/local")
 	kmgFile.MustDeleteFile("/bin/go")

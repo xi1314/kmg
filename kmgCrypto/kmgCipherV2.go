@@ -23,10 +23,10 @@ import (
 func EncryptV2(key []byte, data []byte) (output []byte) {
 	keyHash := sha512.Sum512(key)
 	aseKey := keyHash[:32]
-	cbcIv := kmgRand.MustCryptoRandBytes(16) //除了操作系统不支持,此处不会报错.
+	cbcIv := kmgRand.MustCryptoRandBytes(16) //此处只会报操作系统不支持的错误.
 	block, err := aes.NewCipher(aseKey)
 	if err != nil {
-		panic(err) //此处只会由于key长度错误而报错,此处key长度不会错误
+		panic(err) //此处只会由于key长度错误而报错,而此处key长度不会错误.
 	}
 	blockSize := block.BlockSize()
 	paddingSize := blockSize - len(data)%blockSize

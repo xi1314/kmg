@@ -34,10 +34,17 @@ func MustWriteFile(path string, content []byte) {
 		panic(err)
 	}
 }
-func ReadFileAll(path string) (content []byte, err error) {
+
+func MustWriteFileWithMkdir(path string, content []byte) {
+	MustMkdirForFile(path)
+	MustWriteFile(path, content)
+}
+
+func ReadFile(path string) (content []byte, err error) {
 	return ioutil.ReadFile(path)
 }
-func MustReadFileAll(path string) (content []byte) {
+
+func MustReadFile(path string) (content []byte) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
@@ -51,7 +58,7 @@ func Mkdir(path string) (err error) {
 }
 
 //如果这个目录已经创建过了,不报错
-func MustMkdirAll(dirname string) {
+func MustMkdir(dirname string) {
 	err := os.MkdirAll(dirname, os.FileMode(0777))
 	if err != nil {
 		panic(err)
@@ -110,19 +117,8 @@ func ReadDir(dirname string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(dirname)
 }
 
-//delete file,ignore file not exist err
-func MustDeleteFile(path string) {
-	err := os.Remove(path)
-	if os.IsNotExist(err) {
-		return
-	}
-	if err != nil {
-		panic(err)
-	}
-}
-
 //delete file or directory,ignore file not exist err
-func MustDeleteFileOrDirectory(path string) {
+func MustDelete(path string) {
 	err := os.RemoveAll(path)
 	if os.IsNotExist(err) {
 		return

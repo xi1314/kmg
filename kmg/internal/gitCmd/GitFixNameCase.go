@@ -1,4 +1,6 @@
-package goCommand
+// +build darwin
+
+package gitCmd
 
 import (
 	"flag"
@@ -14,12 +16,11 @@ func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "GitFixNameCase",
 		Desc:   "fix git name case problem on case insensitive opearate system(windows,osx)",
-		Runner: GitFixNameCase,
+		Runner: gitFixNameCaseCmd,
 	})
-
 }
 
-func GitFixNameCase() {
+func gitFixNameCaseCmd() {
 	//检查index里面的文件名大小写和当前的文件名大小写是否一致
 	var basePath string
 	var err error
@@ -29,48 +30,67 @@ func GitFixNameCase() {
 		basePath, err = os.Getwd()
 		kmgConsole.ExitOnErr(err)
 	}
+	err = GitFixNameCase(basePath)
+	kmgConsole.ExitOnErr(err)
+}
+
+func GitFixNameCase(basePath string) (err error) {
 	repo, err := git2go.OpenRepository(basePath)
-	kmgConsole.ExitOnErr(err)
+	if err != nil {
+		return err
+	}
 	index, err := repo.Index()
-	kmgConsole.ExitOnErr(err)
+	if err != nil {
+		return err
+	}
 	indexCount := index.EntryCount()
-	caseDiffChangeArray := []caseDiffChange{}
+	caseDiffChangeArray := []string{}
 	for i := uint(0); i < indexCount; i++ {
 		ie, err := index.EntryByIndex(i)
-		kmgConsole.ExitOnErr(err)
-		fullPath := filepath.Join(basePath, ie.Path)
-		exist, actualFileName := checkOneFileFoldDiff(fullPath)
-		if !exist {
+		if err != nil {
+			return err
+		}
+		//fullPath := filepath.Join(basePath, ie.Path)
+		isSameOrNotExist := checkOneFileFoldDiff(basePath, ie.Path)
+		if isSameOrNotExist {
 			continue
 		}
-		if actualFileName != filepath.Base(ie.Path) {
-			//在index里面修复大小写错误
-			caseDiffChangeArray = append(caseDiffChangeArray, caseDiffChange{
-				gitPath:        ie.Path,
-				fileSystemPath: filepath.Join(basePath, filepath.Dir(ie.Path), actualFileName),
-			})
-		}
+		//在index里面修复大小写错误
+		caseDiffChangeArray = append(caseDiffChangeArray, ie.Path)
 	}
 
 	if len(caseDiffChangeArray) > 0 {
 		fmt.Println("file name diff in case:")
-		for _, change := range caseDiffChangeArray {
-			fmt.Println("\t", change.gitPath)
-			index.RemoveByPath(change.gitPath)
+		for _, refPath := range caseDiffChangeArray {
+			fmt.Println("\t", refPath)
+			index.RemoveByPath(refPath)
 		}
 		err = index.Write()
-		kmgConsole.ExitOnErr(err)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 type caseDiffChange struct {
-	gitPath        string
-	fileSystemPath string
+	gitPath string
 }
 
 var folderFileCache = map[string][]string{}
 
-func checkOneFileFoldDiff(path string) (exist bool, actualFileName string) {
+func checkOneFileFoldDiff(basePath string, refPath string) (isSameOrNotExist bool) {
+	//此处要检查文件的每一部分的fold都一致
+	filePathPartList := strings.Split(refPath, "/")
+	for i := range filePathPartList {
+		ret := checkOneBasePathFoldDiff(filepath.Join(basePath, strings.Join(filePathPartList[:i+1], "/")))
+		if !ret {
+			return false
+		}
+	}
+	return true
+}
+func checkOneBasePathFoldDiff(path string) (isSameOrNotExist bool) {
 	fileName := filepath.Base(path)
 	dirPath := filepath.Dir(path)
 	names, ok := folderFileCache[dirPath]
@@ -79,7 +99,7 @@ func checkOneFileFoldDiff(path string) (exist bool, actualFileName string) {
 		defer dirFile.Close()
 		if err != nil {
 			if os.IsNotExist(err) {
-				return false, ""
+				return true //dir not exist
 			}
 			kmgConsole.ExitOnErr(err)
 		}
@@ -88,19 +108,13 @@ func checkOneFileFoldDiff(path string) (exist bool, actualFileName string) {
 		kmgConsole.ExitOnErr(err)
 		folderFileCache[dirPath] = names
 	}
-	CaseDiffFound := false
-	actualFileName = ""
 	for _, n := range names {
 		if n == fileName {
-			return true, n
+			return true //case same
 		}
 		if strings.EqualFold(n, fileName) {
-			CaseDiffFound = true
-			actualFileName = n
+			return false //case not same
 		}
 	}
-	if CaseDiffFound {
-		return true, actualFileName
-	}
-	return false, ""
+	return true // base path not exist
 }

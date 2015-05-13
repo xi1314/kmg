@@ -6,9 +6,12 @@ import (
 	"github.com/qiniu/api/rs"
 	"github.com/qiniu/api/rsf"
 
+	"bytes"
 	"fmt"
-	"github.com/qiniu/bytes"
 	"hash/crc32"
+	"io"
+	"net/http"
+	"strings"
 )
 
 type Context struct {
@@ -27,25 +30,33 @@ type Bucket struct {
 	Sk        string
 }
 
-//注意: 由于实现的问题,此处Ak和Sk只能使用同一个
+var currentContext *Context
+
+//注意: 由于实现的问题,全局只能使用一个Context,
+// TODO 解决全局只能使用一个Context的问题
 func NewContext(bucket Bucket) *Context {
 	conf.ACCESS_KEY = bucket.Ak
 	conf.SECRET_KEY = bucket.Sk
-	return &Context{
+	currentContext = &Context{
 		client:    rs.New(nil),
 		rsfClient: rsf.New(nil),
 		bucket:    bucket.Name,
 		domain:    bucket.Domain,
 		isPrivate: bucket.IsPrivate,
 	}
+	return currentContext
 }
 
-//可以下载文件或目录 remoteRoot 开头不要带 /
+//可以下载文件或目录 remoteRoot 开头带 / 或不带 / 效果一致
 func (ctx *Context) DownloadToFile(remoteRoot string, localRoot string) (err error) {
+	ctx.singleContextCheck()
+	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
 	return DownloadDir(ctx, remoteRoot, localRoot)
 }
 
 func (ctx *Context) MustDownloadToFile(remoteRoot string, localRoot string) {
+	ctx.singleContextCheck()
+	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
 	err := DownloadDir(ctx, remoteRoot, localRoot)
 	if err != nil {
 		panic(err)
@@ -53,12 +64,48 @@ func (ctx *Context) MustDownloadToFile(remoteRoot string, localRoot string) {
 	return
 }
 
+//下载到一个Writer里面
+func (ctx *Context) DownloadToWriter(remotePath string, w io.Writer) (err error) {
+	remotePath = strings.TrimPrefix(remotePath, "/")
+	var downloadUrl string
+	if ctx.isPrivate {
+		baseUrl := rs.MakeBaseUrl(ctx.domain, remotePath)
+		policy := rs.GetPolicy{}
+		downloadUrl = policy.MakeRequest(baseUrl, nil)
+	} else {
+		downloadUrl = rs.MakeBaseUrl(ctx.domain, remotePath)
+	}
+	resp, err := http.Get(downloadUrl)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+func (ctx *Context) MustDownloadToBytes(remotePath string) (b []byte) {
+	buf := &bytes.Buffer{}
+	err := ctx.DownloadToWriter(remotePath, buf)
+	if err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
+}
+
 //可以上传文件或目录 remoteRoot 开头带 / 或不带 / 效果一致
 func (ctx *Context) UploadFromFile(localRoot string, remoteRoot string) (err error) {
+	ctx.singleContextCheck()
+	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
 	return UploadDirMulitThread(ctx, localRoot, remoteRoot)
 }
 
 func (ctx *Context) MustUploadFromFile(localRoot string, remoteRoot string) {
+	ctx.singleContextCheck()
+	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
 	err := UploadDirMulitThread(ctx, localRoot, remoteRoot)
 	if err != nil {
 		panic(err)
@@ -66,8 +113,10 @@ func (ctx *Context) MustUploadFromFile(localRoot string, remoteRoot string) {
 	return
 }
 
-//上传字节 remotePath 开头带 / 或不带 / 效果一致
+//上传字节 remotePath 开头带 / 或不带 / 效果完全不一样. 正常情况应该是不带 /的
 func (ctx *Context) UploadFromBytes(remotePath string, b []byte) (err error) {
+	ctx.singleContextCheck()
+	remotePath = strings.TrimPrefix(remotePath, "/")
 	h := crc32.NewIEEE()
 	h.Write(b)
 	crc := h.Sum32()
@@ -93,6 +142,7 @@ func (ctx *Context) UploadFromBytes(remotePath string, b []byte) (err error) {
 }
 
 func (ctx *Context) MustUploadFromBytes(remotePath string, context []byte) {
+	ctx.singleContextCheck()
 	err := ctx.UploadFromBytes(remotePath, context)
 	if err != nil {
 		panic(err)
@@ -102,5 +152,13 @@ func (ctx *Context) MustUploadFromBytes(remotePath string, context []byte) {
 
 //prefix 开头带 / 或不带 / 效果一致
 func (ctx *Context) RemovePrefix(prefix string) (err error) {
+	ctx.singleContextCheck()
+	prefix = strings.TrimPrefix(prefix, "/")
 	return RemovePrefix(ctx, prefix)
+}
+
+func (ctx *Context) singleContextCheck() {
+	if ctx != currentContext {
+		panic("同时只能有一个Context存在.")
+	}
 }

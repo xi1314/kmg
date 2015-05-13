@@ -12,7 +12,14 @@ func (p Platform) Compatible(other Platform) bool {
 }
 
 func (p Platform) String() string {
-	return p.Os + "-" + p.Arch
+	return p.Os + "_" + p.Arch
+}
+
+func (p Platform) GetExeSuffix() string {
+	if p.Os == "windows" {
+		return p.Os + "_" + p.Arch + ".exe"
+	}
+	return p.Os + "_" + p.Arch
 }
 
 var LinuxAmd64 = Platform{Os: "linux", Arch: "amd64"}

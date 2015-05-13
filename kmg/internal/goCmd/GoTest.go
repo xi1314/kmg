@@ -1,4 +1,4 @@
-package goCommand
+package goCmd
 
 import (
 	"flag"
@@ -23,14 +23,6 @@ import (
  -bench benchmarks参数,直接传递到go test
  -onePackage 不递归目录测试,仅测试一个package
 */
-func init() {
-	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GoTest",
-		Desc:   "递归目录的go test",
-		Runner: runGoTest,
-	})
-}
-
 func runGoTest() {
 	command := GoTest{}
 	flag.BoolVar(&command.v, "v", false, "show output of test")
