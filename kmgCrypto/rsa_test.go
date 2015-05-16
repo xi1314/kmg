@@ -57,7 +57,7 @@ iWt3iNcpC/BCg0F8tnMhF1QOQ98cRUM8eeI9h+S6g/5UmO4hBKMOP3vg/u7kI0ujr
 CN1RXpsrTbWaqry/xTDgTM8HkKkNhRSyDJWJVye0mPgbvVnx76en+K6LLzDaQH8yK
 I/dbswSq65XFcIwIDAQAB
 -----END PUBLIC KEY-----`)
-	signed := kmgBase64.MustStdBase64DecodeString(`AqDW/m+aGn2kFo54Bt5XnXniBDtCxmPS6FMfHrLizh7d4jgnz4LbwBfRvXywI6HEKgr7Vk37duTM8P+XqmT+uQU2R1h4nRwOf2fCstXmgeD3qGk/XI+XMafgMkTnV/B9dOXpdUbxEpL1fDhmo7A6J0rcJotG7TP7i1zcvY4oiXk=`)
+	signed := kmgBase64.MustStdBase64DecodeStringToByte(`AqDW/m+aGn2kFo54Bt5XnXniBDtCxmPS6FMfHrLizh7d4jgnz4LbwBfRvXywI6HEKgr7Vk37duTM8P+XqmT+uQU2R1h4nRwOf2fCstXmgeD3qGk/XI+XMafgMkTnV/B9dOXpdUbxEpL1fDhmo7A6J0rcJotG7TP7i1zcvY4oiXk=`)
 	msg := []byte("this is a test!")
 	rsaKey, err := RsaParseOpensslPrivateKey(privateKey)
 	s, err := RsaOpensslSign(rsaKey, crypto.SHA1, msg)

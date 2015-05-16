@@ -27,7 +27,7 @@ type Context struct {
 	RedirectUrl      string
 	ResponseCode     int
 	Req              *http.Request
-	W                http.ResponseWriter
+	httpHeader       map[string]string
 }
 
 const (
@@ -226,6 +226,9 @@ func (c *Context) WriteJson(obj interface{}) {
 }
 
 func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
+	for key, value := range c.httpHeader {
+		w.Header().Set(key, value)
+	}
 	if c.RedirectUrl != "" {
 		http.Redirect(w, req, c.RedirectUrl, c.ResponseCode)
 		return
@@ -244,6 +247,13 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *Context) SetHeader(key, value string) {
+	if c.httpHeader == nil {
+		c.httpHeader = map[string]string{}
+	}
+	c.httpHeader[key] = value
 }
 
 func (c *Context) CurrentUrl() string {

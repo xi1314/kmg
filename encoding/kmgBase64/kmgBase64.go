@@ -2,7 +2,7 @@ package kmgBase64
 
 import "encoding/base64"
 
-func MustStdBase64DecodeString(s string) (out []byte) {
+func MustStdBase64DecodeStringToByte(s string) (out []byte) {
 	out, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		panic(err)
@@ -10,11 +10,23 @@ func MustStdBase64DecodeString(s string) (out []byte) {
 	return
 }
 
-func StdBase64Decode(s []byte) (out []byte, err error) {
+func StdBase64DecodeByteToByte(s []byte) (out []byte, err error) {
 	out = make([]byte, base64.StdEncoding.DecodedLen(len(s)))
 	nw, err := base64.StdEncoding.Decode(out, s)
 	if err != nil {
 		return nil, err
 	}
 	return out[:nw], nil
+}
+
+func MustBase64EncodeStringToString(input string) string {
+	return base64.URLEncoding.EncodeToString([]byte(input))
+}
+
+func MustBase64DecodeStringToString(input string) string {
+	output, err := base64.URLEncoding.DecodeString(input)
+	if err != nil {
+		panic(err)
+	}
+	return string(output)
 }

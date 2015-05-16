@@ -64,7 +64,7 @@ func QueryOne(query string, args ...string) (output map[string]string, err error
 		return nil, err
 	}
 	if len(list) <= 0 {
-		return nil, err
+		return nil, nil
 	}
 	output = list[0]
 	return output, err
@@ -162,11 +162,15 @@ func ReplaceById(tableName string, primaryKeyName string, row map[string]string)
 		return Insert(tableName, row)
 	}
 	err = UpdateById(tableName, primaryKeyName, row)
+	if err != nil {
+		return 0, err
+	}
 	lastInsertId, err = strconv.Atoi(one[primaryKeyName])
 	if err != nil {
 		lastInsertId = 0
+		err = nil
 	}
-	return lastInsertId, err
+	return lastInsertId, nil
 }
 
 func MustGetOneWhere(tableName string, fieldName string, value string) (output map[string]string) {
@@ -221,6 +225,12 @@ func Ping() (err error) {
 	return GetDb().Ping()
 }
 
+func MustPing() {
+	err := Ping()
+	if err != nil {
+		panic(err)
+	}
+}
 func argsStringToInterface(args ...string) []interface{} {
 	_args := []interface{}{}
 	for _, value := range args {

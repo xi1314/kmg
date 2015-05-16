@@ -9,11 +9,15 @@ type TestDbConf struct {
 	Db *DbConfig
 }
 
-func MustGetTestConfig() TestDbConf {
+func mustGetTestConfig() TestDbConf {
 	conf := TestDbConf{}
 	err := kmgYaml.ReadFile(kmgConfig.DefaultEnv().PathInConfig("Test.yml"), &conf)
 	if err != nil {
 		panic(err)
 	}
 	return conf
+}
+
+func MustLoadTestConfig() {
+	SetDefaultDbConfig(mustGetTestConfig().Db)
 }

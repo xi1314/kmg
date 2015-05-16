@@ -35,6 +35,14 @@ func RegisterController(obj interface{}) {
 	}
 }
 
+func GetControllerNameList() []string {
+	out := []string{}
+	for key := range controllerObjMap {
+		out = append(out, key)
+	}
+	return out
+}
+
 var HttpHandler = http.HandlerFunc(HttpHandlerFunc)
 
 //httpHandler

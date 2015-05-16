@@ -41,5 +41,8 @@ func SetDefaultDbConfig(conf *DbConfig) {
 func GetDefaultDbConfig() *DbConfig {
 	dbLock.Lock()
 	defer dbLock.Unlock()
+	if defaultDbConfig == nil {
+		panic("you need use SetDefaultDbConfig to set the config")
+	}
 	return defaultDbConfig
 }

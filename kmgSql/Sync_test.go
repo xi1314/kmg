@@ -80,6 +80,5 @@ func TestSyncTableBad(t *testing.T) {
 }
 
 func setTest() {
-	kmgSql.SetDefaultDbConfig(kmgSql.MustGetTestConfig().Db)
 	kmgSql.Exec("DROP TABLE IF EXISTS `testTable`")
 }

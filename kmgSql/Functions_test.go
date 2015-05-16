@@ -6,7 +6,6 @@ import (
 )
 
 func TestConnectToDb(t *testing.T) {
-	SetDefaultDbConfig(MustGetTestConfig().Db)
 	db := GetDb()
 	err := db.Ping()
 	Equal(err, nil)
@@ -31,6 +30,14 @@ func TestQuery(t *testing.T) {
 
 	_, err = Query("SELECT * from kmgSql_test_table WHERE (Id=?) LIMIT 0,10", "2")
 	Equal(err, nil)
+
+}
+
+func TestQuestError(t *testing.T) {
+	_, err := Exec("DROP TABLE IF EXISTS `kmgSql_test_table`")
+	Equal(err, nil)
+	_, err = Query("show table status where name=?;", "kmgSql_test_table")
+	Ok(err == nil)
 }
 
 func TestInsert(t *testing.T) {

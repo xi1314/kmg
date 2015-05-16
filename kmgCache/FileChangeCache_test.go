@@ -4,6 +4,7 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+	"time"
 )
 
 func TestFileChangeCacheOneFile(t *testing.T) {
@@ -14,19 +15,12 @@ func TestFileChangeCacheOneFile(t *testing.T) {
 	//指定的文件不存在
 	kmgFile.MustDeleteFile(getFileChangeCachePath("test_file_change_cache"))
 	kmgFile.MustDeleteFile("testFile/notExist")
-	MustFileChangeCache("test_file_change_cache", []string{
-		"testFile/notExist",
-	}, func() {
-		callLog[0] = "notExist"
-	})
-	kmgTest.Equal(callLog[0], "notExist")
 
 	MustFileChangeCache("test_file_change_cache", []string{
 		"testFile/notExist",
 	}, func() {
 		callLog[1] = "notExist"
-		kmgFile.MustMkdirAll("testFile")
-		kmgFile.MustWriteFile("testFile/notExist", []byte("1"))
+		kmgFile.MustWriteFileWithMkdir("testFile/notExist", []byte("1"))
 	})
 	kmgTest.Equal(callLog[1], "notExist")
 
@@ -37,11 +31,13 @@ func TestFileChangeCacheOneFile(t *testing.T) {
 	})
 	kmgTest.Equal(callLog[2], "")
 
+	time.Sleep(time.Second * 1)
+
 	kmgFile.MustWriteFile("testFile/notExist", []byte("2"))
 	MustFileChangeCache("test_file_change_cache", []string{
 		"testFile/notExist",
 	}, func() {
-		callLog[2] = "notExist"
+		callLog[3] = "notExist"
 	})
 	kmgTest.Equal(callLog[3], "notExist")
 }
@@ -65,6 +61,7 @@ func TestFileChangeCacheOneDir(t *testing.T) {
 	})
 	kmgTest.Equal(callLog[4], "")
 
+	time.Sleep(time.Second * 1)
 	kmgFile.MustWriteFile("testFile/d1/d2/f3", []byte("2"))
 	MustFileChangeCache("test_file_change_cache", []string{
 		"testFile/d1",

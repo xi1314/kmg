@@ -1,6 +1,7 @@
 package kmgSql
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/kmgStrings"
 	"strings"
 )
@@ -16,12 +17,14 @@ type Table struct {
 type DbType string
 
 const (
-	DbTypeInt        DbType = `int(11) DEFAULT 0`
-	DbTypeString     DbType = `varchar(255) COLLATE utf8_bin DEFAULT ""`
-	DbTypeLongString DbType = `longtext COLLATE utf8_bin DEFAULT ""`
-	DbTypeFloat      DbType = `float default 0`
-	DbTypeDatetime   DbType = `datetime DEFAULT "0000-00-00 00:00:00"`
-	DbTypeBool       DbType = `tinyint(4) DEFAULT 0`
+	DbTypeInt           DbType = `int(11) DEFAULT 0`
+	DbTypePrimaryKeyInt DbType = `int(11) unsigned AUTO_INCREMENT`
+	DbTypeString        DbType = `varchar(255) COLLATE utf8_bin DEFAULT ""`
+	DbTypeLongString    DbType = `longtext COLLATE utf8_bin DEFAULT ""`
+	DbTypeFloat         DbType = `float default 0`
+	DbTypeDatetime      DbType = `datetime DEFAULT "0000-00-00 00:00:00"`
+	DbTypeBool          DbType = `tinyint(4) DEFAULT 0`
+	DbTypeLongBlob      DbType = `LONGBLOB`
 )
 
 func MustSyncTable(tableConf Table) {
@@ -44,18 +47,23 @@ func MustIsTableExist(tableName string) bool {
 func MustCreateTable(tableConf Table) {
 	sql := "CREATE TABLE IF NOT EXISTS `" + tableConf.Name + "` \n("
 	sqlItemList := []string{}
+	hasPrimaryKey := false
 	for fieldName, fieldType := range tableConf.FieldList {
+		if tableConf.PrimaryKey == fieldName {
+			hasPrimaryKey = true
+			//continue
+		}
 		sqlField := "`" + fieldName + "` " + string(fieldType)
 		if !kmgStrings.IsInSlice(tableConf.Null, fieldName) {
 			sqlField += " NOT NULL"
 		}
-		if tableConf.PrimaryKey == fieldName {
-			continue
-		}
 		sqlItemList = append(sqlItemList, sqlField)
 	}
 	if tableConf.PrimaryKey != "" {
-		sqlItemList = append(sqlItemList, "`"+tableConf.PrimaryKey+"` int(11) unsigned AUTO_INCREMENT")
+		if !hasPrimaryKey {
+			panic(fmt.Sprintf(`tableConf.PrimaryKey[%s], 但是这个主键不在字段列表里面`, tableConf.PrimaryKey))
+		}
+		//sqlItemList = append(sqlItemList, "`"+tableConf.PrimaryKey+"` int(11) unsigned AUTO_INCREMENT")
 		sqlItemList = append(sqlItemList, "PRIMARY KEY (`"+tableConf.PrimaryKey+"`)")
 	}
 	for _, group := range tableConf.UniqueKey {

@@ -79,6 +79,14 @@ func UnmarshalNoType(r []byte) (interface{}, error) {
 	return obj, nil
 }
 
+func MustUnmarshal(r []byte, obj interface{}) {
+	err := json.Unmarshal(r, &obj)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
 func MustUnmarshalToMap(r []byte) (obj map[string]interface{}) {
 	err := json.Unmarshal(r, &obj)
 	if err != nil {
@@ -106,4 +114,12 @@ func MustMarshal(obj interface{}) []byte {
 		panic(err)
 	}
 	return output
+}
+
+func MustMarshalToString(obj interface{}) string {
+	output, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	return string(output)
 }

@@ -18,6 +18,9 @@ func GetDb() *Db {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 	if db == nil {
+		if defaultDbConfig == nil {
+			panic("you need use SetDefaultDbConfig to set the database config")
+		}
 		odb, err := sql.Open("mysql", defaultDbConfig.GetDsn())
 		if err != nil {
 			panic(err)

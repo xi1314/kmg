@@ -17,7 +17,8 @@ func getFileChangeCachePath(key string) string {
 // key表示这件事情的缓存key
 // pathList表示需要监控的目录
 // 文件列表里面如果有文件不存在,会运行代码
-// TODO 有bug还不能用
+// 已知bug,小于1秒的修改不能被检测到.
+// 要求 f执行完毕后 pathList里面所有的文件都存在
 func MustFileChangeCache(key string, pathList []string, f func()) {
 	//读取文件修改时间缓存信息
 	toChange := false
@@ -33,18 +34,25 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 		if err != nil {
 			if os.IsNotExist(err) {
 				toChange = true
+				//fmt.Printf("[MustFileChangeCache] path:[%s] not exist\n", path)
 				break
 			}
 			panic(err)
 		}
 		for _, stat := range statList {
+			if stat.Fi.IsDir() {
+				continue
+			}
 			cacheTime := cacheInfo[stat.FullPath]
 			if cacheTime.IsZero() {
 				toChange = true
+				//fmt.Printf("[MustFileChangeCache] path:[%s] no save mod time\n", stat.FullPath)
 				break
 			}
 			if stat.Fi.ModTime() != cacheTime {
 				toChange = true
+				//fmt.Printf("[MustFileChangeCache] path:[%s] mod time not match save[%s] file[%s]\n", stat.FullPath,
+				//	cacheTime, stat.Fi.ModTime())
 				break
 			}
 		}
@@ -60,26 +68,13 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 	for _, path := range pathList {
 		statList, err := kmgFile.GetAllFileAndDirectoryStat(path)
 		if err != nil {
-			if os.IsNotExist(err) {
-				toChange = true
-				break
-			}
 			panic(err)
 		}
 		for _, stat := range statList {
+			if stat.Fi.IsDir() {
+				continue
+			}
 			cacheInfo[stat.FullPath] = stat.Fi.ModTime()
-			cacheTime := cacheInfo[stat.FullPath]
-			if cacheTime.IsZero() {
-				toChange = true
-				break
-			}
-			if stat.Fi.ModTime() != cacheTime {
-				toChange = true
-				break
-			}
-		}
-		if toChange {
-			break
 		}
 	}
 	kmgGob.MustWriteFile(cacheFilePath, cacheInfo)

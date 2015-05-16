@@ -31,9 +31,8 @@ func GetAllFileAndDirectoryStat(root string) (out []StatAndFullPath, err error) 
 		if err != nil {
 			return err
 		}
-		fullPath := filepath.Join(root, path)
 		out = append(out, StatAndFullPath{
-			FullPath: fullPath,
+			FullPath: path,
 			Fi:       info,
 		})
 		return nil
