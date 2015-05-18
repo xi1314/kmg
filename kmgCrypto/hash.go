@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 func Sha256Hex(data []byte) string {
@@ -31,4 +32,10 @@ func Md5HexFromString(data string) string {
 	hash := md5.New()
 	hash.Write([]byte(data))
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+//获得文件的MD5值
+func MustMd5File(path string) string {
+	content := kmgFile.MustReadFile(path)
+	return Md5Hex(content)
 }

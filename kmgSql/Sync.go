@@ -17,14 +17,14 @@ type Table struct {
 type DbType string
 
 const (
-	DbTypeInt           DbType = `int(11) DEFAULT 0`
-	DbTypePrimaryKeyInt DbType = `int(11) unsigned AUTO_INCREMENT`
-	DbTypeString        DbType = `varchar(255) COLLATE utf8_bin DEFAULT ""`
-	DbTypeLongString    DbType = `longtext COLLATE utf8_bin DEFAULT ""`
-	DbTypeFloat         DbType = `float default 0`
-	DbTypeDatetime      DbType = `datetime DEFAULT "0000-00-00 00:00:00"`
-	DbTypeBool          DbType = `tinyint(4) DEFAULT 0`
-	DbTypeLongBlob      DbType = `LONGBLOB`
+	DbTypeInt              DbType = `int(11) DEFAULT 0`
+	DbTypeIntAutoIncrement DbType = `int(11) unsigned AUTO_INCREMENT`
+	DbTypeString           DbType = `varchar(255) COLLATE utf8_bin DEFAULT ""`
+	DbTypeLongString       DbType = `longtext COLLATE utf8_bin DEFAULT ""`
+	DbTypeFloat            DbType = `float default 0`
+	DbTypeDatetime         DbType = `datetime DEFAULT "0000-00-00 00:00:00"`
+	DbTypeBool             DbType = `tinyint(4) DEFAULT 0`
+	DbTypeLongBlob         DbType = `LONGBLOB`
 )
 
 func MustSyncTable(tableConf Table) {

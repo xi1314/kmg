@@ -1,22 +1,23 @@
 package kmgCache
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
-	"github.com/bronze1man/kmg/kmgConfig"
-	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgFile"
 	"os"
-	"path/filepath"
+	"time"
 )
 
-func getFileChangeCachePath(key string) string {
-	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", key)
-}
-
-func MustMd5FileChangeCache(key string, pathList []string, f func()) {
+// 这个函数bug太多，以废弃，请使用 MustMd5FileChangeCache
+// 根据文件变化,对f这个请求进行缓存
+// key表示这件事情的缓存key
+// pathList表示需要监控的目录
+// 文件列表里面如果有文件不存在,会运行代码
+// 已知bug,小于1秒的修改不能被检测到.
+func MustFileChangeCache(key string, pathList []string, f func()) {
 	//读取文件修改时间缓存信息
 	toChange := false
-	cacheInfo := map[string]string{}
+	cacheInfo := map[string]time.Time{}
 	cacheFilePath := getFileChangeCachePath(key)
 	kmgFile.MustMkdirForFile(cacheFilePath)
 	err := kmgGob.ReadFile(cacheFilePath, &cacheInfo)
@@ -28,7 +29,7 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 		if err != nil {
 			if os.IsNotExist(err) {
 				toChange = true
-				//fmt.Printf("[MustFileChangeCache] path:[%s] not exist\n", path)
+				fmt.Printf("[MustFileChangeCache] path:[%s] not exist\n", path)
 				break
 			}
 			panic(err)
@@ -37,12 +38,16 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 			if stat.Fi.IsDir() {
 				continue
 			}
-
-			cacheMd5 := cacheInfo[stat.FullPath]
-			if kmgCrypto.MustMd5File(stat.FullPath) != cacheMd5 {
+			cacheTime := cacheInfo[stat.FullPath]
+			if cacheTime.IsZero() {
 				toChange = true
-				//fmt.Printf("[MustMd5FileChangeCache] path:[%s] mod md5 not match save[%s] file[%s]\n", stat.FullPath,
-				//	cacheMd5, kmgCrypto.MustMd5File(stat.FullPath))
+				fmt.Printf("[MustFileChangeCache] path:[%s] no save mod time\n", stat.FullPath)
+				break
+			}
+			if stat.Fi.ModTime() != cacheTime {
+				toChange = true
+				fmt.Printf("[MustFileChangeCache] path:[%s] mod time not match save[%s] file[%s]\n", stat.FullPath,
+					cacheTime, stat.Fi.ModTime())
 				break
 			}
 		}
@@ -54,7 +59,7 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 		return
 	}
 	f()
-	cacheInfo = map[string]string{}
+	cacheInfo = map[string]time.Time{}
 	for _, path := range pathList {
 		statList, err := kmgFile.GetAllFileAndDirectoryStat(path)
 		if err != nil {
@@ -64,7 +69,7 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 			if stat.Fi.IsDir() {
 				continue
 			}
-			cacheInfo[stat.FullPath] = kmgCrypto.MustMd5File(stat.FullPath)
+			cacheInfo[stat.FullPath] = stat.Fi.ModTime()
 		}
 	}
 	kmgGob.MustWriteFile(cacheFilePath, cacheInfo)
