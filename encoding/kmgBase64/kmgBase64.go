@@ -23,10 +23,18 @@ func MustBase64EncodeStringToString(input string) string {
 	return base64.URLEncoding.EncodeToString([]byte(input))
 }
 
+func Base64EncodeByteToString(input []byte) string {
+	return base64.URLEncoding.EncodeToString(input)
+}
+
 func MustBase64DecodeStringToString(input string) string {
 	output, err := base64.URLEncoding.DecodeString(input)
 	if err != nil {
 		panic(err)
 	}
 	return string(output)
+}
+
+func Base64DecodeStringToByte(input string) (b []byte, err error) {
+	return base64.URLEncoding.DecodeString(input)
 }

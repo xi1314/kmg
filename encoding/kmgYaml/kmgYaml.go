@@ -32,6 +32,13 @@ func MustMarshal(obj interface{}) []byte {
 	return out
 }
 
+func MustUnmarshal(in []byte, obj interface{}) {
+	err := Unmarshal(in, obj)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func WriteFile(path string, obj interface{}) error {
 	out, err := Marshal(obj)
 	if err != nil {

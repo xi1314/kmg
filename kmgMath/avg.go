@@ -43,6 +43,19 @@ func FloatMin(a []float64) float64 {
 	return min
 }
 
+func IntMin(a ...int) int {
+	if len(a) == 0 {
+		return 0
+	}
+	min := a[0]
+	for i := range a {
+		if a[i] < min {
+			min = a[i]
+		}
+	}
+	return min
+}
+
 //标准方差
 func FloatStdDev(a []float64) float64 {
 	if len(a) == 0 {

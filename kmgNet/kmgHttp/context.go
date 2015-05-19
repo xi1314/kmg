@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgRand"
-	"github.com/bronze1man/kmg/kmgSession"
+	"github.com/bronze1man/kmg/encoding/kmgBase64"
+	"github.com/bronze1man/kmg/encoding/kmgJson"
+	"github.com/bronze1man/kmg/kmgCrypto"
+	"github.com/bronze1man/kmg/kmgErr"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -16,11 +18,11 @@ import (
 
 //该对象上的方法不应该被并发调用.
 type Context struct {
-	Method           string
-	RequestUrl       string
-	Request          map[string]string
-	RequestFile      map[string]*multipart.FileHeader
-	Session          *kmgSession.Session
+	Method      string
+	RequestUrl  string
+	Request     map[string]string
+	RequestFile map[string]*multipart.FileHeader
+	//Session          *kmgSession.Session
 	Response         string
 	ResponseFileName string
 	ResponseFile     *bytes.Buffer
@@ -28,19 +30,22 @@ type Context struct {
 	ResponseCode     int
 	Req              *http.Request
 	httpHeader       map[string]string
+	sessionMap       map[string]string
 }
 
 const (
 	defaultMaxMemory = 32 << 20 // 32 MB
 )
 
+var SessionKey = kmgBase64.MustStdBase64DecodeStringToByte("JOr7fL1TBkU/VqatYYc0D2wERVNUoECzM78HYWaJhIE=")
+
 func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	context := &Context{
-		Method:       req.Method,
-		Request:      map[string]string{},
-		RequestFile:  map[string]*multipart.FileHeader{},
-		RequestUrl:   req.URL.String(),
-		Session:      kmgSession.GetSession(w, req),
+		Method:      req.Method,
+		Request:     map[string]string{},
+		RequestFile: map[string]*multipart.FileHeader{},
+		RequestUrl:  req.URL.String(),
+		//Session:      kmgSession.GetSession(w, req),
 		ResponseCode: 200,
 		Req:          req,
 	}
@@ -82,7 +87,8 @@ func NewTestContext() *Context {
 		Request:      map[string]string{},
 		RequestFile:  map[string]*multipart.FileHeader{},
 		ResponseCode: 200,
-		Session:      kmgSession.GetSessionById("test_" + kmgRand.MustCryptoRandToAlphaNum(20)),
+		sessionMap:   map[string]string{},
+		//Session:      kmgSession.GetSessionById("test_" + kmgRand.MustCryptoRandToAlphaNum(20)),
 	}
 }
 
@@ -168,21 +174,55 @@ func (c *Context) SetPost() *Context {
 	return c
 }
 
+func (c *Context) sessionInit() {
+	if c.sessionMap != nil {
+		return
+	}
+	cookie, err := c.Req.Cookie("kmgSession")
+	if err != nil {
+		kmgErr.LogErrorWithStack(err)
+		c.sessionMap = map[string]string{}
+		//没有Cooke
+		return
+	}
+	output, err := kmgBase64.Base64DecodeStringToByte(cookie.Value)
+	if err != nil {
+		kmgErr.LogErrorWithStack(err)
+		c.sessionMap = map[string]string{}
+		return
+	}
+	output, err = kmgCrypto.DecryptV2(SessionKey, output)
+	if err != nil {
+		kmgErr.LogErrorWithStack(err)
+		c.sessionMap = map[string]string{}
+		return
+	}
+	err = json.Unmarshal(output, &c.sessionMap)
+	if err != nil {
+		kmgErr.LogErrorWithStack(err)
+		c.sessionMap = map[string]string{}
+		return
+	}
+}
+
 //向Session里面设置一个字符串
 func (c *Context) SessionSetStr(key string, value string) *Context {
-	c.Session.Set(key, value)
+	c.sessionInit()
+	c.sessionMap[key] = value
 	return c
 }
 
 //从Session里面获取一个字符串
 func (c *Context) SessionGetStr(key string) string {
-	return c.Session.Get(key)
+	c.sessionInit()
+	return c.sessionMap[key]
 }
 
 //清除Session里面的内容.
 //更换Session的Id.
 func (c *Context) SessionClear() *Context {
-	c.Session.Clear()
+	c.sessionInit()
+	c.sessionMap = map[string]string{}
 	//TODO 重启初始化SessionId
 	return c
 }
@@ -190,7 +230,7 @@ func (c *Context) SessionClear() *Context {
 //仅把Session传递过去的上下文,其他东西都恢复默认值
 func (c *Context) NewTestContextWithSession() *Context {
 	nc := NewTestContext()
-	nc.Session = c.Session
+	nc.sessionMap = c.sessionMap
 	return nc
 }
 
@@ -228,6 +268,12 @@ func (c *Context) WriteJson(obj interface{}) {
 func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
 	for key, value := range c.httpHeader {
 		w.Header().Set(key, value)
+	}
+	if c.sessionMap != nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "kmgSession",
+			Value: kmgBase64.Base64EncodeByteToString(kmgCrypto.EncryptV2(SessionKey, kmgJson.MustMarshal(c.sessionMap))),
+		})
 	}
 	if c.RedirectUrl != "" {
 		http.Redirect(w, req, c.RedirectUrl, c.ResponseCode)
