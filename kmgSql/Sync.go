@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgStrings"
 	"strings"
+	//"github.com/bronze1man/kmg/kmgDebug"
 )
 
 type Table struct {
@@ -27,9 +28,69 @@ const (
 	DbTypeLongBlob         DbType = `LONGBLOB`
 )
 
+func (t DbType) GetMysqlFieldType() MysqlFieldType {
+	switch t {
+	case DbTypeInt:
+		return MysqlFieldType{
+			DataType: MysqlDataTypeInt32,
+			Default:  "0",
+		}
+	case DbTypeIntAutoIncrement:
+		return MysqlFieldType{
+			DataType:        MysqlDataTypeInt32,
+			IsUnsigned:      true,
+			IsAutoIncrement: true,
+		}
+	case DbTypeString:
+		return MysqlFieldType{
+			DataType:         MysqlDataTypeVarchar,
+			Default:          "",
+			CharacterSetName: "utf8",
+			CollationName:    "utf8_bin",
+			StringLength:     255,
+		}
+	case DbTypeLongString:
+		return MysqlFieldType{
+			DataType:         MysqlDataTypeLongText,
+			Default:          "",
+			CharacterSetName: "utf8",
+			CollationName:    "utf8_bin",
+		}
+	case DbTypeFloat:
+		return MysqlFieldType{
+			DataType: MysqlDataTypeFloat,
+			Default:  "0",
+		}
+	case DbTypeDatetime:
+		return MysqlFieldType{
+			DataType: MysqlDataTypeDateTime,
+			Default:  "0000-00-00 00:00:00",
+		}
+	case DbTypeBool:
+		return MysqlFieldType{
+			DataType: MysqlDataTypeInt8,
+			Default:  "0",
+		}
+	case DbTypeLongBlob:
+		return MysqlFieldType{
+			DataType: MysqlDataTypeLongBlob,
+		}
+	default:
+		panic(fmt.Errorf("Unsupport DbType %s", t))
+	}
+}
+
 func MustSyncTable(tableConf Table) {
 	if MustIsTableExist(tableConf.Name) {
 		MustModifyTable(tableConf)
+	} else {
+		MustCreateTable(tableConf)
+	}
+}
+
+func MustForceSyncTable(tableConf Table) {
+	if MustIsTableExist(tableConf.Name) {
+		MustForceModifyTable(tableConf)
 	} else {
 		MustCreateTable(tableConf)
 	}
@@ -81,13 +142,70 @@ func MustCreateTable(tableConf Table) {
 }
 
 func MustModifyTable(tableConf Table) {
-	fieldRow := MustQuery("SHOW COLUMNS FROM `" + tableConf.Name + "`")
+	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
+	//kmgDebug.Println(MysqlFieldTypeList)
 	dbFieldNameList := []string{}
-	for _, row := range fieldRow {
-		dbFieldNameList = append(dbFieldNameList, row["Field"])
+	for _, row := range MysqlFieldTypeList {
+		dbFieldNameList = append(dbFieldNameList, row.Name)
 	}
-	for fieldName, _ := range tableConf.FieldList {
+	for _, f1 := range dbFieldNameList {
+		found := false
+		for f2 := range tableConf.FieldList {
+			if f2 == f1 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			fmt.Printf("[kmgSql.SyncTable] 数据库中包含多余字段 Table[%s] Field[%s]\n", tableConf.Name, f1)
+		}
+	}
+	for fieldName, fieldType := range tableConf.FieldList {
 		if kmgStrings.IsInSlice(dbFieldNameList, fieldName) {
+			for _, row := range MysqlFieldTypeList {
+				if row.Name == fieldName {
+					if !fieldType.GetMysqlFieldType().Equal(row.Type) {
+						fmt.Printf("[kmgSql.SyncTable] Table[%s] Field[%s] OldType[%s] NewType[%s] 数据库字段类型不一致\n",
+							tableConf.Name, fieldName, row.Type.String(), fieldType.GetMysqlFieldType().String())
+					}
+					break
+				}
+			}
+			continue
+		}
+		MustAddNewField(tableConf, fieldName)
+	}
+}
+
+func MustForceModifyTable(tableConf Table) {
+	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
+	//kmgDebug.Println(MysqlFieldTypeList)
+	dbFieldNameList := []string{}
+	for _, row := range MysqlFieldTypeList {
+		dbFieldNameList = append(dbFieldNameList, row.Name)
+	}
+	for _, f1 := range dbFieldNameList {
+		found := false
+		for f2 := range tableConf.FieldList {
+			if f2 == f1 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			MustExec(fmt.Sprintf("ALTER TABLE `%s` DROP COLUMN `%s`", tableConf.Name, f1))
+		}
+	}
+	for fieldName, fieldType := range tableConf.FieldList {
+		if kmgStrings.IsInSlice(dbFieldNameList, fieldName) {
+			for _, row := range MysqlFieldTypeList {
+				if row.Name == fieldName {
+					if !fieldType.GetMysqlFieldType().Equal(row.Type) {
+						MustExec(fmt.Sprintf("ALTER TABLE `%s` CHANGE COLUMN `%s` `%s` %s NOT NULL", tableConf.Name, fieldName, fieldName, fieldType))
+					}
+					break
+				}
+			}
 			continue
 		}
 		MustAddNewField(tableConf, fieldName)

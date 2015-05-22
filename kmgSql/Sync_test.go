@@ -50,7 +50,7 @@ func TestModifyTable(t *testing.T) {
 		Name: "testTable",
 		FieldList: map[string]kmgSql.DbType{
 			"Id":   kmgSql.DbTypeInt,
-			"Name": kmgSql.DbTypeString,
+			"Name": kmgSql.DbTypeLongString,
 			"Age":  kmgSql.DbTypeInt,
 		},
 		PrimaryKey: "Id",

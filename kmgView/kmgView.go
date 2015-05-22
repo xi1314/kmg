@@ -1,6 +1,9 @@
 package kmgView
 
-import "bytes"
+import (
+	"bytes"
+	"github.com/bronze1man/kmg/kmgXss"
+)
 
 type HtmlRenderer interface {
 	HtmlRender() string
@@ -14,4 +17,10 @@ func (l HtmlRendererList) HtmlRender() string {
 		_buffer.WriteString(renderer.HtmlRender())
 	}
 	return _buffer.String()
+}
+
+type String string
+
+func (s String) HtmlRender() string {
+	return kmgXss.H(string(s))
 }
