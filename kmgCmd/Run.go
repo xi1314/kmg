@@ -27,7 +27,8 @@ func MustRun(cmd string) {
 	CmdString(cmd).MustRun()
 }
 
-//代理运行命令,同run,出现错误时
+//代理运行命令,同run,出现错误时,会退出进程
+// 请仅在命令行程序中使用
 func ProxyRun(cmd string) {
 	CmdString(cmd).ProxyRun()
 }

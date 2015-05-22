@@ -1,7 +1,6 @@
 package kmgNet
 
 import (
-	"fmt"
 	"github.com/bronze1man/kmg/kmgTest"
 	"net"
 	"testing"

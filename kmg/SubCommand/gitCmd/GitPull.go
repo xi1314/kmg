@@ -2,8 +2,10 @@ package gitCmd
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
 func gitPull() {
-	kmgCmd.ProxyRun("git pull origin master")
+	branchName := kmgGit.DefaultRepository().MustCurrentBranchName()
+	kmgCmd.ProxyRun("git pull origin " + branchName)
 }

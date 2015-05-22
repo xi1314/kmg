@@ -410,11 +410,10 @@ func (c *S) TestUnmarshal() {
 }
 
 func TestUnmarshalNaN(ot *testing.T) {
-	c := kmgTest.NewTestTools(ot)
 	value := map[string]interface{}{}
 	err := Unmarshal([]byte("notanum: .NaN"), &value)
-	c.Equal(err, nil)
-	c.Equal(math.IsNaN(value["notanum"].(float64)), true)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(math.IsNaN(value["notanum"].(float64)), true)
 	//c.Assert(err, IsNil)
 	//c.Assert(math.IsNaN(value["notanum"].(float64)), Equals, true)
 }
@@ -508,7 +507,6 @@ func TestUnmarshalWholeDocumentWithSetter(ot *testing.T) {
 }
 
 func TestUnmarshalWithFalseSetterIgnoresValue(ot *testing.T) {
-	c := kmgTest.NewTestTools(ot)
 	setterResult[2] = false
 	setterResult[4] = false
 	defer func() {
@@ -519,23 +517,13 @@ func TestUnmarshalWithFalseSetterIgnoresValue(ot *testing.T) {
 	m := map[string]*typeWithSetter{}
 	data := "{abc: 1, def: 2, ghi: 3, jkl: 4}"
 	err := Unmarshal([]byte(data), m)
-	c.Equal(err, nil)
-	c.Ok(m["abc"] != nil)
-	c.Equal(m["def"], nil)
-	c.Ok(m["ghi"] != nil)
-	c.Equal(m["jkl"], nil)
-	c.Equal(m["abc"].value, 1)
-	c.Equal(m["ghi"].value, 3)
-	/*
-		c.Assert(err, IsNil)
-		c.Assert(m["abc"], NotNil)
-		c.Assert(m["def"], IsNil)
-		c.Assert(m["ghi"], NotNil)
-		c.Assert(m["jkl"], IsNil)
-
-		c.Assert(m["abc"].value, Equals, 1)
-		c.Assert(m["ghi"].value, Equals, 3)
-	*/
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(m["abc"] != nil)
+	kmgTest.Equal(m["def"], nil)
+	kmgTest.Ok(m["ghi"] != nil)
+	kmgTest.Equal(m["jkl"], nil)
+	kmgTest.Equal(m["abc"].value, 1)
+	kmgTest.Equal(m["ghi"].value, 3)
 }
 
 func TestUnmarshalTypeNotMatch(t *testing.T) {

@@ -21,7 +21,7 @@ func AddCommandList() {
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "GoRun",
 		Desc:   "run go run in current project and use go install to speed up build",
-		Runner: gorun,
+		Runner: GoRunCmd,
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "GoTest",

@@ -79,30 +79,29 @@ func (context *Env) PathInConfig(relPath string) string {
 func (context *Env) PathInTmp(relPath string) string {
 	return filepath.Join(context.TmpPath, relPath)
 }
+func (context *Env) MustGetPathFromImportPath(importPath string) string {
+	for _, gopath := range context.GOPATH {
+		thisPath := filepath.Join(gopath, "src", importPath)
+		_, err := os.Stat(thisPath)
+		if err == nil {
+			return thisPath
+		}
+	}
+	thisPath := filepath.Join(context.GOROOT, "src", importPath)
+	_, err := os.Stat(thisPath)
+	if err == nil {
+		return thisPath
+	}
+	panic(fmt.Errorf("can not found import path [%s] GOPATH:[%s] GOROOT:[%s]",
+		importPath, context.GOPATHToString(), context.GOROOT))
+}
 
 func FindFromPath(p string) (context *Env, err error) {
-	p, err = filepath.Abs(p)
+	p, err = kmgFile.SearchFileInParentDir(p, ".kmg.yml")
 	if err != nil {
 		return
 	}
-	var kmgFilePath string
-	for {
-		kmgFilePath = filepath.Join(p, ".kmg.yml")
-		_, err = os.Stat(kmgFilePath)
-		if err == nil {
-			//found it
-			break
-		}
-		if !os.IsNotExist(err) {
-			return
-		}
-		thisP := filepath.Dir(p)
-		if p == thisP {
-			err = NotFoundError{}
-			return
-		}
-		p = thisP
-	}
+	kmgFilePath := filepath.Join(p, ".kmg.yml")
 	context = &Env{}
 	err = kmgYaml.ReadFile(kmgFilePath, context)
 	if err != nil {

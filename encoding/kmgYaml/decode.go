@@ -425,7 +425,7 @@ func (d *decoder) sequence(n *node, out reflect.Value) (good bool) {
 		}
 		return true
 	}
-
+	panic("Type not match, can not set slice to " + out.Kind().String())
 	return false
 }
 
@@ -445,6 +445,7 @@ func (d *decoder) mapping(n *node, out reflect.Value) (good bool) {
 	}
 
 	if out.Kind() != reflect.Map {
+		panic("Type not match, can not set map to " + out.Kind().String())
 		return false
 	}
 	outt := out.Type()

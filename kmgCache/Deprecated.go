@@ -1,7 +1,6 @@
 package kmgCache
 
 import (
-	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgFile"
 	"os"
@@ -29,7 +28,7 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 		if err != nil {
 			if os.IsNotExist(err) {
 				toChange = true
-				fmt.Printf("[MustFileChangeCache] path:[%s] not exist\n", path)
+				//fmt.Printf("[MustFileChangeCache] path:[%s] not exist\n", path)
 				break
 			}
 			panic(err)
@@ -41,13 +40,13 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 			cacheTime := cacheInfo[stat.FullPath]
 			if cacheTime.IsZero() {
 				toChange = true
-				fmt.Printf("[MustFileChangeCache] path:[%s] no save mod time\n", stat.FullPath)
+				//fmt.Printf("[MustFileChangeCache] path:[%s] no save mod time\n", stat.FullPath)
 				break
 			}
 			if stat.Fi.ModTime() != cacheTime {
 				toChange = true
-				fmt.Printf("[MustFileChangeCache] path:[%s] mod time not match save[%s] file[%s]\n", stat.FullPath,
-					cacheTime, stat.Fi.ModTime())
+				//fmt.Printf("[MustFileChangeCache] path:[%s] mod time not match save[%s] file[%s]\n", stat.FullPath,
+				//	cacheTime, stat.Fi.ModTime())
 				break
 			}
 		}

@@ -2,10 +2,13 @@ package gitCmd
 
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
+//把当前分支推到origin的当前分支,当前分支不一定是master
 func gitPush() {
-	kmgCmd.ProxyRun("git add -A")
-	kmgCmd.ProxyRun("git commit -am'save'")
-	kmgCmd.ProxyRun("git push origin master")
+	branchName := kmgGit.DefaultRepository().MustCurrentBranchName()
+	kmgCmd.MustRunNotExistStatusCheck("git add -A")
+	kmgCmd.MustRunNotExistStatusCheck("git commit -am save")
+	kmgCmd.MustRunNotExistStatusCheck("git push origin " + branchName)
 }

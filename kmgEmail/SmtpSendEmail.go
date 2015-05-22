@@ -3,8 +3,8 @@ package kmgEmail
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/bronze1man/InlProxy"
 	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgNet/kmgProxy"
 	"net"
 	"net/smtp"
 	"strings"
@@ -33,7 +33,7 @@ func SmtpSendEmail(req *SmtpRequest) (err error) {
 
 	var conn net.Conn
 	if req.Socks4aProxyAddr != "" {
-		conn, err = InlProxy.Socks4aDial(req.Socks4aProxyAddr, kmgNet.JoinHostPortInt(req.SmtpHost, req.SmtpPort))
+		conn, err = kmgProxy.Socks4aDial(req.Socks4aProxyAddr, kmgNet.JoinHostPortInt(req.SmtpHost, req.SmtpPort))
 	} else {
 		conn, err = net.Dial("tcp", kmgNet.JoinHostPortInt(req.SmtpHost, req.SmtpPort))
 	}

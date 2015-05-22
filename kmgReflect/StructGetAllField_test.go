@@ -1,9 +1,10 @@
-package kmgReflect
+package kmgReflect_test
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/bronze1man/kmg/kmgReflect"
 	"github.com/bronze1man/kmg/kmgTest"
 )
 
@@ -38,7 +39,7 @@ type GetAllFieldT6 int
 func TestStructGetAllField(ot *testing.T) {
 	t := kmgTest.NewTestTools(ot)
 	t1 := reflect.TypeOf(&GetAllFieldT1{})
-	ret := StructGetAllField(t1)
+	ret := kmgReflect.StructGetAllField(t1)
 	t.Equal(len(ret), 7)
 	t.Equal(ret[0].Name, "GetAllFieldT3")
 	t.Equal(ret[1].Name, "GetAllFieldT4")
@@ -52,7 +53,7 @@ func TestStructGetAllField(ot *testing.T) {
 	t.Equal(ret[6].Name, "D")
 	t.Equal(ret[6].Index, []int{1, 1})
 
-	ret = StructGetAllField(reflect.TypeOf(&GetAllFieldT5{}))
+	ret = kmgReflect.StructGetAllField(reflect.TypeOf(&GetAllFieldT5{}))
 	t.Equal(len(ret), 2)
 
 }
@@ -60,14 +61,14 @@ func TestStructGetAllField(ot *testing.T) {
 func TestStructGetAllFieldMap(ot *testing.T) {
 	t := kmgTest.NewTestTools(ot)
 	t1 := reflect.TypeOf(&GetAllFieldT1{})
-	ret := StructGetAllFieldMap(t1)
+	ret := kmgReflect.StructGetAllFieldMap(t1)
 	t.Equal(ret["A"].Index, []int{0, 0})
 	t.Equal(ret["B"].Index, []int{2})
 	t.Equal(ret["C"].Index, []int{0, 2, 2})
 	t.Equal(ret["D"].Index, []int{1, 1})
 	t.Equal(len(ret), 7)
 
-	ret = StructGetAllFieldMap(reflect.TypeOf(&GetAllFieldT5{}))
+	ret = kmgReflect.StructGetAllFieldMap(reflect.TypeOf(&GetAllFieldT5{}))
 	t.Equal(ret["A"].Index, []int{1})
 	t.Equal(len(ret), 2)
 }

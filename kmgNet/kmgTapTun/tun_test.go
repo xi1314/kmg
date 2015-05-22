@@ -28,7 +28,7 @@ func TestTun(ot *testing.T) {
 	err = SetMtu(tun, 1420)
 	t.Equal(err, nil)
 	fmt.Println(4)
-	cmd := kmgCmd.NewOsStdioCmdString("ping 10.209.34.2")
+	cmd := kmgCmd.CmdString("ping 10.209.34.2").GetExecCmd()
 	err = cmd.Start()
 	t.Equal(err, nil)
 	defer cmd.Process.Kill()
@@ -55,7 +55,7 @@ func TestTap(ot *testing.T) {
 	defer tap.Close()
 	t.Equal(tap.GetDeviceType(), DeviceTypeTap)
 
-	err = kmgCmd.RunOsStdioCmdString("ifconfig " + tap.Name() + " 10.209.34.1 up")
+	err = kmgCmd.CmdString("ifconfig " + tap.Name() + " 10.209.34.1 up").GetExecCmd().Run()
 	t.Equal(err, nil)
 	/*
 		cmd := kmgCmd.NewOsStdioCmdString("ping 10.0.0.2")

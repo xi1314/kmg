@@ -13,3 +13,16 @@ func ExecuteToString(tmpl *template.Template, data interface{}) (output string, 
 	}
 	return buf.String(), nil
 }
+
+func MustRenderToByte(text string, data interface{}) (b []byte) {
+	w := &bytes.Buffer{}
+	tmpl, err := template.New("").Parse(text)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		panic(err)
+	}
+	return w.Bytes()
+}

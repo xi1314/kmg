@@ -45,6 +45,13 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 		kmgFile.MustDeleteFile(lastLogPath)
 		kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " " + lastLogPath)
 	}
+	//TODO 大部分命令是 kmg gorun xxx 在这个地方可以直接调用gorun解决问题,这样可以少开一个进程加快了一些速度
+	// 问题: 上诉做法不靠谱,会导致last.log没有用处.
+	//if len(args) >= 2 && args[0] == "kmg" && strings.EqualFold(args[1], "gorun") {
+	//	os.Args = append(args[1:], os.Args[1:]...)
+	//	goCmd.GoRunCmd()
+	//	return
+	//}
 	err := kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
 		SetDir(kmgc.ProjectPath).
 		RunAndTeeOutputToFile(thisLogFilePath)

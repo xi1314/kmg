@@ -1,7 +1,12 @@
 package kmgSlice
 
-func (t *Tester) TestIntSliceRemoveAt() {
+import (
+	"github.com/bronze1man/kmg/kmgTest"
+	"testing"
+)
+
+func TestIntSliceRemoveAt(ot *testing.T) {
 	s := []int{1, 2, 3}
 	IntSliceRemoveAt(&s, 1)
-	t.Equal(s, []int{1, 3})
+	kmgTest.Equal(s, []int{1, 3})
 }

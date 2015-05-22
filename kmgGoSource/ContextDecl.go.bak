@@ -1,4 +1,4 @@
-package kmgReflect
+package kmgGoSource
 
 import (
 	"go/parser"

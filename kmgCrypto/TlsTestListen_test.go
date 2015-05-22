@@ -1,10 +1,11 @@
-package kmgCrypto
+package kmgCrypto_test
 
 import (
 	"testing"
 	//"fmt"
 	"bytes"
 	"crypto/tls"
+	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgNet"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgTest"
@@ -14,7 +15,7 @@ import (
 
 func TestMustTlsTestListen(ot *testing.T) {
 	t := kmgTest.NewTestTools(ot)
-	listener := MustTlsTestListen(":0")
+	listener := kmgCrypto.MustTlsTestListen(":0")
 	defer listener.Close()
 	listenAddr := kmgNet.MustGetLocalAddrFromListener(listener)
 	waitAcceptChan := make(chan int)
@@ -41,7 +42,7 @@ func TestMustTlsTestListen(ot *testing.T) {
 
 func TestMustTlsTestListenHttps(ot *testing.T) {
 	t := kmgTest.NewTestTools(ot)
-	listener := MustTlsTestListen(":0")
+	listener := kmgCrypto.MustTlsTestListen(":0")
 	defer listener.Close()
 	go http.Serve(listener, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("hello world"))

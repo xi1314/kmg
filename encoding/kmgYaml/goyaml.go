@@ -92,7 +92,6 @@ func Unmarshal(in []byte, out interface{}) (err error) {
 		case reflect.Ptr, reflect.Map:
 		default:
 			return errors.New("YAML error: Unmarshal need a pointer or a map.")
-
 		}
 		d.unmarshal(node, val)
 	}
