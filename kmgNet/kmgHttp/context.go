@@ -18,11 +18,10 @@ import (
 
 //该对象上的方法不应该被并发调用.
 type Context struct {
-	Method      string
-	RequestUrl  string
-	Request     map[string]string
-	RequestFile map[string]*multipart.FileHeader
-	//Session          *kmgSession.Session
+	Method           string
+	RequestUrl       string
+	Request          map[string]string
+	RequestFile      map[string]*multipart.FileHeader
 	Response         string
 	ResponseFileName string
 	ResponseFile     *bytes.Buffer
@@ -88,7 +87,6 @@ func NewTestContext() *Context {
 		RequestFile:  map[string]*multipart.FileHeader{},
 		ResponseCode: 200,
 		sessionMap:   map[string]string{},
-		//Session:      kmgSession.GetSessionById("test_" + kmgRand.MustCryptoRandToAlphaNum(20)),
 	}
 }
 
@@ -223,7 +221,6 @@ func (c *Context) SessionGetStr(key string) string {
 func (c *Context) SessionClear() *Context {
 	c.sessionInit()
 	c.sessionMap = map[string]string{}
-	//TODO 重启初始化SessionId
 	return c
 }
 
