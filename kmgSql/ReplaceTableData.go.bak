@@ -1,0 +1,19 @@
+package kmgSql
+import (
+	"github.com/bronze1man/kmg/encoding/kmgYaml"
+)
+
+
+func MustReplaceTableDataYaml(yaml string,IdName string){
+	data := make(map[string][]map[string]string)
+	err := kmgYaml.Unmarshal([]byte(yaml), &data)
+	if err != nil {
+		panic(err)
+	}
+	if len(data) == 0 {
+		panic("[MustReplaceTableDataYaml] try to set tables with no data,wrong format?")
+	}
+	MustTransactionCallback(func(){
+
+	})
+}

@@ -1,55 +1,30 @@
 package kmgSql
 
 import (
-	"fmt"
-
-	"github.com/go-sql-driver/mysql"
+	"database/sql"
 )
 
-type TransactionableDb interface {
-	Begin() error
-	Commit() error
-	Rollback() error
-}
-
-//transaction callback on beego.orm,but not depend on it
-func TransactionCallback(db TransactionableDb, f func() error) (err error) {
-	for i := 0; i < 3; i++ {
-		err = runTransaction(db, f)
-		mysqlErr, ok := err.(*mysql.MySQLError)
-		if ok && mysqlErr.Number == 1213 {
-			//1213 错误可以重试解决
-			continue
-		}
-		return err
-	}
-	return err
-}
-
-func runTransaction(db TransactionableDb, f func() error) error {
+//使用默认数据库开启事务回调
+func MustTransactionCallback(f func(tx Tx)) {
+	db := GetDb()
+	var err error
+	var tx *sql.Tx
 	hasFinish := false
 	defer func() { //panic的时候处理
 		if !hasFinish {
-			db.Rollback()
+			tx.Rollback()
+			//不用recover,让异常继续向上传递
 		}
 	}()
-	err := db.Begin()
+	tx, err = db.Begin()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	err = f()
+	f(NewTx(tx))
+	err = tx.Commit() //TODO commit失败怎么搞?
 	if err != nil {
-		errR := db.Rollback()
-		hasFinish = true
-		if errR != nil {
-			return fmt.Errorf("rollback fail:%s,origin fail:%s", errR.Error(), err.Error())
-		}
-		return err
-	}
-	err = db.Commit()
-	if err != nil {
-		return err
+		panic(err)
 	}
 	hasFinish = true
-	return nil
+	return
 }

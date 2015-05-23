@@ -31,9 +31,9 @@ var defaultDbConfig *DbConfig
 func SetDefaultDbConfig(conf *DbConfig) {
 	dbLock.Lock()
 	defer dbLock.Unlock()
-	if db != nil {
+	if db.DB != nil {
 		db.DB.Close()
-		db = nil
+		db = DB{}
 	}
 	defaultDbConfig = conf
 }

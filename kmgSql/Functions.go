@@ -9,7 +9,7 @@ import (
 )
 
 func MustQuery(query string, args ...string) []map[string]string {
-	out, err := Query(query, args...)
+	out, err := GetDb().DbQueryer.Query(query, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,11 @@ func MustQuery(query string, args ...string) []map[string]string {
 }
 
 func Query(query string, args ...string) (output []map[string]string, err error) {
-	rows, err := GetDb().Query(query, argsStringToInterface(args...)...)
+	return GetDb().DbQueryer.Query(query, args...)
+}
+
+func (q DbQueryer) Query(query string, args ...string) (output []map[string]string, err error) {
+	rows, err := q.SqlQueryer.Query(query, argsStringToInterface(args...)...)
 	if err != nil {
 		return nil, fmt.Errorf("[Query] sql: [%s] data: [%s] err:[%s]", query, strings.Join(args, ","), err.Error())
 	}
@@ -50,8 +54,9 @@ func Query(query string, args ...string) (output []map[string]string, err error)
 	return
 }
 
+// 如果没有数据不会报错
 func MustQueryOne(query string, args ...string) map[string]string {
-	out, err := QueryOne(query, args...)
+	out, err := GetDb().QueryOne(query, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -59,11 +64,15 @@ func MustQueryOne(query string, args ...string) map[string]string {
 }
 
 func QueryOne(query string, args ...string) (output map[string]string, err error) {
-	list, err := Query(query, args...)
+	return GetDb().QueryOne(query, args...)
+}
+
+func (q DbQueryer) QueryOne(query string, args ...string) (output map[string]string, err error) {
+	list, err := q.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
-	if len(list) <= 0 {
+	if len(list) == 0 {
 		return nil, nil
 	}
 	output = list[0]
@@ -78,7 +87,11 @@ func MustExec(query string, args ...string) {
 }
 
 func Exec(query string, args ...string) (sql.Result, error) {
-	ret, err := GetDb().Exec(query, argsStringToInterface(args...)...)
+	return GetDb().Exec(query, args...)
+}
+
+func (q DbQueryer) Exec(query string, args ...string) (sql.Result, error) {
+	ret, err := q.SqlQueryer.Exec(query, argsStringToInterface(args...)...)
 	if err != nil {
 		return nil, fmt.Errorf("[Exec] sql: [%s] data: [%s] err:[%s]", query, strings.Join(args, ","), err.Error())
 	}
@@ -86,7 +99,7 @@ func Exec(query string, args ...string) (sql.Result, error) {
 }
 
 func MustInsert(tableName string, row map[string]string) (lastInsertId int) {
-	lastInsertId, err := Insert(tableName, row)
+	lastInsertId, err := GetDb().Insert(tableName, row)
 	if err != nil {
 		panic(err)
 	}
@@ -94,6 +107,10 @@ func MustInsert(tableName string, row map[string]string) (lastInsertId int) {
 }
 
 func Insert(tableName string, row map[string]string) (lastInsertId int, err error) {
+	return GetDb().Insert(tableName, row)
+}
+
+func (q DbQueryer) Insert(tableName string, row map[string]string) (lastInsertId int, err error) {
 	keyList := []string{}
 	valueList := []string{}
 	for key, value := range row {
@@ -103,7 +120,7 @@ func Insert(tableName string, row map[string]string) (lastInsertId int, err erro
 	keyStr := "`" + strings.Join(keyList, "`,`") + "`"
 	valueStr := strings.Repeat("?,", (len(row)-1)) + "?"
 	sql := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", tableName, keyStr, valueStr)
-	result, err := Exec(sql, valueList...)
+	result, err := q.Exec(sql, valueList...)
 	if err != nil {
 		return 0, err
 	}
@@ -113,13 +130,17 @@ func Insert(tableName string, row map[string]string) (lastInsertId int, err erro
 }
 
 func MustUpdateById(tableName string, primaryKeyName string, row map[string]string) {
-	err := UpdateById(tableName, primaryKeyName, row)
+	err := GetDb().UpdateById(tableName, primaryKeyName, row)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func UpdateById(tableName string, primaryKeyName string, row map[string]string) error {
+	return GetDb().UpdateById(tableName, primaryKeyName, row)
+}
+
+func (q DbQueryer) UpdateById(tableName string, primaryKeyName string, row map[string]string) error {
 	keyList := []string{}
 	valueList := []string{}
 	var idValue string
@@ -138,7 +159,7 @@ func UpdateById(tableName string, primaryKeyName string, row map[string]string) 
 	updateStr := strings.Join(keyList, ",")
 	//sql例子 UPDATE AdminUser SET username=?,password=? where id = 1;
 	sql := fmt.Sprintf("UPDATE `%s` SET %s where `%s` = ?", tableName, updateStr, primaryKeyName)
-	_, err := Exec(sql, valueList...)
+	_, err := q.Exec(sql, valueList...)
 	if err != nil {
 		return err
 	}
@@ -146,7 +167,7 @@ func UpdateById(tableName string, primaryKeyName string, row map[string]string) 
 }
 
 func MustReplaceById(tableName string, primaryKeyName string, row map[string]string) (lastInsertId int) {
-	lastInsertId, err := ReplaceById(tableName, primaryKeyName, row)
+	lastInsertId, err := GetDb().ReplaceById(tableName, primaryKeyName, row)
 	if err != nil {
 		panic(err)
 	}
@@ -154,14 +175,18 @@ func MustReplaceById(tableName string, primaryKeyName string, row map[string]str
 }
 
 func ReplaceById(tableName string, primaryKeyName string, row map[string]string) (lastInsertId int, err error) {
+	return GetDb().ReplaceById(tableName, primaryKeyName, row)
+}
+
+func (q DbQueryer) ReplaceById(tableName string, primaryKeyName string, row map[string]string) (lastInsertId int, err error) {
 	var one map[string]string
 	if idValue, ok := row[primaryKeyName]; ok {
-		one, _ = GetOneWhere(tableName, primaryKeyName, idValue)
+		one, _ = q.GetOneWhere(tableName, primaryKeyName, idValue)
 	}
 	if one == nil {
-		return Insert(tableName, row)
+		return q.Insert(tableName, row)
 	}
-	err = UpdateById(tableName, primaryKeyName, row)
+	err = q.UpdateById(tableName, primaryKeyName, row)
 	if err != nil {
 		return 0, err
 	}
@@ -174,33 +199,41 @@ func ReplaceById(tableName string, primaryKeyName string, row map[string]string)
 }
 
 func MustGetOneWhere(tableName string, fieldName string, value string) (output map[string]string) {
-	output, err := GetOneWhere(tableName, fieldName, value)
+	output, err := GetDb().GetOneWhere(tableName, fieldName, value)
 	if err != nil {
 		panic(err)
 	}
 	return output
 }
 
+// 如果没有数据不会报错,output和err都会返回nil
 func GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, err error) {
-	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
-	return QueryOne(sql, value)
+	return GetDb().GetOneWhere(tableName, fieldName, value)
 }
 
+func (q DbQueryer) GetOneWhere(tableName string, fieldName string, value string) (output map[string]string, err error) {
+	sql := fmt.Sprintf("SELECT * FROM `%s` WHERE `%s`=? LIMIT 1", tableName, fieldName)
+	return q.QueryOne(sql, value)
+}
 func MustDeleteById(tableName string, fieldName string, value string) {
-	err := DeleteById(tableName, fieldName, value)
+	err := GetDb().DeleteById(tableName, fieldName, value)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func DeleteById(tableName string, fieldName string, value string) error {
+	return GetDb().DeleteById(tableName, fieldName, value)
+}
+
+func (q DbQueryer) DeleteById(tableName string, fieldName string, value string) error {
 	sql := fmt.Sprintf("DELETE FROM `%s` WHERE `%s`=?", tableName, fieldName)
-	_, err := Exec(sql, value)
+	_, err := q.Exec(sql, value)
 	return err
 }
 
 func MustGetAllInTable(tableName string) (output []map[string]string) {
-	output, err := GetAllInTable(tableName)
+	output, err := GetDb().GetAllInTable(tableName)
 	if err != nil {
 		panic(err)
 	}
@@ -208,23 +241,32 @@ func MustGetAllInTable(tableName string) (output []map[string]string) {
 }
 
 func GetAllInTable(tableName string) (output []map[string]string, err error) {
-	output, err = Query("SELECT * FROM `" + tableName + "`")
-	return output, err
+	return GetDb().GetAllInTable(tableName)
+}
+
+func (q DbQueryer) GetAllInTable(tableName string) (output []map[string]string, err error) {
+	return q.Query("SELECT * FROM `" + tableName + "`")
 }
 
 func MustRunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
+	return GetDb().MustRunSelectCommand(selectCommand)
+}
+
+func (q DbQueryer) MustRunSelectCommand(selectCommand *MysqlAst.SelectCommand) (mapValue []map[string]string) {
 	output, paramList := selectCommand.GetPrepareParameter()
-	list, error := Query(output, paramList...)
+	list, error := q.Query(output, paramList...)
 	if error != nil {
 		panic(error)
 	}
 	return list
 }
 
+//事务不可以ping
 func Ping() (err error) {
 	return GetDb().Ping()
 }
 
+//事务不可以ping
 func MustPing() {
 	err := Ping()
 	if err != nil {

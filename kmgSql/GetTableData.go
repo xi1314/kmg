@@ -4,10 +4,10 @@ import "fmt"
 
 // get all data of a table
 // mostly for test
-func (db *Db) GetTableData(tableName string) (output []map[string]string, err error) {
+func (db *DB) GetTableData(tableName string) (output []map[string]string, err error) {
 	return Query(fmt.Sprintf("SELECT * FROM `%s`", tableName))
 }
-func (db *Db) MustGetTableData(tableName string) (output []map[string]string) {
+func (db *DB) MustGetTableData(tableName string) (output []map[string]string) {
 	output, err := db.GetTableData(tableName)
 	if err != nil {
 		panic(err)
@@ -15,7 +15,7 @@ func (db *Db) MustGetTableData(tableName string) (output []map[string]string) {
 	return
 }
 
-func (db *Db) GetTableDataMap(tableName string, pkName string) (output map[string]map[string]string, err error) {
+func (db *DB) GetTableDataMap(tableName string, pkName string) (output map[string]map[string]string, err error) {
 	grid, err := db.GetTableData(tableName)
 	output = make(map[string]map[string]string)
 	for _, row := range grid {
@@ -28,7 +28,7 @@ func (db *Db) GetTableDataMap(tableName string, pkName string) (output map[strin
 	return
 }
 
-func (db *Db) MustGetTableDataMap(tableName string, pkName string) (output map[string]map[string]string) {
+func (db *DB) MustGetTableDataMap(tableName string, pkName string) (output map[string]map[string]string) {
 	output, err := db.GetTableDataMap(tableName, pkName)
 	if err != nil {
 		panic(err)

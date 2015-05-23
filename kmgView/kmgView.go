@@ -24,3 +24,9 @@ type String string
 func (s String) HtmlRender() string {
 	return kmgXss.H(string(s))
 }
+
+type Html string
+
+func (s Html) HtmlRender() string {
+	return string(s)
+}
