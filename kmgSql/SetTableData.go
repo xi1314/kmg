@@ -8,6 +8,8 @@ import (
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 )
 
+//设置表数据
+// 注意会删除数据
 func MustSetTableDataYaml(yaml string) {
 	err := GetDb().SetTablesDataYaml(yaml)
 	if err != nil {
@@ -16,7 +18,7 @@ func MustSetTableDataYaml(yaml string) {
 }
 
 // @deprecated
-func (db *Db) MustSetTablesDataYaml(yaml string) {
+func (db DB) MustSetTablesDataYaml(yaml string) {
 	err := db.SetTablesDataYaml(yaml)
 	if err != nil {
 		panic(err)
@@ -24,7 +26,7 @@ func (db *Db) MustSetTablesDataYaml(yaml string) {
 }
 
 // @deprecated
-func (db *Db) SetTablesDataYaml(yaml string) (err error) {
+func (db DB) SetTablesDataYaml(yaml string) (err error) {
 	data := make(map[string][]map[string]string)
 	err = kmgYaml.Unmarshal([]byte(yaml), &data)
 	if err != nil {
@@ -40,10 +42,11 @@ func (db *Db) SetTablesDataYaml(yaml string) (err error) {
 // Set some tables data in this database.
 // mostly for test
 // not guarantee next increment id will be!!
-func (db *Db) SetTablesData(data map[string][]map[string]string) (err error) {
-	if err != nil {
-		return err
-	}
+//设置表数据
+// 注意:
+//   * 会删除数据
+//   * 保证 auto_increase 的值是数据里面的最大值+1
+func (db DB) SetTablesData(data map[string][]map[string]string) (err error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return err

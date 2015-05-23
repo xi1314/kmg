@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -86,6 +87,15 @@ func MustRequestFromString(reqString string) (req *http.Request) {
 // 如果出现错误,(对方服务器连不上之类的,不会修改w,会返回一个error
 // 不跟踪redirect(跟踪redirect会导致redirect的请求的内容被返回)
 func HttpProxyToWriter(w http.ResponseWriter, req *http.Request) (err error) {
+	resp, err := HttpRoundTrip(req)
+	if err != nil {
+		return err
+	}
+	HttpResponseToWrite(resp, w)
+	return
+}
+
+func HttpRoundTrip(req *http.Request) (resp *http.Response, err error) {
 	req.RequestURI = ""
 	if req.Proto == "" {
 		req.Proto = "HTTP/1.1"
@@ -93,10 +103,14 @@ func HttpProxyToWriter(w http.ResponseWriter, req *http.Request) (err error) {
 	if req.URL.Scheme == "" {
 		req.URL.Scheme = "http"
 	}
-	resp, err := http.DefaultTransport.RoundTrip(req)
+	resp, err = http.DefaultTransport.RoundTrip(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return
+}
+
+func HttpResponseToWrite(resp *http.Response, w http.ResponseWriter) {
 	defer resp.Body.Close()
 	for k, values := range resp.Header {
 		for _, value := range values {
@@ -105,7 +119,6 @@ func HttpProxyToWriter(w http.ResponseWriter, req *http.Request) (err error) {
 	}
 	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
-	return nil
 }
 
 //会把request里面的东西全部都读出来(body)
@@ -120,6 +133,14 @@ func HttpRequestClone(in *http.Request) (out *http.Request, err error) {
 		return
 	}
 	return
+}
+
+func MustHttpRequestClone(in *http.Request) *http.Request {
+	out, err := HttpRequestClone(in)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
 
 func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string) {
@@ -148,4 +169,21 @@ func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFileP
 		})
 	}
 	return nil
+}
+
+func AddUriProxyToDefaultServer(uri, targetUrl string) {
+	http.DefaultServeMux.HandleFunc(uri, func(w http.ResponseWriter, req *http.Request) {
+		proxyReq := MustHttpRequestClone(req)
+		target, err := url.Parse(targetUrl)
+		if err != nil {
+			panic(err)
+		}
+		proxyReq.Host = target.Host
+		proxyReq.URL.Host = target.Host
+		proxyReq.URL.Scheme = target.Scheme
+		err = HttpProxyToWriter(w, proxyReq)
+		if err != nil {
+			panic(err)
+		}
+	})
 }

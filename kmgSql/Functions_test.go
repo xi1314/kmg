@@ -102,6 +102,10 @@ func TestGetOneWhere(t *testing.T) {
 	one, err := GetOneWhere("kmgSql_test_table", "Id", "1")
 	Equal(err, nil)
 	Equal(one["Info"], "Hello")
+
+	one, err = GetOneWhere("kmgSql_test_table", "Id", "100")
+	Equal(err, nil)
+	Equal(one, nil)
 }
 
 func TestDeleteById(t *testing.T) {
@@ -121,16 +125,13 @@ func TestGetAllInTable(t *testing.T) {
 }
 
 func setTestSqlTable() {
-	_, err := Exec("DROP TABLE IF EXISTS `kmgSql_test_table`")
-	Equal(err, nil)
-	_, err = Exec("CREATE TABLE `kmgSql_test_table` ( `Id` int(11) NOT NULL AUTO_INCREMENT, `Info` varchar(255) COLLATE utf8_bin DEFAULT NULL, PRIMARY KEY (`Id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin")
-	Equal(err, nil)
-	err = GetDb().SetTablesDataYaml(`
+	MustExec("DROP TABLE IF EXISTS `kmgSql_test_table`")
+	MustExec("CREATE TABLE `kmgSql_test_table` ( `Id` int(11) NOT NULL AUTO_INCREMENT, `Info` varchar(255) COLLATE utf8_bin DEFAULT NULL, PRIMARY KEY (`Id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin")
+	MustSetTableDataYaml(`
 kmgSql_test_table:
   - Id: 1
     Info: Hello
   - Id: 2
     Info: World
 `)
-	Equal(err, nil)
 }
