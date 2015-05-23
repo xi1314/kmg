@@ -6,6 +6,6 @@ import (
 )
 
 func gitPull() {
-	branchName := kmgGit.DefaultRepository().MustCurrentBranchName()
+	branchName := kmgGit.DefaultRepository().MustGetCurrentBranchName()
 	kmgCmd.ProxyRun("git pull origin " + branchName)
 }

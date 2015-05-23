@@ -39,7 +39,24 @@ type Repository struct {
 	gitPath string
 }
 
-func (repo *Repository) MustCurrentBranchName() string {
-	output := kmgCmd.CmdString("git rev-parse --abbrev-ref HEAD").SetDir(repo.gitPath).MustRunAndReturnOutput()
+func (repo *Repository) MustGetCurrentBranchName() string {
+	output := kmgCmd.CmdString("git rev-parse --abbrev-ref HEAD").SetDir(repo.gitPath).MustCombinedOutput()
 	return strings.TrimSpace(string(output))
+}
+
+func (repo *Repository) MustGetIndexFileList() []string {
+	output := kmgCmd.CmdString("git ls-files").SetDir(repo.gitPath).MustCombinedOutput()
+	outputSlice:=[]string{}
+	for _,s:=range strings.Split(string(output),"\n"){
+		s=strings.TrimSpace(s)
+		if s==""{
+			continue
+		}
+		outputSlice = append(outputSlice,s)
+	}
+	return outputSlice
+}
+
+func (repo *Repository) MustIndexRemoveByPath(path string) {
+	kmgCmd.CmdSlice([]string{"git", "rm", "--cached","-r",path}).MustStdioRun()
 }

@@ -7,7 +7,7 @@ import (
 
 //把当前分支推到origin的当前分支,当前分支不一定是master
 func gitPush() {
-	branchName := kmgGit.DefaultRepository().MustCurrentBranchName()
+	branchName := kmgGit.DefaultRepository().MustGetCurrentBranchName()
 	kmgCmd.MustRunNotExistStatusCheck("git add -A")
 	kmgCmd.MustRunNotExistStatusCheck("git commit -am save")
 	kmgCmd.MustRunNotExistStatusCheck("git push origin " + branchName)

@@ -1,15 +1,13 @@
-// +build darwin
-
 package gitCmd
 
 import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgConsole"
-	git2go "github.com/libgit2/git2go"
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
 func init() {
@@ -35,39 +33,27 @@ func gitFixNameCaseCmd() {
 }
 
 func GitFixNameCase(basePath string) (err error) {
-	repo, err := git2go.OpenRepository(basePath)
+	repo,err:=kmgGit.GetRepositoryFromPath(basePath)
 	if err != nil {
 		return err
 	}
-	index, err := repo.Index()
-	if err != nil {
-		return err
-	}
-	indexCount := index.EntryCount()
 	caseDiffChangeArray := []string{}
-	for i := uint(0); i < indexCount; i++ {
-		ie, err := index.EntryByIndex(i)
-		if err != nil {
-			return err
-		}
+	for _,indexPath:=range repo.MustGetIndexFileList() {
 		//fullPath := filepath.Join(basePath, ie.Path)
-		isSameOrNotExist := checkOneFileFoldDiff(basePath, ie.Path)
+		isSameOrNotExist := checkOneFileFoldDiff(basePath, indexPath)
 		if isSameOrNotExist {
 			continue
 		}
 		//在index里面修复大小写错误
-		caseDiffChangeArray = append(caseDiffChangeArray, ie.Path)
+		caseDiffChangeArray = append(caseDiffChangeArray, indexPath)
 	}
 
 	if len(caseDiffChangeArray) > 0 {
 		fmt.Println("file name diff in case:")
 		for _, refPath := range caseDiffChangeArray {
 			fmt.Println("\t", refPath)
-			index.RemoveByPath(refPath)
-		}
-		err = index.Write()
-		if err != nil {
-			return err
+			repo.MustIndexRemoveByPath(refPath)
+			//index.RemoveByPath(refPath)
 		}
 	}
 	return nil
