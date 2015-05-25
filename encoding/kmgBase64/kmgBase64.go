@@ -19,7 +19,7 @@ func StdBase64DecodeByteToByte(s []byte) (out []byte, err error) {
 	return out[:nw], nil
 }
 
-func MustBase64EncodeStringToString(input string) string {
+func Base64EncodeStringToString(input string) string {
 	return base64.URLEncoding.EncodeToString([]byte(input))
 }
 
