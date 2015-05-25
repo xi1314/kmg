@@ -46,17 +46,17 @@ func (repo *Repository) MustGetCurrentBranchName() string {
 
 func (repo *Repository) MustGetIndexFileList() []string {
 	output := kmgCmd.CmdString("git ls-files").SetDir(repo.gitPath).MustCombinedOutput()
-	outputSlice:=[]string{}
-	for _,s:=range strings.Split(string(output),"\n"){
-		s=strings.TrimSpace(s)
-		if s==""{
+	outputSlice := []string{}
+	for _, s := range strings.Split(string(output), "\n") {
+		s = strings.TrimSpace(s)
+		if s == "" {
 			continue
 		}
-		outputSlice = append(outputSlice,s)
+		outputSlice = append(outputSlice, s)
 	}
 	return outputSlice
 }
 
 func (repo *Repository) MustIndexRemoveByPath(path string) {
-	kmgCmd.CmdSlice([]string{"git", "rm", "--cached","-r",path}).MustStdioRun()
+	kmgCmd.CmdSlice([]string{"git", "rm", "--cached", "-r", path}).MustStdioRun()
 }

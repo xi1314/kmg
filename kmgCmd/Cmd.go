@@ -141,9 +141,9 @@ func (c *Cmd) MustRunAndReturnOutput() (b []byte) {
 }
 
 //允许命令,返回命令的内容,不回显任何东西
-func (c *Cmd) MustCombinedOutput() (b []byte){
+func (c *Cmd) MustCombinedOutput() (b []byte) {
 	b, err := c.cmd.CombinedOutput()
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 	return b

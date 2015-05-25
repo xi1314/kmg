@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgConsole"
+	"github.com/bronze1man/kmg/third/kmgGit"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
 func init() {
@@ -33,12 +33,12 @@ func gitFixNameCaseCmd() {
 }
 
 func GitFixNameCase(basePath string) (err error) {
-	repo,err:=kmgGit.GetRepositoryFromPath(basePath)
+	repo, err := kmgGit.GetRepositoryFromPath(basePath)
 	if err != nil {
 		return err
 	}
 	caseDiffChangeArray := []string{}
-	for _,indexPath:=range repo.MustGetIndexFileList() {
+	for _, indexPath := range repo.MustGetIndexFileList() {
 		//fullPath := filepath.Join(basePath, ie.Path)
 		isSameOrNotExist := checkOneFileFoldDiff(basePath, indexPath)
 		if isSameOrNotExist {
