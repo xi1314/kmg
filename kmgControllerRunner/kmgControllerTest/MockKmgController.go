@@ -1,7 +1,8 @@
-package kmgControllerRunner
+package kmgControllerTest
 
 import (
 	"bytes"
+	"github.com/bronze1man/kmg/kmgControllerRunner"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"io"
 	"io/ioutil"
@@ -17,7 +18,7 @@ func CallApiByHttp(uri string, c *kmgHttp.Context) string {
 }
 
 func CallApiByHttpWithUploadFile(uri string, c *kmgHttp.Context, uploadFileList map[string]string) string {
-	server := httptest.NewServer(HttpHandler)
+	server := httptest.NewServer(kmgControllerRunner.HttpHandler)
 	defer server.Close()
 	var response *http.Response
 	var err error

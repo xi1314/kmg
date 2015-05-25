@@ -1,6 +1,7 @@
-package kmgControllerRunner
+package kmgControllerTest
 
 import (
+	"github.com/bronze1man/kmg/kmgControllerRunner"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	. "github.com/bronze1man/kmg/kmgTest"
 	"io/ioutil"
@@ -23,18 +24,18 @@ func TestMockCallApi(t *testing.T) {
 }
 
 func TestCallApiGet(t *testing.T) {
-	RegisterController(TestObj{})
+	kmgControllerRunner.RegisterController(TestObj{})
 	out := CallApiByHttp(
-		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.TestObj.TestFunc&a=10",
+		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestFunc&a=10",
 		&kmgHttp.Context{Method: "GET"},
 	)
 	Equal(out, "11")
 }
 
 func TestCallApiPost(t *testing.T) {
-	RegisterController(TestObj{})
+	kmgControllerRunner.RegisterController(TestObj{})
 	out := CallApiByHttp(
-		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.TestObj.TestFunc",
+		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestFunc",
 		&kmgHttp.Context{
 			Method: "POST",
 			Request: map[string]string{
@@ -54,8 +55,8 @@ func TestUploadFile(t *testing.T) {
 	}
 	file.WriteString("hello")
 	file.Close()
-	RegisterController(TestObj{})
-	out := CallApiByHttpWithUploadFile("/?n=github.com.bronze1man.kmg.kmgControllerRunner.TestObj.TestHandleUploadFile",
+	kmgControllerRunner.RegisterController(TestObj{})
+	out := CallApiByHttpWithUploadFile("/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestHandleUploadFile",
 		&kmgHttp.Context{
 			Method: "POST",
 			Request: map[string]string{
