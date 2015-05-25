@@ -2,6 +2,8 @@ package kmgSql
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/encoding/kmgYaml"
+	"github.com/bronze1man/kmg/kmgConfig"
 )
 
 type DbConfig struct {
@@ -45,4 +47,25 @@ func GetDefaultDbConfig() *DbConfig {
 		panic("you need use SetDefaultDbConfig to set the config")
 	}
 	return defaultDbConfig
+}
+
+type TestDbConf struct {
+	Db *DbConfig
+}
+
+func MustLoadTestConfig() {
+	mustLoadConfigByFilename("Test.yml")
+}
+
+func MustLoadProdConfig() {
+	mustLoadConfigByFilename("Prod.yml")
+}
+
+func mustLoadConfigByFilename(filename string) {
+	conf := TestDbConf{}
+	err := kmgYaml.ReadFile(kmgConfig.DefaultEnv().PathInConfig(filename), &conf)
+	if err != nil {
+		panic(err)
+	}
+	SetDefaultDbConfig(conf.Db)
 }
