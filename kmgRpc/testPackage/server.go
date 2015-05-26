@@ -21,3 +21,28 @@ type DemoRequest struct {
 func (s *Demo) DemoFunc2(Req1 DemoRequest, Req2 *DemoRequest) (err error) {
 	return nil
 }
+
+//返回参数没有名字
+func (s *Demo) DemoFunc3(Req1 DemoRequest, Req2 *DemoRequest) error {
+	return nil
+}
+
+//没有返回参数
+func (s *Demo) DemoFunc4(Req1 DemoRequest, Req2 *DemoRequest) {
+	return
+}
+
+//有返回参数,但是不包含error
+func (s *Demo) DemoFunc5(Req1 DemoRequest, Req2 *DemoRequest) (Info string) {
+	return ""
+}
+
+//不管私有方法
+func (s *Demo) demoFunc6(Req1 DemoRequest, Req2 *DemoRequest) (Info string) {
+	return ""
+}
+
+//返回值变成一个参数
+func (s *Demo) DemoFunc7(Req1 DemoRequest, Req2 *DemoRequest) (Response string) {
+	return ""
+}

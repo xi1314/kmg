@@ -1,6 +1,7 @@
 package kmgRpc
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgBase64"
 	"github.com/bronze1man/kmg/kmgGoSource"
 	"golang.org/x/tools/go/types"
@@ -33,6 +34,9 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 	//获取 object的 上面所有的方法
 	methodList := kmgGoSource.MustGetMethodListFromGoTypes(ObjTyp)
 	for _, methodObj := range methodList {
+		if !methodObj.Obj().Exported() {
+			continue
+		}
 		api := Api{
 			Name: methodObj.Obj().Name(),
 		}
@@ -48,8 +52,16 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 		}
 		for i := 0; i < methodTyp.Results().Len(); i++ {
 			pairObj := methodTyp.Results().At(i)
+			name := pairObj.Name()
+			if name == "" {
+				if pairObj.Type().String() == "error" { //TODO 不要特例
+					name = "err"
+				} else {
+					name = fmt.Sprintf("out_%d", i)
+				}
+			}
 			pair := ArgumentNameTypePair{
-				Name: pairObj.Name(),
+				Name: name,
 			}
 			pair.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, pairObj.Type())
 			config.mergeImportPath(importPathList)
