@@ -9,7 +9,7 @@ import (
 
 func StartServerCommand() {
 	req := ServerRequest{}
-	flag.StringVar(&req.HttpAddr, "http", ":80", "listen addr")
+	flag.StringVar(&req.HttpAddr, "http", ":8080", "listen addr") //默认值应该不需要root权限.
 	flag.StringVar(&req.HttpsAddr, "https", ":443", "")
 	flag.StringVar(&req.HttpsCertFilePath, "certFile", "", "")
 	flag.StringVar(&req.HttpsKeyFilePath, "keyFile", "", "")

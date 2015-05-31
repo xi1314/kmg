@@ -1,8 +1,9 @@
-package kmgHttp
+package kmgTextEncoding
 
 import (
 	"bytes"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 	"io/ioutil"
@@ -23,8 +24,8 @@ var encodingGuessList []encodingType = []encodingType{
 }
 
 //目前只处理了编码是 shift_jis 时的情况
-func ResponseToUtf8(res *http.Response) []byte {
-	body := MustResponseReadAllBody(res)
+func HttpResponseToUtf8(res *http.Response) []byte {
+	body := kmgHttp.MustResponseReadAllBody(res)
 	out := []byte{}
 	isKnownEncoding := false
 	for _, encoding := range encodingGuessList {
@@ -60,7 +61,7 @@ func isResponseEncodingBy(encoding encodingType, res *http.Response) bool {
 	if charset != "" {
 		return false
 	}
-	buf := MustResponseReadAllBody(res)
+	buf := kmgHttp.MustResponseReadAllBody(res)
 	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(buf))
 	if err != nil {
 		panic(err)
