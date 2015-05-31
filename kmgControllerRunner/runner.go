@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var EnterPointApiName = "Sig.Front.Front.IndexPage"
+var EnterPointApiName = ""
 var controllerObjMap = map[string]func(ctx *kmgHttp.Context){} //key 带点号的完整的类名.
 var controllerFuncType = reflect.TypeOf((func(ctx *kmgHttp.Context))(nil))
 
