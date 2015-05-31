@@ -18,10 +18,10 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 	toChange := false
 	cacheInfo := map[string]string{}
 	cacheFilePath := getFileChangeCachePath(key)
-	kmgFile.MustMkdirForFile(cacheFilePath)
 	err := kmgGob.ReadFile(cacheFilePath, &cacheInfo)
-	if err != nil && !os.IsNotExist(err) {
-		panic(err)
+	if err != nil {
+		//忽略缓存读取的任何错误
+		cacheInfo = map[string]string{}
 	}
 	for _, path := range pathList {
 		statList, err := kmgFile.GetAllFileAndDirectoryStat(path)
@@ -67,6 +67,7 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 			cacheInfo[stat.FullPath] = kmgCrypto.MustMd5File(stat.FullPath)
 		}
 	}
+	kmgFile.MustMkdirForFile(cacheFilePath)
 	kmgGob.MustWriteFile(cacheFilePath, cacheInfo)
 	//保存文件缓存信息
 	return

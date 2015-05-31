@@ -18,10 +18,9 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 	toChange := false
 	cacheInfo := map[string]time.Time{}
 	cacheFilePath := getFileChangeCachePath(key)
-	kmgFile.MustMkdirForFile(cacheFilePath)
 	err := kmgGob.ReadFile(cacheFilePath, &cacheInfo)
-	if err != nil && !os.IsNotExist(err) {
-		panic(err)
+	if err != nil {
+		cacheInfo = map[string]time.Time{}
 	}
 	for _, path := range pathList {
 		statList, err := kmgFile.GetAllFileAndDirectoryStat(path)
@@ -71,6 +70,7 @@ func MustFileChangeCache(key string, pathList []string, f func()) {
 			cacheInfo[stat.FullPath] = stat.Fi.ModTime()
 		}
 	}
+	kmgFile.MustMkdirForFile(cacheFilePath)
 	kmgGob.MustWriteFile(cacheFilePath, cacheInfo)
 	//保存文件缓存信息
 	return

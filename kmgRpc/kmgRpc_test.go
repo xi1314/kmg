@@ -8,20 +8,6 @@ import (
 	"testing"
 )
 
-func TestReflectToTplConfig(t *testing.T) {
-	conf := reflectToTplConfig(
-		GenerateRequest{
-			Object:               &testPackage.Demo{},
-			ObjectName:           "Demo",
-			OutFilePath:          "testPackage/generated.go",
-			OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
-		},
-	)
-	kmgTest.Equal(len(conf.ApiList), 2)
-	kmgTest.Equal(conf.ApiList[0].Name, "DemoFunc2")
-	kmgTest.Equal(conf.ApiList[1].Name, "PostScoreInt")
-}
-
 func TestMustGenerateCode(t *testing.T) {
 	kmgFile.MustDeleteFile("testPackage/generated.go")
 	MustGenerateCode(GenerateRequest{
@@ -31,8 +17,25 @@ func TestMustGenerateCode(t *testing.T) {
 		OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
 	})
 	kmgCmd.CmdString("kmg go test").SetDir("testPackage").Run()
-
 }
+
+func TestReflectToTplConfig(t *testing.T) {
+	conf := reflectToTplConfig(
+		GenerateRequest{
+			Object:               &testPackage.Demo{},
+			ObjectName:           "Demo",
+			OutFilePath:          "testPackage/generated.go",
+			OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
+		},
+	)
+	kmgTest.Equal(len(conf.ApiList), 5)
+	for i, name := range []string{
+		"DemoFunc2", "DemoFunc3", "DemoFunc4", "DemoFunc5", "PostScoreInt",
+	} {
+		kmgTest.Equal(conf.ApiList[i].Name, name)
+	}
+}
+
 func TestTplGenerateCode(t *testing.T) {
 	out := tplGenerateCode(tplConfig{
 		OutPackageName: "testPackage",
