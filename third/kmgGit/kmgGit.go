@@ -97,7 +97,7 @@ func (repo *Repository) MustIndexAddFile(path string) {
 
 func (repo *Repository) MustIsFileIgnore(path string) bool {
 	return kmgCmd.CmdSlice([]string{"git", "check-ignore", path}).SetDir(repo.gitPath).
-		MustHiddenRunAndGetExitStatus() == 0
+		MustHiddenRunAndIsSuccess()
 }
 
 func (repo *Repository) MustGetAllParentCommitId(commitId string) []string {
