@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
@@ -141,9 +142,9 @@ func (c *Cmd) MustRunAndReturnOutput() (b []byte) {
 }
 
 //允许命令,返回命令的内容,不回显任何东西
-func (c *Cmd) MustCombinedOutput() (b []byte){
+func (c *Cmd) MustCombinedOutput() (b []byte) {
 	b, err := c.cmd.CombinedOutput()
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 	return b
@@ -161,4 +162,15 @@ func (c *Cmd) MustRun() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *Cmd) MustHiddenRunAndGetExitStatus() int {
+	err := c.cmd.Run()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if !ok {
+			panic(err)
+		}
+	}
+	return int(c.cmd.ProcessState.Sys().(syscall.WaitStatus))
 }
