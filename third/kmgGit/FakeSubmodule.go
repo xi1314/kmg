@@ -14,6 +14,10 @@ type SubRepositoryInfo struct {
 	CommitId  string
 }
 
+//TODO 修复bug: A commit了一个子项目,B update这个子项目 ,A 删除了一种的一个子项目,并且commit到远程分支,B update了这个子项目,此时 B会加入这个子项目的真submodule
+//TODO 修复bug: origin/master的实时性不强的问题.
+//TODO 修复bug时,写测试.
+
 //把当前项目里面的所有的子项目都变成伪submodule,并且保存版本信息到.gitFakeSubmodule 中
 func (repo *Repository) MustFakeSubmoduleCommit() {
 	//把当前目录下面的所有叫.git的目录都翻出来
@@ -36,7 +40,6 @@ func (repo *Repository) MustFakeSubmoduleCommit() {
 			return nil
 		}
 		//记录版本号
-		//TODO 确认origin/master有这个commitid,如果没有报一个warning.
 		subRepo := MustGetRepositoryFromPath(path)
 		commitId := subRepo.MustGetHeadCommitId()
 		if !subRepo.MustIsInParent("origin/master", commitId) {
