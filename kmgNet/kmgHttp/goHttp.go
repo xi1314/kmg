@@ -3,6 +3,8 @@ package kmgHttp
 import (
 	"bufio"
 	"bytes"
+	"fmt"
+	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {
@@ -150,6 +153,11 @@ func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string)
 	}
 }
 
+//清空默认的Http服务器的路径表
+func ClearHttpDefaultServer() {
+	http.DefaultServeMux = http.NewServeMux()
+}
+
 func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFilePath string) error {
 	fi, err := os.Stat(localFilePath)
 	if err != nil {
@@ -186,4 +194,62 @@ func AddUriProxyToDefaultServer(uri, targetUrl string) {
 			panic(err)
 		}
 	})
+}
+
+func Redirect301ToNewHost(w http.ResponseWriter, req *http.Request, scheme string, host string) {
+	u := req.URL
+	u.Host = host
+	if u.Scheme == "" {
+		u.Scheme = scheme
+	}
+	http.Redirect(w, req, u.String(), 301)
+}
+
+func MustUrlGetContentProcess(url string) (b []byte) {
+	fmt.Print("\nConnnecting\r")
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	printProgress(0, resp.ContentLength, 0, 0)
+	defer resp.Body.Close()
+	buf := bytes.Buffer{}
+	bufBytes := make([]byte, 32*1024)
+	lastTime := time.Now()
+	lastBytes := 0
+	for {
+		n, err := resp.Body.Read(bufBytes)
+		if n > 0 {
+			buf.Write(bufBytes[:n])
+			now := time.Now()
+			if now.After(lastTime.Add(100 * time.Millisecond)) {
+				thisBytes := buf.Len()
+				printProgress(int64(thisBytes), resp.ContentLength, now.Sub(lastTime), thisBytes-lastBytes)
+				lastTime = now
+				lastBytes = thisBytes
+			}
+		}
+		if err == io.EOF {
+			return buf.Bytes()
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func printProgress(get int64, total int64, dur time.Duration, lastBytes int) {
+	percent := 0.0
+	if total <= 0 {
+		percent = 0.0
+	} else if total < get {
+		percent = 1.0
+	} else {
+		percent = float64(get) / float64(total)
+	}
+	showNum := int(percent * 40)
+	notShowNum := 40 - showNum
+	fmt.Printf("%s%s %.2f%% %s/%s %s     \r",
+		strings.Repeat("#", showNum), strings.Repeat(" ", notShowNum), percent*100,
+		kmgNet.SizeString(get), kmgNet.SizeString(total), kmgNet.SpeedString(lastBytes, dur))
 }

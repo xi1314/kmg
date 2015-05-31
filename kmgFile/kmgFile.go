@@ -107,6 +107,14 @@ func FileExist(path string) (exist bool, err error) {
 	return true, err
 }
 
+func MustFileExist(path string) bool {
+	exist, err := FileExist(path)
+	if err != nil {
+		panic(err)
+	}
+	return exist
+}
+
 //from http://stackoverflow.com/a/13027975/1586797
 func RemoveExtFromFilePath(path string) string {
 	return path[:len(path)-len(filepath.Ext(path))]
@@ -196,4 +204,11 @@ func MustChangeToTmpPath() string {
 		panic(err)
 	}
 	return folder
+}
+
+func MustRename(oldpath string, newpath string) {
+	err := os.Rename(oldpath, newpath)
+	if err != nil {
+		panic(err)
+	}
 }

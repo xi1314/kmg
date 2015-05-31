@@ -2,6 +2,7 @@ package kmgGoSource
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCmd"
 	"go/ast"
 	_ "golang.org/x/tools/go/gcimporter"
 	"golang.org/x/tools/go/types"
@@ -44,9 +45,16 @@ func MustWriteGoTypes(thisPackagePath string, typi types.Type) (s string, addPkg
 	case *types.Pointer:
 		s, addPkgPathList = MustWriteGoTypes(thisPackagePath, typ.Elem())
 		return "*" + s, addPkgPathList
+	case *types.Slice:
+		s, addPkgPathList = MustWriteGoTypes(thisPackagePath, typ.Elem())
+		return "[]" + s, addPkgPathList
+	case *types.Interface:
+		return typ.String(), nil
+		//s, addPkgPathList = MustWriteGoTypes(thisPackagePath, typ.Elem())
+		//return "[]" + s, addPkgPathList
 	default:
-		panic(fmt.Errorf("[MustWriteGoTypes] Not implement go/types [%T]",
-			typi))
+		panic(fmt.Errorf("[MustWriteGoTypes] Not implement go/types [%T] [%s]",
+			typi, typi.String()))
 	}
 	return "", nil
 }
@@ -67,6 +75,8 @@ func MustGetMethodListFromGoTypes(typ types.Type) (output []*types.Selection) {
 //返回这个导入路径的主Package的types.Package对象
 //TODO 解决测试package的问题
 func MustNewGoTypesMainPackageFromImportPath(importPath string) *types.Package {
+	kmgCmd.CmdSlice([]string{"kmg", "go", "install", importPath}).MustRun()
+	kmgCmd.CmdSlice([]string{"kmg", "go", "test", "-i", importPath}).MustRun()
 	//TODO 解决需要预先创建pkg的问题.
 	astPkg, fset := MustNewMainAstPackageFromImportPath(importPath)
 	astFileList := []*ast.File{}

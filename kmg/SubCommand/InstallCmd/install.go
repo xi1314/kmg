@@ -10,10 +10,10 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
-	"os"
 )
 
 func AddCommandList() {
+
 	kmgConsole.AddAction(kmgConsole.Command{
 		Name:   "install",
 		Desc:   "install tool",
@@ -21,23 +21,10 @@ func AddCommandList() {
 	})
 }
 
-var toolList = []kmgConsole.Command{}
-
-func addTool(name string, f func()) {
-	toolList = append(toolList, kmgConsole.Command{
-		Name:   name,
-		Runner: f,
-	})
-}
-
 func installCmd() {
-	addTool("golang", installGolang)
-	for _, cmd := range toolList {
-		if cmd.Name == os.Args[1] {
-			cmd.Runner()
-			return
-		}
-	}
+	cg := kmgConsole.NewCommandGroup()
+	cg.AddCommandWithName("golang", installGolang)
+	cg.Main()
 }
 
 /*
@@ -48,6 +35,7 @@ func installCmd() {
 	* 如果已经安装 cp -rf go /usr/local/go 会再创建一个/usr/local/go/go 目录,而不是更新它
 	* 如果已经在/usr/local/bin/go处放了一个执行,又在/bin/go处放了一个执行文件, /bin/go的版本不会被使用,使用函数专门判断这种情况,并且把多余的去除掉
 	* 如果上一种情况发生,当前bash不能执行go version,因为当前bash有路径查询缓存(暂时无解了..)
+	* TODO 国外服务器因为网络太卡而不能安装
 */
 func installGolang() {
 	p := kmgPlatform.GetCompiledPlatform()
@@ -75,13 +63,13 @@ func installGolang() {
 	switch {
 	case p.Compatible(kmgPlatform.LinuxAmd64):
 		packageName = "go1.4.2.linux-amd64.tar.gz"
+		kmgCmd.ProxyRun("apt-get install -y gcc")
 	case p.Compatible(kmgPlatform.DarwinAmd64):
 		packageName = "go1.4.2.darwin-amd64-osx10.8.tar.gz"
 	default:
 		kmgConsole.ExitOnErr(fmt.Errorf("not support platform [%s]", p))
 	}
-	contentB, err := kmgHttp.UrlGetContent("http://kmgtools.qiniudn.com/v1/" + packageName)
-	kmgConsole.ExitOnErr(err)
+	contentB := kmgHttp.MustUrlGetContentProcess("http://kmgtools.qiniudn.com/v1/" + packageName)
 
 	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)

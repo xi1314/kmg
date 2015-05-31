@@ -1,10 +1,8 @@
 package gitCmd
 
-/*
 import (
 	"github.com/bronze1man/kmg/kmgConsole"
-    "path/filepath"
-    "os"
+	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
 // fake     //伪造submodule
@@ -13,19 +11,13 @@ import (
 // status
 func init() {
 	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GitSubmoduleInit",
-		Desc:   "git fake submodule init",
-		Runner: GitSubmoduleInit,
+		Name:   "GitSubmoduleCommit",
+		Desc:   "git fake submodule Commit",
+		Runner: func() { kmgGit.DefaultRepository().MustFakeSubmoduleCommit() },
 	})
-
+	kmgConsole.AddAction(kmgConsole.Command{
+		Name:   "GitSubmoduleUpdate",
+		Desc:   "git fake submodule Update",
+		Runner: func() { kmgGit.DefaultRepository().MustFakeSubmoduleUpdate() },
+	})
 }
-
-func GitSubmoduleInit() {
-    //把当前目录下面的所有叫.git的目录都翻出来
-    wd,err:=os.Getwd()
-    kmgConsole.ExitOnErr(err)
-    err = filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-
-    })
-}
-*/
