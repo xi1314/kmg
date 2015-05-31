@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 )
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
