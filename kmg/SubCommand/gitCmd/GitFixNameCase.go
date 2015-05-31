@@ -33,6 +33,7 @@ func gitFixNameCaseCmd() {
 }
 
 func GitFixNameCase(basePath string) (err error) {
+	folderFileCache = map[string][]string{}
 	repo, err := kmgGit.GetRepositoryFromPath(basePath)
 	if err != nil {
 		return err

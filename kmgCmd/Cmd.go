@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
@@ -161,4 +162,15 @@ func (c *Cmd) MustRun() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *Cmd) MustHiddenRunAndGetExitStatus() int {
+	err := c.cmd.Run()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if !ok {
+			panic(err)
+		}
+	}
+	return int(c.cmd.ProcessState.Sys().(syscall.WaitStatus))
 }
