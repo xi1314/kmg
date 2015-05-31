@@ -153,6 +153,11 @@ func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string)
 	}
 }
 
+//清空默认的Http服务器的路径表
+func ClearHttpDefaultServer() {
+	http.DefaultServeMux = http.NewServeMux()
+}
+
 func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFilePath string) error {
 	fi, err := os.Stat(localFilePath)
 	if err != nil {
@@ -189,6 +194,15 @@ func AddUriProxyToDefaultServer(uri, targetUrl string) {
 			panic(err)
 		}
 	})
+}
+
+func Redirect301ToNewHost(w http.ResponseWriter, req *http.Request, scheme string, host string) {
+	u := req.URL
+	u.Host = host
+	if u.Scheme == "" {
+		u.Scheme = scheme
+	}
+	http.Redirect(w, req, u.String(), 301)
 }
 
 func MustUrlGetContentProcess(url string) (b []byte) {
