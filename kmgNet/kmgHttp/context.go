@@ -216,6 +216,24 @@ func (c *Context) SessionGetStr(key string) string {
 	return c.sessionMap[key]
 }
 
+func (c *Context) SessionSetJson(key string, value interface{}) *Context {
+	json, err := json.Marshal(value)
+	if err != nil {
+		panic(err) //不能Marshal一定是代码的问题
+	}
+	c.SessionSetStr(key, string(json))
+	return c
+}
+
+func (c *Context) SessionGetJson(key string, obj interface{}) (err error) {
+	out := c.SessionGetStr(key)
+	if out == "" {
+		return errors.New("Session Empty")
+	}
+	err = json.Unmarshal([]byte(out), obj)
+	return err
+}
+
 //清除Session里面的内容.
 //更换Session的Id.
 func (c *Context) SessionClear() *Context {

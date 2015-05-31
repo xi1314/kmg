@@ -79,6 +79,9 @@ func (context *Env) PathInConfig(relPath string) string {
 func (context *Env) PathInTmp(relPath string) string {
 	return filepath.Join(context.TmpPath, relPath)
 }
+func (context *Env) PathInData(relPath string) string {
+	return filepath.Join(context.DataPath, relPath)
+}
 func (context *Env) MustGetPathFromImportPath(importPath string) string {
 	for _, gopath := range context.GOPATH {
 		thisPath := filepath.Join(gopath, "src", importPath)
