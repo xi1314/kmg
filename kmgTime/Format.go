@@ -21,6 +21,9 @@ var ParseFormatGuessList = []string{
 	Iso3339Second,
 }
 
+var MysqlStart = "0000-01-01 00:00:00"
+var MysqlEnd = "9999-12-31 23:59:59"
+
 //输出成mysql的格式,并且使用默认时区,并且在0值的时候输出空字符串
 func DefaultFormat(t time.Time) string {
 	if t.IsZero() {

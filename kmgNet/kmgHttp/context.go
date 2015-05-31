@@ -105,11 +105,15 @@ func (c *Context) InNum(key string) int {
 
 //根据key返回输入参数,包括post和url的query的数据,如果没有返回"" 类型为string
 func (c *Context) InStr(key string) string {
-	value, ok := c.Request[key]
-	if !ok {
-		return ""
+	return c.Request[key]
+}
+
+func (c *Context) InStrDefault(key string, def string) string {
+	out := c.Request[key]
+	if out == "" {
+		return def
 	}
-	return value
+	return out
 }
 
 func (c *Context) MustPost() {
@@ -131,6 +135,10 @@ func (c *Context) MustInNum(key string) int {
 		panic(fmt.Errorf("Need %s parameter", key))
 	}
 	return s
+}
+
+func (c *Context) InHas(key string) bool {
+	return c.Request[key] != ""
 }
 
 func (c *Context) MustInStr(key string) string {
@@ -312,11 +320,6 @@ func (c *Context) GetResponseContent() []byte {
 }
 
 /*
-目前用的比较少
-func (c *Context)InHas(key string)bool{
-    return false
-}
-
 //这个返回类型可能有问题
 func (c *Context)InArray(key string)[]string{
     return nil

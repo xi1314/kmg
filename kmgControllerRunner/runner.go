@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var EnterPointApiName = ""
+var EnterPointApiName = "Sig.Front.Front.IndexPage"
 var controllerObjMap = map[string]func(ctx *kmgHttp.Context){} //key 带点号的完整的类名.
 var controllerFuncType = reflect.TypeOf((func(ctx *kmgHttp.Context))(nil))
 
@@ -85,6 +85,7 @@ func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 		ctx.NotFound("api not found")
 		return
 	}
+
 	apiFunc(ctx)
 	return
 }

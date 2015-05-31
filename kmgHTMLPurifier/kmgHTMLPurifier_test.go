@@ -15,6 +15,6 @@ func TestHTMLPurifier(t *testing.T) {
 	}
 	for _, content := range input {
 		output := kmgHTMLPurifier.HTMLPurifier(content)
-		kmgTest.Ok(len(strings.Split(output, "alert")) < 2)
+		kmgTest.Ok(!strings.Contains(output, "alert"))
 	}
 }

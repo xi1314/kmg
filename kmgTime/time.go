@@ -11,18 +11,6 @@ const (
 
 var DefaultTimeZone = BeijingZone
 
-func ParseAutoInLocal(sTime string) (t time.Time, err error) {
-	return ParseAutoInLocation(sTime, time.Local)
-}
-
-func MustParseAutoInLocal(sTime string) (t time.Time) {
-	t, err := ParseAutoInLocation(sTime, time.Local)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
 //auto guess format from ParseFormatGuessList
 func ParseAutoInLocation(sTime string, loc *time.Location) (t time.Time, err error) {
 	for _, format := range ParseFormatGuessList {
@@ -33,6 +21,14 @@ func ParseAutoInLocation(sTime string, loc *time.Location) (t time.Time, err err
 	}
 	err = fmt.Errorf("[ParseAutoInLocation] time: %s can not parse", sTime)
 	return
+}
+
+func MustParseAutoInDefault(sTime string) (t time.Time) {
+	t, err := ParseAutoInLocation(sTime, DefaultTimeZone)
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
 
 //utc time
@@ -78,7 +74,7 @@ func ToDateString(t time.Time) string {
 	return t.Format(FormatDateMysql)
 }
 
-//规则到日期,去掉时分秒
+//规整到日期,去掉时分秒
 func ToDate(t time.Time) time.Time {
 	y, m, d := t.Date()
 	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())

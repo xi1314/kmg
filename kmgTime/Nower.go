@@ -12,7 +12,7 @@ type FixedNower struct {
 	Time time.Time
 }
 
-var DefaultNower tDefaultNower
+var NowTime Nower = tDefaultNower{}
 
 func GetDefaultNower() Nower {
 	return DefaultNower
