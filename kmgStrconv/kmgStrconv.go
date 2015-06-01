@@ -8,5 +8,9 @@ func AtoIDefault0(s string) int {
 }
 
 func FormatFloat(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
+	return strconv.FormatFloat(f, 'f', -1, 64)
+}
+
+func ParseFloat64(f string) (float64, error) {
+	return strconv.ParseFloat(f, 64)
 }

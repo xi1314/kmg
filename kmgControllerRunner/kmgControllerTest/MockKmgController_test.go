@@ -13,21 +13,18 @@ import (
 var i int = 1
 
 func TestMockCallApi(t *testing.T) {
-	c := &kmgHttp.Context{
-		Method: "POST",
-		Request: map[string]string{
-			"a": "1",
-		},
-	}
+	c := kmgHttp.NewTestContext().
+		SetPost().
+		SetInStr("a", "1")
 	TestObj{}.TestFunc(c)
-	Equal(c.Response, "2")
+	Equal(c.GetResponseString(), "2")
 }
 
 func TestCallApiGet(t *testing.T) {
 	kmgControllerRunner.RegisterController(TestObj{})
 	out := CallApiByHttp(
 		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestFunc&a=10",
-		&kmgHttp.Context{Method: "GET"},
+		kmgHttp.NewTestContext(),
 	)
 	Equal(out, "11")
 }
@@ -36,13 +33,9 @@ func TestCallApiPost(t *testing.T) {
 	kmgControllerRunner.RegisterController(TestObj{})
 	out := CallApiByHttp(
 		"/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestFunc",
-		&kmgHttp.Context{
-			Method: "POST",
-			Request: map[string]string{
-				"a": "1",
-			},
-		},
-	)
+		kmgHttp.NewTestContext().
+			SetPost().
+			SetInStr("a", "1"))
 	Equal(out, "2")
 }
 
@@ -57,12 +50,9 @@ func TestUploadFile(t *testing.T) {
 	file.Close()
 	kmgControllerRunner.RegisterController(TestObj{})
 	out := CallApiByHttpWithUploadFile("/?n=github.com.bronze1man.kmg.kmgControllerRunner.kmgControllerTest.TestObj.TestHandleUploadFile",
-		&kmgHttp.Context{
-			Method: "POST",
-			Request: map[string]string{
-				"a": "10",
-			},
-		},
+		kmgHttp.NewTestContext().
+			SetPost().
+			SetInStr("a", "10"),
 		map[string]string{
 			"UFile": "/tmp/UFile.md",
 		},
@@ -74,11 +64,11 @@ type TestObj struct{}
 
 func (t TestObj) TestFunc(ctx *kmgHttp.Context) {
 	a := ctx.InNum("a")
-	ctx.Response = strconv.Itoa(a + i)
+	ctx.WriteString(strconv.Itoa(a + i))
 }
 
 func (t TestObj) TestHandleUploadFile(ctx *kmgHttp.Context) {
-	fileInfo := ctx.InFile("UFile")
+	fileInfo := ctx.MustInFile("UFile")
 	file, err := fileInfo.Open()
 	if err != nil {
 		panic(err)

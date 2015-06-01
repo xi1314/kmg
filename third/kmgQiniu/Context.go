@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Context struct {
@@ -155,6 +156,62 @@ func (ctx *Context) RemovePrefix(prefix string) (err error) {
 	ctx.singleContextCheck()
 	prefix = strings.TrimPrefix(prefix, "/")
 	return RemovePrefix(ctx, prefix)
+}
+
+// 目录开头带 / 或不带 / 效果一致
+func (ctx *Context) MustRemoveBatch(PathList []string) {
+	ctx.singleContextCheck()
+	if len(PathList) == 0 {
+		return
+	}
+	//这个好像也有1000个文件的限制.
+	deleteItemList := make([]rs.EntryPath, 0, len(PathList))
+	length := len(PathList)
+	for i := 0; i < length; i += 1000 {
+		end := i + 1000
+		if end > length {
+			end = length
+		}
+		deleteItemList = deleteItemList[0:0]
+		for j := i; j < end; j++ {
+			path := strings.TrimPrefix(PathList[j], "/")
+			deleteItemList = append(deleteItemList, rs.EntryPath{
+				Key:    path,
+				Bucket: ctx.bucket,
+			})
+		}
+		_, err := ctx.client.BatchDelete(nil, deleteItemList)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+}
+
+type FileInfo struct {
+	Path    string
+	Hash    string
+	Size    int64
+	ModTime time.Time
+	//还有几个字段暂时用不着.
+}
+
+// 返回的path前面不带 /
+func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
+	ctx.singleContextCheck()
+	prefix = strings.TrimPrefix(prefix, "/")
+	entries, err := ListPrefix(ctx, prefix)
+	if err != nil {
+		panic(err)
+	}
+	output = make([]FileInfo, len(entries))
+	for i := range entries {
+		output[i].Path = entries[i].Key
+		output[i].Hash = entries[i].Hash
+		output[i].Size = entries[i].Fsize
+		output[i].ModTime = time.Unix(entries[i].PutTime/1e7, entries[i].PutTime%1e7*100)
+	}
+	return output
 }
 
 func (ctx *Context) singleContextCheck() {

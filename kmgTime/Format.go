@@ -3,6 +3,7 @@ package kmgTime
 import "time"
 
 const (
+	FormatMysqlZero  = "0000-00-00 00:00:00"
 	FormatMysql      = "2006-01-02 15:04:05"
 	FormatFileName   = "2006-01-02_15-04-05" //适合显示在文件上面的日期格式 @deprecated
 	FormatFileNameV2 = "2006-01-02-15-04-05" //版本2,更规整,方便使用正则取出
@@ -14,12 +15,16 @@ const (
 )
 
 var ParseFormatGuessList = []string{
+	FormatMysqlZero,
 	FormatMysql,
 	FormatDateMysql,
 	Iso3339Hour,
 	Iso3339Minute,
 	Iso3339Second,
 }
+
+var MysqlStart = "0000-01-01 00:00:00"
+var MysqlEnd = "9999-12-31 23:59:59"
 
 //输出成mysql的格式,并且使用默认时区,并且在0值的时候输出空字符串
 func DefaultFormat(t time.Time) string {

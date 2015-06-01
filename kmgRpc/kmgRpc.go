@@ -5,6 +5,7 @@ import (
 	"github.com/bronze1man/kmg/kmgTextTemplate"
 	"go/format"
 	"strings"
+	//"fmt"
 )
 
 type GenerateRequest struct {
@@ -20,9 +21,10 @@ type GenerateRequest struct {
 func MustGenerateCode(req GenerateRequest) {
 	config := reflectToTplConfig(req)
 	outB := tplGenerateCode(config)
-	outB, err := format.Source(outB)
-	if err != nil {
-		panic(err)
+	//fmt.Println(string(outB))
+	outB1, err := format.Source(outB)
+	if err == nil {
+		outB = outB1
 	}
 	kmgFile.MustWriteFileWithMkdir(req.OutFilePath, outB)
 	return
@@ -67,6 +69,29 @@ func (api Api) GetOutArgsNameListForAssign() string {
 	return strings.Join(nameList, ",")
 }
 
+func (api Api) HasReturnArgument() bool {
+	return len(api.OutArgsList) > 0
+}
+
+func (api Api) GetClientOutArgument() []ArgumentNameTypePair {
+	for _, pair := range api.OutArgsList {
+		if pair.ObjectTypeStr == "error" {
+			return api.OutArgsList
+		}
+	}
+	return append(api.OutArgsList, ArgumentNameTypePair{
+		Name:          "err",
+		ObjectTypeStr: "error",
+	})
+}
+
+// TODO 下一个版本不要这个hook了,复杂度太高
+func (api Api) IsOutExpendToOneArgument() bool {
+	return len(api.OutArgsList) == 2 &&
+		api.OutArgsList[0].Name == "Response" &&
+		api.OutArgsList[1].ObjectTypeStr == "error"
+}
+
 type ArgumentNameTypePair struct {
 	Name          string
 	ObjectTypeStr string
@@ -80,8 +105,6 @@ import (
 	{{end}}
 )
 
-var encryptKey = kmgBase64.MustStdBase64DecodeString("{{.OutKeyBase64}}")
-
 //server
 func ListenAndServe_{{.ObjectName}}(addr string, obj {{.ObjectTypeStr}}) {
 	s := &generateServer_{{.ObjectName}}{
@@ -93,16 +116,36 @@ func ListenAndServe_{{.ObjectName}}(addr string, obj {{.ObjectTypeStr}}) {
 	}
 }
 
+func NewServer_{{.ObjectName}}(obj {{.ObjectTypeStr}}) http.Handler {
+	return &generateServer_{{.ObjectName}}{
+		obj: obj,
+	}
+}
+
+func NewClient_{{.ObjectName}}(RemoteUrl string) *Client_{{.ObjectName}} {
+	return &Client_{{.ObjectName}}{RemoteUrl: RemoteUrl}
+}
+
+//client
+// 信息服务器的客户端.
+// httpjson api v1 client used for monitor to check that the server is good.
+type Client_{{.ObjectName}} struct {
+	RemoteUrl string //只有主机和地址
+}
+
+
+var kmgRpc_{{.ObjectName}}_encryptKey = kmgBase64.MustStdBase64DecodeString("{{.OutKeyBase64}}")
+
+const (
+	kmgRpc_{{.ObjectName}}_ResponseCodeSuccess byte = 1
+	kmgRpc_{{.ObjectName}}_ResponseCodeError   byte = 2
+)
+
+
+
 type generateServer_{{.ObjectName}} struct {
 	obj {{.ObjectTypeStr}}
 }
-
-type ResponseCode byte
-
-const (
-	ResponseCodeSuccess ResponseCode = 1
-	ResponseCodeError   ResponseCode = 2
-)
 
 // http-json-api v1
 // 1.数据传输使用psk加密,明文不泄漏信息
@@ -117,7 +160,7 @@ func (s *generateServer_{{.ObjectName}}) ServeHTTP(w http.ResponseWriter, req *h
 	}
 
 	//解密
-	b1, err = kmgCrypto.AesCbcPKCS7PaddingDecrypt(b1, encryptKey)
+	b1, err = kmgCrypto.AesCbcPKCS7PaddingDecrypt(b1, kmgRpc_{{.ObjectName}}_encryptKey)
 	if err != nil {
 		http.Error(w, "error 2", 400)
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
@@ -126,16 +169,57 @@ func (s *generateServer_{{.ObjectName}}) ServeHTTP(w http.ResponseWriter, req *h
 	outBuf, err := s.handleApiV1(b1)
 	if err != nil {
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
-		outBuf = append([]byte{byte(ResponseCodeError)}, err.Error()...)
+		outBuf = append([]byte{kmgRpc_{{.ObjectName}}_ResponseCodeError}, err.Error()...)
 	} else {
-		outBuf = append([]byte{byte(ResponseCodeSuccess)}, outBuf...)
+		outBuf = append([]byte{kmgRpc_{{.ObjectName}}_ResponseCodeSuccess}, outBuf...)
 	}
 	//加密
-	outBuf = kmgCrypto.AesCbcPKCS7PaddingEncrypt(outBuf, encryptKey)
+	outBuf = kmgCrypto.AesCbcPKCS7PaddingEncrypt(outBuf, kmgRpc_{{.ObjectName}}_encryptKey)
 	w.WriteHeader(200)
 	w.Header().Set("Content-type", "image/jpeg")
 	w.Write(outBuf)
 }
+
+func (c *Client_{{.ObjectName}}) sendRequest(apiName string, inData interface{}, outData interface{}) (err error) {
+	inDataByte, err := json.Marshal(inData)
+	if err != nil {
+		return
+	}
+	if len(apiName) > 255 {
+		return errors.New("len(apiName)>255")
+	}
+	inByte := []byte{byte(len(apiName))}
+	inByte = append(inByte, []byte(apiName)...)
+	inByte = append(inByte, inDataByte...)
+	inByte = kmgCrypto.AesCbcPKCS7PaddingEncrypt(inByte, kmgRpc_{{.ObjectName}}_encryptKey)
+
+	resp, err := http.Post(c.RemoteUrl, "image/jpeg", bytes.NewBuffer(inByte))
+	if err != nil {
+		return
+	}
+	outByte, err := kmgHttp.ResponseReadAllBody(resp)
+	if err != nil {
+		return
+	}
+	outByte, err = kmgCrypto.AesCbcPKCS7PaddingDecrypt(outByte, kmgRpc_{{.ObjectName}}_encryptKey)
+	if err != nil {
+		return
+	}
+	if len(outByte) == 0 {
+		return errors.New("len(outByte)==0")
+	}
+	switch outByte[0] {
+	case kmgRpc_{{.ObjectName}}_ResponseCodeError:
+		return errors.New(string(outByte[1:]))
+	case kmgRpc_{{.ObjectName}}_ResponseCodeSuccess:
+		return json.Unmarshal(outByte[1:], outData)
+	default:
+		return fmt.Errorf("httpjsonApi protocol error 1 %d", outByte[0])
+	}
+}
+
+
+
 func (s *generateServer_{{.ObjectName}}) handleApiV1(inBuf []byte) (outBuf []byte, err error) {
 	//从此处开始协议正确了,换一种返回方式
 	// 1 byte api name len apiNameLen
@@ -165,31 +249,33 @@ func (s *generateServer_{{.ObjectName}}) handleApiV1(inBuf []byte) (outBuf []byt
 		if err != nil {
 			return nil, err
 		}
-		{{.GetOutArgsNameListForAssign}} = s.obj.{{.Name}}( {{range .InArgsList}} reqData.{{.Name}},{{end}} )
-		if err != nil {
-			return nil, err
-		}
-		return json.Marshal(struct {
-			{{range .GetOutArgsListWithoutError}}{{.Name}} {{.ObjectTypeStr}}
-			{{end}}
-		}{
-			{{range .GetOutArgsListWithoutError}}{{.Name}}:{{.Name}},
-			{{end}}
-		})
+		{{if .HasReturnArgument}}
+			{{.GetOutArgsNameListForAssign}} = s.obj.{{.Name}}( {{range .InArgsList}} reqData.{{.Name}},{{end}} )
+			if err != nil {
+				return nil, err
+			}
+		{{else}}
+			s.obj.{{.Name}}( {{range .InArgsList}} reqData.{{.Name}},{{end}} )
+		{{end}}
+		{{if .IsOutExpendToOneArgument}}
+			return json.Marshal(Response)
+		{{else}}
+			return json.Marshal(struct {
+				{{range .GetOutArgsListWithoutError}}{{.Name}} {{.ObjectTypeStr}}
+				{{end}}
+			}{
+				{{range .GetOutArgsListWithoutError}}{{.Name}}:{{.Name}},
+				{{end}}
+			})
+		{{end}}
+
 	{{end}}
 	}
 	return nil, fmt.Errorf("api %s not found", name)
 }
 
-//client
-// 信息服务器的客户端.
-// httpjson api v1 client used for monitor to check that the server is good.
-type Client_{{.ObjectName}} struct {
-	RemoteUrl string //只有主机和地址
-}
-
 {{range .ApiList}}
-func (c *Client_{{$.ObjectName}}) {{.Name}}( {{range .InArgsList}} {{.Name}} {{.ObjectTypeStr}}, {{end}} ) ({{range .OutArgsList}} {{.Name}} {{.ObjectTypeStr}}, {{end}}) {
+func (c *Client_{{$.ObjectName}}) {{.Name}}( {{range .InArgsList}} {{.Name}} {{.ObjectTypeStr}}, {{end}} ) ({{range .GetClientOutArgument}} {{.Name}} {{.ObjectTypeStr}}, {{end}}) {
 	reqData := &struct {
 		{{range .InArgsList}}{{.Name}} {{.ObjectTypeStr}}
 		{{end}}
@@ -197,55 +283,21 @@ func (c *Client_{{$.ObjectName}}) {{.Name}}( {{range .InArgsList}} {{.Name}} {{.
 		{{range .InArgsList}}{{.Name}}: {{.Name}},
 		{{end}}
 	}
-	respData := &struct {
-		{{range .GetOutArgsListWithoutError}}{{.Name}} {{.ObjectTypeStr}}
-		{{end}}
-	}{}
-	err = c.sendRequest("{{.Name}}", reqData, &respData)
-	return {{range .GetOutArgsListWithoutError}}respData.{{.Name}},{{end}} err
+	{{if .IsOutExpendToOneArgument}}
+		var respData {{(index .OutArgsList 0).ObjectTypeStr}}
+		err = c.sendRequest("{{.Name}}", reqData, &respData)
+		return respData,err
+	{{else}}
+		respData := &struct {
+			{{range .GetOutArgsListWithoutError}}{{.Name}} {{.ObjectTypeStr}}
+			{{end}}
+		}{}
+		err = c.sendRequest("{{.Name}}", reqData, &respData)
+		return {{range .GetOutArgsListWithoutError}}respData.{{.Name}},{{end}} err
+	{{end}}
 }
 {{end}}
 
-func (c *Client_{{.ObjectName}}) sendRequest(apiName string, inData interface{}, outData interface{}) (err error) {
-	inDataByte, err := json.Marshal(inData)
-	if err != nil {
-		return
-	}
-	if len(apiName) > 255 {
-		return errors.New("len(apiName)>255")
-	}
-	inByte := []byte{byte(len(apiName))}
-	inByte = append(inByte, []byte(apiName)...)
-	inByte = append(inByte, inDataByte...)
-	inByte = kmgCrypto.AesCbcPKCS7PaddingEncrypt(inByte, encryptKey)
 
-	resp, err := http.Post(c.RemoteUrl, "image/jpeg", bytes.NewBuffer(inByte))
-	if err != nil {
-		return
-	}
-	outByte, err := kmgHttp.ResponseReadAllBody(resp)
-	if err != nil {
-		return
-	}
-	outByte, err = kmgCrypto.AesCbcPKCS7PaddingDecrypt(outByte, encryptKey)
-	if err != nil {
-		return
-	}
-	if len(outByte) == 0 {
-		return errors.New("len(outByte)==0")
-	}
-	switch ResponseCode(outByte[0]) {
-	case ResponseCodeError:
-		return errors.New(string(outByte[1:]))
-	case ResponseCodeSuccess:
-		return json.Unmarshal(outByte[1:], outData)
-	default:
-		return fmt.Errorf("httpjsonApi protocol error 1 %d", outByte[0])
-	}
-}
-
-func NewClient_{{.ObjectName}}(RemoteUrl string) *Client_{{.ObjectName}} {
-	return &Client_{{.ObjectName}}{RemoteUrl: RemoteUrl}
-}
 `, config)
 }

@@ -2,9 +2,11 @@ package kmgNet
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"net"
 	"regexp"
+	"strconv"
 )
 
 //一个网络设备上面的地址
@@ -27,6 +29,32 @@ func GetCurrentDeviceAddr() (ipnets []DeviceAddr, err error) {
 		return
 	}
 	return getCurrentDeviceAddrFromIPAddr(out)
+}
+
+//返回当前机器上面的所有ip列表.没有ip会报错
+func MustGetCurrentIpList() (ipList []net.IP) {
+	deviceAddrList, err := GetCurrentDeviceAddr()
+	if err != nil {
+		panic(err)
+	}
+	if len(deviceAddrList) == 0 {
+		panic(errors.New("[MustGetCurrentIpList] do not find any ip address."))
+	}
+	ipList = make([]net.IP, len(deviceAddrList))
+	for i, addr := range deviceAddrList {
+		ipList[i] = addr.IP
+	}
+	return ipList
+}
+
+func MustGetCurrentIpWithPortList(port uint16) (sList []string) {
+	ipList := MustGetCurrentIpList()
+	sList = make([]string, len(ipList))
+	sPort := strconv.Itoa(int(port))
+	for i, ip := range ipList {
+		sList[i] = ip.String() + ":" + sPort
+	}
+	return sList
 }
 
 func getCurrentDeviceAddrFromIPAddr(cmdReturn []byte) (ipnets []DeviceAddr, err error) {

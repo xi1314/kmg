@@ -68,8 +68,7 @@ func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 		processorList[0](ctx, processorList[1:])
 	})
 	if err != nil {
-		ctx.Response = err.Error()
-		ctx.ResponseCode = 500
+		ctx.Error(err)
 		return
 	}
 	return
@@ -85,6 +84,7 @@ func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 		ctx.NotFound("api not found")
 		return
 	}
+
 	apiFunc(ctx)
 	return
 }

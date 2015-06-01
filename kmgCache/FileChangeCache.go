@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 )
 
+//这个测试要用到.
 func getFileChangeCachePath(key string) string {
 	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", key)
 }

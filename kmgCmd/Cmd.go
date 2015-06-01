@@ -162,3 +162,33 @@ func (c *Cmd) MustRun() {
 		panic(err)
 	}
 }
+
+func (c *Cmd) MustHiddenRunAndGetExitStatus() int {
+	err := c.cmd.Run()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if !ok {
+			panic(err)
+		}
+	}
+	return GetExecCmdExitStatus(c.cmd)
+}
+
+func (c *Cmd) MustHiddenRunAndIsSuccess() bool {
+	err := c.cmd.Run()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if !ok {
+			panic(err)
+		}
+	}
+	return c.cmd.ProcessState.Success()
+}
+
+type exitStatuser interface {
+	ExitStatus() int
+}
+
+func GetExecCmdExitStatus(cmd *exec.Cmd) int {
+	return cmd.ProcessState.Sys().(exitStatuser).ExitStatus()
+}
