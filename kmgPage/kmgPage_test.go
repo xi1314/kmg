@@ -1,7 +1,7 @@
 package kmgPage_test
 
 import (
-	"FastCms/Engine"
+	"FastCms"
 	"github.com/bronze1man/kmg/kmgPage"
 	"github.com/bronze1man/kmg/kmgSql"
 	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
@@ -52,5 +52,5 @@ kmgSql_test_table:
 }
 
 func setupDb() {
-	kmgSql.SetDefaultDbConfig(Engine.MustGetTestConfig().Db)
+	kmgSql.SetDefaultDbConfig(FastCms.MustGetTestConfig().Db)
 }
