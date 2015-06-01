@@ -22,12 +22,14 @@ func Sha512HexFromString(data string) string {
 	return hex.EncodeToString(out[:])
 }
 
+//小写hex
 func Md5Hex(data []byte) string {
 	hash := md5.New()
 	hash.Write(data)
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+//小写hex
 func Md5HexFromString(data string) string {
 	hash := md5.New()
 	hash.Write([]byte(data))

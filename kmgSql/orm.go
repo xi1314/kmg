@@ -1,6 +1,7 @@
 package kmgSql
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/typeTransform"
 )
 
@@ -35,11 +36,10 @@ func OrmPersist(obj OrmObject) (lastInsertId int, err error) {
 	return ReplaceById(obj.GetTableName(), obj.GetIdFieldName(), row)
 }
 
-func GetOrmById(obj OrmObject, id string) {
+func MustOrmFromId(obj OrmObject, id string) {
 	row := MustGetOneWhere(obj.GetTableName(), obj.GetIdFieldName(), id)
 	if row == nil {
-		obj = nil
-		return
+		panic(fmt.Sprintf("[kmgSql.MustOrmFromId Table:%s.%s=%s not exist]", obj.GetTableName(), obj.GetIdFieldName(), id))
 	}
 	obj, err := OrmFromRow(obj, row)
 	if err != nil {

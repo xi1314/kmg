@@ -51,5 +51,5 @@ kmgSql_test_table:
 }
 
 func setupDb() {
-	kmgSql.SetDefaultDbConfig(FastCms.MustGetTestConfig().Db)
+	kmgSql.MustLoadTestConfig()
 }

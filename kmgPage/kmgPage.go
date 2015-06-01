@@ -24,6 +24,7 @@ type CreateFromSelectCommandRequest struct {
 	Url         string
 	ItemPerPage int
 	CurrentPage int
+	PageKeyName string
 }
 
 func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
@@ -31,6 +32,7 @@ func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
 	page.BaseUrl = req.Url
 	page.ItemPerPage = req.ItemPerPage
 	page.CurrentPage = req.CurrentPage
+	page.PageKeyName = req.PageKeyName
 	page.init()
 	return page.runSelectCommand(req.Select)
 }
@@ -67,7 +69,9 @@ func (page *KmgPage) init() {
 		page.ItemPerPage = 5
 	}
 	page.ShowPageNum = 10
-	page.PageKeyName = "page"
+	if page.PageKeyName == "" {
+		page.PageKeyName = "page"
+	}
 	if page.CurrentPage == 0 {
 		page.CurrentPage = 1
 	}

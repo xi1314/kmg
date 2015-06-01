@@ -56,6 +56,18 @@ func UrlGetContent(url string) (b []byte, err error) {
 	return ResponseReadAllBody(resp)
 }
 
+func MustUrlGetContent(url string) (b []byte) {
+	resp, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	b, err = ResponseReadAllBody(resp)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
 func HeaderToString(header http.Header) (s string) {
 	buf := &bytes.Buffer{}
 	header.Write(buf)

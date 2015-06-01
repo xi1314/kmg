@@ -23,7 +23,7 @@ func CallApiByHttpWithUploadFile(uri string, c *kmgHttp.Context, uploadFileList 
 	var response *http.Response
 	var err error
 	uri = server.URL + uri
-	if c.Method == "GET" {
+	if c.IsGet() {
 		response, err = http.Get(uri)
 		handleErr(err)
 	} else {
@@ -40,7 +40,7 @@ func CallApiByHttpWithUploadFile(uri string, c *kmgHttp.Context, uploadFileList 
 			handleErr(err)
 		}
 
-		for key, value := range c.Request {
+		for key, value := range c.GetInMap() {
 			formDataWriter.WriteField(key, value)
 		}
 		contentType := formDataWriter.FormDataContentType()

@@ -42,3 +42,16 @@ func NewSliceExistChecker(slice ...string) SliceExistChecker {
 	}
 	return out
 }
+
+//是否s里面全部都是英文字母(只有那26个,大小写均可)
+func IsAllAphphabet(s string) bool {
+	for _, rune := range s {
+		if !((rune >= 65 && //A
+			rune <= 90) || //Z
+			(rune >= 97 && //a
+				rune <= 122)) { //z
+			return false
+		}
+	}
+	return true
+}

@@ -3,6 +3,7 @@ package kmgTime
 import "time"
 
 const (
+	FormatMysqlZero  = "0000-00-00 00:00:00"
 	FormatMysql      = "2006-01-02 15:04:05"
 	FormatFileName   = "2006-01-02_15-04-05" //适合显示在文件上面的日期格式 @deprecated
 	FormatFileNameV2 = "2006-01-02-15-04-05" //版本2,更规整,方便使用正则取出
@@ -14,6 +15,7 @@ const (
 )
 
 var ParseFormatGuessList = []string{
+	FormatMysqlZero,
 	FormatMysql,
 	FormatDateMysql,
 	Iso3339Hour,

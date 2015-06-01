@@ -18,18 +18,16 @@ import (
 
 //该对象上的方法不应该被并发调用.
 type Context struct {
-	Method           string
-	RequestUrl       string
-	Request          map[string]string
-	RequestFile      map[string]*multipart.FileHeader
-	Response         string
-	ResponseFileName string
-	ResponseFile     *bytes.Buffer
-	RedirectUrl      string
-	ResponseCode     int
-	Req              *http.Request
-	httpHeader       map[string]string
-	sessionMap       map[string]string
+	method         string
+	requestUrl     string
+	inMap          map[string]string
+	requestFile    map[string]*multipart.FileHeader
+	responseBuffer bytes.Buffer
+	redirectUrl    string
+	responseCode   int
+	req            *http.Request
+	responseHeader map[string]string
+	sessionMap     map[string]string
 }
 
 const (
@@ -40,20 +38,20 @@ var SessionKey = kmgBase64.MustStdBase64DecodeStringToByte("JOr7fL1TBkU/VqatYYc0
 
 func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	context := &Context{
-		Method:      req.Method,
-		Request:     map[string]string{},
-		RequestFile: map[string]*multipart.FileHeader{},
-		RequestUrl:  req.URL.String(),
+		method:      req.Method,
+		inMap:       map[string]string{},
+		requestFile: map[string]*multipart.FileHeader{},
+		requestUrl:  req.URL.String(),
 		//Session:      kmgSession.GetSession(w, req),
-		ResponseCode: 200,
-		Req:          req,
+		responseCode: 200,
+		req:          req,
 	}
 	err := req.ParseForm()
 	if err != nil {
 		panic(err)
 	}
 	for key, value := range req.Form {
-		context.Request[key] = value[0] //TODO 这里没有处理同一个 key 多个 value 的情况
+		context.inMap[key] = value[0] //TODO 这里没有处理同一个 key 多个 value 的情况
 	}
 	contentType := req.Header.Get("Content-Type")
 	if contentType == "" {
@@ -71,10 +69,10 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 		panic(err)
 	}
 	for key, value := range req.MultipartForm.File {
-		context.RequestFile[key] = value[0]
+		context.requestFile[key] = value[0]
 	}
 	for key, value := range req.MultipartForm.Value {
-		context.Request[key] = value[0]
+		context.inMap[key] = value[0]
 	}
 	return context
 }
@@ -82,17 +80,18 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 //返回一个新的测试上下文,这个上下文的所有参数都是空的
 func NewTestContext() *Context {
 	return &Context{
-		RequestUrl:   "/testContext",
-		Request:      map[string]string{},
-		RequestFile:  map[string]*multipart.FileHeader{},
-		ResponseCode: 200,
+		requestUrl:   "/testContext",
+		inMap:        map[string]string{},
+		requestFile:  map[string]*multipart.FileHeader{},
+		responseCode: 200,
 		sessionMap:   map[string]string{},
+		method:       "GET",
 	}
 }
 
 //根据key返回输入参数,包括post和url的query的数据,如果没有,或者不是整数返回0 返回类型为int
 func (c *Context) InNum(key string) int {
-	value, ok := c.Request[key]
+	value, ok := c.inMap[key]
 	if !ok {
 		return 0
 	}
@@ -105,11 +104,11 @@ func (c *Context) InNum(key string) int {
 
 //根据key返回输入参数,包括post和url的query的数据,如果没有返回"" 类型为string
 func (c *Context) InStr(key string) string {
-	return c.Request[key]
+	return c.inMap[key]
 }
 
 func (c *Context) InStrDefault(key string, def string) string {
-	out := c.Request[key]
+	out := c.inMap[key]
 	if out == "" {
 		return def
 	}
@@ -123,10 +122,10 @@ func (c *Context) MustPost() {
 }
 
 func (c *Context) IsGet() bool {
-	return c.Method == "GET"
+	return c.method == "GET"
 }
 func (c *Context) IsPost() bool {
-	return c.Method == "POST"
+	return c.method == "POST"
 }
 
 func (c *Context) MustInNum(key string) int {
@@ -138,7 +137,7 @@ func (c *Context) MustInNum(key string) int {
 }
 
 func (c *Context) InHas(key string) bool {
-	return c.Request[key] != ""
+	return c.inMap[key] != ""
 }
 
 func (c *Context) MustInStr(key string) string {
@@ -158,25 +157,37 @@ func (c *Context) MustInJson(key string, obj interface{}) {
 	return
 }
 
-func (c *Context) InFile(key string) *multipart.FileHeader {
-	if file, ok := c.RequestFile[key]; ok {
+func (c *Context) MustInFile(key string) *multipart.FileHeader {
+	file := c.requestFile[key]
+	if file == nil {
+		panic(fmt.Errorf("Need %s file", key))
+	}
+	return file
+}
+
+func (c *Context) MustFirstInFile() *multipart.FileHeader {
+	for _, file := range c.requestFile {
 		return file
 	}
-	return &multipart.FileHeader{}
+	panic(fmt.Errorf("Need a upload file"))
 }
 
 func (c *Context) SetInStr(key string, value string) *Context {
-	c.Request[key] = value
+	c.inMap[key] = value
 	return c
 }
 
-func (c *Context) SetRequest(data map[string]string) *Context {
-	c.Request = data
+func (c *Context) SetInMap(data map[string]string) *Context {
+	c.inMap = data
 	return c
+}
+
+func (c *Context) GetInMap() map[string]string {
+	return c.inMap
 }
 
 func (c *Context) SetPost() *Context {
-	c.Method = "POST"
+	c.method = "POST"
 	return c
 }
 
@@ -184,9 +195,10 @@ func (c *Context) sessionInit() {
 	if c.sessionMap != nil {
 		return
 	}
-	cookie, err := c.Req.Cookie("kmgSession")
+	cookie, err := c.req.Cookie("kmgSession")
 	if err != nil {
-		kmgErr.LogErrorWithStack(err)
+		//kmgErr.LogErrorWithStack(err)
+		// 这个地方没有cookie是正常情况
 		c.sessionMap = map[string]string{}
 		//没有Cooke
 		return
@@ -258,26 +270,27 @@ func (c *Context) NewTestContextWithSession() *Context {
 }
 
 func (c *Context) Redirect(url string) {
-	c.RedirectUrl = url
-	c.ResponseCode = 302
+	c.redirectUrl = url
+	c.responseCode = 302
 }
 
 func (c *Context) NotFound(msg string) {
-	c.Response = msg
-	c.ResponseCode = 404
+	c.responseBuffer.WriteString(msg)
+	c.responseCode = 404
 }
 
 func (c *Context) Error(err error) {
-	c.Response += err.Error()
+	c.responseBuffer.WriteString(err.Error())
+	c.responseCode = 500
 }
 
 func (c *Context) WriteString(s string) {
-	c.Response += s
+	c.responseBuffer.WriteString(s)
 }
 
-func (c *Context) WriteAttachmentFile(file *bytes.Buffer, fileName string) {
-	c.ResponseFile = file
-	c.ResponseFileName = fileName
+func (c *Context) WriteAttachmentFile(b []byte, fileName string) {
+	c.responseBuffer.Write(b)
+	c.SetResponseHeader("Content-Disposition", "attachment;filename="+fileName)
 }
 
 func (c *Context) WriteJson(obj interface{}) {
@@ -285,11 +298,11 @@ func (c *Context) WriteJson(obj interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	c.Response += string(json)
+	c.responseBuffer.Write(json)
 }
 
 func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
-	for key, value := range c.httpHeader {
+	for key, value := range c.responseHeader {
 		w.Header().Set(key, value)
 	}
 	if c.sessionMap != nil {
@@ -298,43 +311,54 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 			Value: kmgBase64.Base64EncodeByteToString(kmgCrypto.EncryptV2(SessionKey, kmgJson.MustMarshal(c.sessionMap))),
 		})
 	}
-	if c.RedirectUrl != "" {
-		http.Redirect(w, req, c.RedirectUrl, c.ResponseCode)
+	if c.redirectUrl != "" {
+		http.Redirect(w, req, c.redirectUrl, c.responseCode)
 		return
 	}
-	if c.Response != "" {
-		w.WriteHeader(c.ResponseCode)
-		w.Write([]byte(c.Response))
-		return
-	}
-	if c.ResponseFile == nil {
-		return
-	}
-	w.Header().Set("Content-Disposition", "attachment;filename="+c.ResponseFileName)
-	w.WriteHeader(c.ResponseCode)
-	_, err := io.Copy(w, c.ResponseFile)
-	if err != nil {
-		panic(err)
+	w.WriteHeader(c.responseCode)
+	if c.responseBuffer.Len() > 0 {
+		w.Write(c.responseBuffer.Bytes())
 	}
 }
 
-func (c *Context) SetHeader(key, value string) {
-	if c.httpHeader == nil {
-		c.httpHeader = map[string]string{}
+func (c *Context) SetResponseHeader(key string, value string) {
+	if c.responseHeader == nil {
+		c.responseHeader = map[string]string{}
 	}
-	c.httpHeader[key] = value
+	c.responseHeader[key] = value
 }
 
-func (c *Context) CurrentUrl() string {
-	return c.RequestUrl
+func (c *Context) GetResponseHeader(key string) string {
+	return c.responseHeader[key]
+}
+
+func (c *Context) GetResponseWriter() io.Writer {
+	return &c.responseBuffer
+}
+
+func (c *Context) GetRequestUrl() string {
+	return c.requestUrl
+}
+
+func (c *Context) SetRequestUrl(url string) *Context {
+	c.requestUrl = url
+	return c
+}
+
+func (c *Context) GetRedirectUrl() string {
+	return c.redirectUrl
 }
 
 func (c *Context) GetResponseCode() int {
-	return c.ResponseCode
+	return c.responseCode
 }
 
-func (c *Context) GetResponseContent() []byte {
-	return []byte(c.Response)
+func (c *Context) GetResponseByteList() []byte {
+	return c.responseBuffer.Bytes()
+}
+
+func (c *Context) GetResponseString() string {
+	return c.responseBuffer.String()
 }
 
 /*
