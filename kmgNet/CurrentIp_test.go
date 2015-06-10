@@ -17,9 +17,13 @@ func TestGetCurrentDeviceAddrFromIPAddr(ot *testing.T) {
        valid_lft forever preferred_lft forever
     inet 172.20.8.1/32 scope global eth0
        valid_lft forever preferred_lft forever
+307: ppp0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1496 qdisc pfifo_fast state UNKNOWN group default qlen 3
+    link/ppp
+    inet 172.20.0.1 peer 172.20.0.2/32 scope global ppp0
+       valid_lft forever preferred_lft forever
 `))
 	kmgTest.Equal(err, nil)
-	kmgTest.Equal(len(addrs), 3)
+	kmgTest.Equal(len(addrs), 4)
 	kmgTest.Ok(addrs[0].IP.Equal(net.IPv4(127, 0, 0, 1)))
 	//fmt.Println(addrs[0].IPNet.Mask.Size())
 	one, _ := addrs[0].IPNet.Mask.Size()
@@ -37,4 +41,6 @@ func TestGetCurrentDeviceAddrFromIPAddr(ot *testing.T) {
 	kmgTest.Equal(one, 32)
 	kmgTest.Equal(addrs[2].DevString, "eth0")
 
+	kmgTest.Ok(addrs[3].IP.Equal(net.IPv4(172, 20, 0, 1)))
+	kmgTest.Equal(addrs[3].DevString, "ppp0")
 }

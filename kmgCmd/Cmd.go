@@ -140,10 +140,34 @@ func (c *Cmd) MustRunAndReturnOutput() (b []byte) {
 	return b
 }
 
+func (c *Cmd) MustRunAndReturnOutputAndNotExitStatusCheck() (b []byte) {
+	b, err := c.RunAndReturnOutput()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if ok {
+			return b
+		}
+		panic(err)
+	}
+	return b
+}
+
 //允许命令,返回命令的内容,不回显任何东西
 func (c *Cmd) MustCombinedOutput() (b []byte) {
 	b, err := c.cmd.CombinedOutput()
 	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (c *Cmd) MustCombinedOutputAndNotExitStatusCheck() (b []byte) {
+	b, err := c.cmd.CombinedOutput()
+	if err != nil {
+		_, ok := err.(*exec.ExitError)
+		if ok {
+			return b
+		}
 		panic(err)
 	}
 	return b

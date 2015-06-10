@@ -23,6 +23,14 @@ func LogErrorWithStack(err error) {
 	kmgLog.Log("error", s, kmgDebug.GetCurrentStack(1))
 }
 
+func LogUserErrorWithStack(err error) {
+	s := ""
+	if err != nil {
+		s = err.Error()
+	}
+	kmgLog.Log("userError", s, kmgDebug.GetCurrentStack(1))
+}
+
 func LogError(err error) {
 	s := ""
 	if err != nil {
