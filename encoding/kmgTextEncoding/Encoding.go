@@ -24,15 +24,12 @@ var encodingGuessList []encodingType = []encodingType{
 }
 
 //目前只处理了编码是 shift_jis 时的情况
-func HttpResponseToUtf8(res *http.Response) []byte {
+func HttpResponseToUtf8(res *http.Response) (out []byte) {
 	body := kmgHttp.MustResponseReadAllBody(res)
-	out := []byte{}
-	isKnownEncoding := false
 	for _, encoding := range encodingGuessList {
 		if !isResponseEncodingBy(encoding, res) {
 			continue
 		}
-		isKnownEncoding = true
 		if encoding == ShiftJis {
 			tReader := transform.NewReader(bytes.NewReader(body), japanese.ShiftJIS.NewDecoder())
 			var err error
@@ -46,10 +43,8 @@ func HttpResponseToUtf8(res *http.Response) []byte {
 			return body
 		}
 	}
-	if !isKnownEncoding {
-		panic("[kmgHttp.ResponseToUtf8] Unknown Encoding Type")
-	}
-	return out
+	panic("[kmgHttp.ResponseToUtf8] Unknown Encoding Type")
+	return
 }
 
 func isResponseEncodingBy(encoding encodingType, res *http.Response) bool {

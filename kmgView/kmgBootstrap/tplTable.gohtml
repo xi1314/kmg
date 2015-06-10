@@ -1,0 +1,26 @@
+@{
+    var table Table
+}
+<table class="table">
+    @if table.Caption!=nil{
+        <caption>@raw(table.Caption.HtmlRender())</caption>
+    }
+    @if table.TitleList!=nil{
+        <thead>
+        <tr>
+            @for _,title:=range table.TitleList{
+                <th>@raw(title.HtmlRender())</th>
+            }
+        </tr>
+        </thead>
+    }
+    <tbody>
+    @for _,row:=range table.DataList{
+        <tr>
+            @for _,cell:=range row{
+                <th>@raw(cell.HtmlRender())</th>
+            }
+        </tr>
+    }
+    </tbody>
+</table>

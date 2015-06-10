@@ -99,4 +99,5 @@ func TestManager(ot *testing.T) {
 		t.EqualMsg(err, nil, "fail at %d", i)
 		t.EqualMsg(reflect.ValueOf(testCase.out).Elem().Interface(), testCase.exp, "fail at %d", i)
 	}
+
 }

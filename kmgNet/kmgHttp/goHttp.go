@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -158,37 +157,9 @@ func MustHttpRequestClone(in *http.Request) *http.Request {
 	return out
 }
 
-func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string) {
-	err := AddFileToHttpPathToServeMux(http.DefaultServeMux, httpPath, localFilePath)
-	if err != nil {
-		panic(err)
-	}
-}
-
 //清空默认的Http服务器的路径表
 func ClearHttpDefaultServer() {
 	http.DefaultServeMux = http.NewServeMux()
-}
-
-func AddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localFilePath string) error {
-	fi, err := os.Stat(localFilePath)
-	if err != nil {
-		return err
-	}
-	if !strings.HasPrefix(httpPath, "/") {
-		httpPath = "/" + httpPath
-	}
-	if fi.IsDir() {
-		if !strings.HasSuffix(httpPath, "/") {
-			httpPath += "/"
-		}
-		mux.Handle(httpPath, http.StripPrefix(httpPath, http.FileServer(http.Dir(localFilePath))))
-	} else {
-		mux.HandleFunc(httpPath, func(w http.ResponseWriter, req *http.Request) {
-			http.ServeFile(w, req, localFilePath)
-		})
-	}
-	return nil
 }
 
 func AddUriProxyToDefaultServer(uri, targetUrl string) {

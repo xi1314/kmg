@@ -135,7 +135,7 @@ type Image struct {
 func init() {
 	rand.Seed(int64(time.Second))
 }
-func NewImage(digits [4]int, width, height int) *Image {
+func NewCaptchaImage(digits [4]int, width, height int) *Image {
 	img := new(Image)
 	r := image.Rect(img.width, img.height, stdWidth, stdHeight)
 	img.NRGBA = image.NewNRGBA(r)
@@ -358,36 +358,3 @@ func NewLenChars(length int, chars []byte) string {
 	}
 	panic("unreachable")
 }
-
-//
-//func pic(w http.ResponseWriter, req *http.Request) {
-//	d := make([]byte, 4)
-//	s := NewLen(4)
-//	ss := ""
-//	d = []byte(s)
-//	for v := range d {
-//		d[v] %= 10
-//		ss += strconv.FormatInt(int64(d[v]), 32)
-//	}
-//	w.Header().Set("Content-Type", "image/png")
-//	NewImage(d, 100, 34).WriteTo(w)
-//	fmt.Println(ss)
-//}
-//
-//func index(w http.ResponseWriter, req *http.Request) {
-//	str := "<meta charset=\"utf-8\"><h3>golang 图片验证码例子</h3><img border=\"1\" src=\"/pic\" alt=\"图片验证码\" onclick=\"this.src='/pic'\" />"
-//	w.Header().Set("Content-Type", "text/html")
-//	w.Write([]byte(str))
-//}
-//
-//func main() {
-//	http.HandleFunc("/pic", pic)
-//	http.HandleFunc("/", index)
-//	s := &http.Server{
-//		Addr:           ":8080",
-//		ReadTimeout:    30 * time.Second,
-//		WriteTimeout:   30 * time.Second,
-//		MaxHeaderBytes: 1 << 20,
-//	}
-//	s.ListenAndServe()
-//}

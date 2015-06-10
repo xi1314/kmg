@@ -25,7 +25,7 @@ func foo(ch chan int) {
 }
 
 func TestRun(t *testing.T) {
-	kmgTime.NowTime = kmgTime.NewFixedNower(kmgTime.MustFromMysqlFormatDefaultTZ("2000-01-15 00:00:00"))
+	kmgTime.SetFixNowFromString("2000-01-15 00:00:00")
 	RegisterTask(Task{
 		ExecuteTime: kmgTime.MustFromMysqlFormatDefaultTZ("2000-06-15 00:00:00"),
 	})
@@ -50,7 +50,7 @@ func TestRun(t *testing.T) {
 }
 
 func TestStart(t *testing.T) {
-	kmgTime.NowTime = kmgTime.NewFixedNower(kmgTime.MustFromMysqlFormatDefaultTZ("2000-01-15 00:00:00"))
+	kmgTime.SetFixNowFromString("2000-01-15 00:00:00")
 	RegisterTask(Task{
 		ExecuteTime:           kmgTime.MustFromMysqlFormatDefaultTZ("1999-06-15 00:00:00"),
 		MaxAllowNumberOfRetry: 3,

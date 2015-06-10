@@ -1,7 +1,7 @@
 package kmgCache
 
 import (
-	"github.com/bronze1man/kmg/encoding/kmgBase64"
+	"encoding/hex"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
@@ -15,7 +15,7 @@ type fileTtlCacheEntry struct {
 }
 
 func getFileTtlCachePath(key string) string {
-	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileTtlCache", kmgBase64.Base64EncodeStringToString(key))
+	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileTtlCache", hex.EncodeToString([]byte(key)))
 }
 
 // 文件ttl缓存实现,每次都会读取文件,由于没有泛型,此处需要调用者自行解决序列化问题.

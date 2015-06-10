@@ -15,15 +15,16 @@ func IsInSlice(slice []string, s string) bool {
 // 3. 查不到 表示不需要检查,是否遇到过无关紧要.
 type SliceExistChecker map[string]bool
 
-//向Checker中插入一个字符串
-func (c SliceExistChecker) Add(s string) {
+//向Checker中插入一个字符串,返回该字符串是否在最开始要检查的列表里面.
+func (c SliceExistChecker) Add(s string) bool {
 	ret, ok := c[s]
 	if !ok {
-		return
+		return false
 	}
 	if ret == false {
 		c[s] = true
 	}
+	return true
 }
 func (c SliceExistChecker) Check() (NotExist string) {
 	for s, ret := range c {

@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+//默认的那个精度太高了,此处减少了若干精度.
 func DurationFormat(dur time.Duration) string {
 	if dur >= time.Second {
 		mod := 10 * time.Millisecond

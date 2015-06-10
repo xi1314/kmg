@@ -3,6 +3,7 @@ package typeTransform
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgReflect"
+	"github.com/bronze1man/kmg/kmgStrconv"
 	"github.com/bronze1man/kmg/kmgTime"
 	"math"
 	"reflect"
@@ -19,6 +20,13 @@ special case:
 */
 func Transform(in interface{}, out interface{}) (err error) {
 	return DefaultTransformer.Transform(in, out)
+}
+
+func MustTransform(in interface{}, out interface{}) {
+	err := DefaultTransformer.Transform(in, out)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func MustTransformToMap(in interface{}) (m map[string]string) {
@@ -115,8 +123,9 @@ func StructToMap(t Transformer, in reflect.Value, out reflect.Value) (err error)
 	oValType := out.Type().Elem()
 	oKey := reflect.New(reflect.TypeOf("")).Elem()
 	if out.IsNil() {
-		out.Set(reflect.New(out.Type()).Elem())
+		out.Set(reflect.MakeMap(out.Type())) //新建map不能使用reflect.New
 	}
+
 	fieldMap := kmgReflect.StructGetAllFieldMap(in.Type())
 	for key, field := range fieldMap {
 		if field.PkgPath != "" {
@@ -229,6 +238,13 @@ func FloatToFloat(t Transformer, in reflect.Value, out reflect.Value) (err error
 	return
 }
 
+func FloatToString(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	f := in.Float()
+	fs := kmgStrconv.FormatFloat(f)
+	out.SetString(fs)
+	return
+}
+
 func NonePtrToPtr(t Transformer, in reflect.Value, out reflect.Value) (err error) {
 	if out.IsNil() {
 		out.Set(reflect.New(out.Type().Elem()))
@@ -239,6 +255,11 @@ func InterfaceToNoneInterface(t Transformer, in reflect.Value, out reflect.Value
 	return t.Tran(in.Elem(), out)
 }
 func NoneInterfaceToInterface(t Transformer, in reflect.Value, out reflect.Value) (err error) {
+	//满足interface的情况
+	if in.Type().Implements(out.Type()) {
+		out.Set(in)
+		return
+	}
 	return t.Tran(in, out.Elem())
 }
 

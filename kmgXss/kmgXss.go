@@ -2,10 +2,14 @@ package kmgXss
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 )
 
-func Urlv(s string) string {
+//在模板上面经常需要直接传入int等数据类型.
+func Urlv(obj interface{}) string {
+	s := fmt.Sprint(obj)
+	// 系统的QueryEscape版本 存在bug,主要是' '变'+'这个坑,
 	out := make([]byte, 0, len(s))
 	for i := 0; i < len(s); i++ {
 		c := s[i]

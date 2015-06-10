@@ -75,7 +75,8 @@ func StartServer(sReq ServerRequest) {
 			}))
 			panic(err)
 		}()
-		err := http.ListenAndServeTLS(sReq.HttpsAddr, sReq.HttpsCertFilePath, sReq.HttpsKeyFilePath, nil)
+		err := http.ListenAndServeTLS(sReq.HttpsAddr, sReq.HttpsCertFilePath, sReq.HttpsKeyFilePath,
+			nil)
 		if err != nil {
 			panic(err)
 		}

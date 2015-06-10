@@ -20,11 +20,3 @@ func MustParseFloat(s string) float64 {
 	}
 	return f
 }
-
-func MustStringToInt(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		panic(err)
-	}
-	return i
-}

@@ -14,6 +14,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"unicode/utf8"
 )
 
 //该对象上的方法不应该被并发调用.
@@ -28,6 +29,7 @@ type Context struct {
 	req            *http.Request
 	responseHeader map[string]string
 	sessionMap     map[string]string
+	sessionHasSet  bool
 }
 
 const (
@@ -46,6 +48,10 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 		responseCode: 200,
 		req:          req,
 	}
+	//绕开支付宝请求bug
+	if req.Header.Get("Content-Type") == "application/x-www-form-urlencoded; text/html; charset=utf-8" {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+	}
 	err := req.ParseForm()
 	if err != nil {
 		panic(err)
@@ -53,13 +59,13 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	for key, value := range req.Form {
 		context.inMap[key] = value[0] //TODO 这里没有处理同一个 key 多个 value 的情况
 	}
-	contentType := req.Header.Get("Content-Type")
-	if contentType == "" {
+	originContentType := req.Header.Get("Content-Type")
+	if originContentType == "" {
 		return context
 	}
-	contentType, _, err = mime.ParseMediaType(contentType)
+	contentType, _, err := mime.ParseMediaType(originContentType)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("[NewContextFromHttp] %s %s", originContentType, err.Error()))
 	}
 	if contentType != "multipart/form-data" {
 		return context
@@ -177,6 +183,10 @@ func (c *Context) SetInStr(key string, value string) *Context {
 	return c
 }
 
+func (c *Context) DeleteInMap(key string) {
+	delete(c.inMap, key)
+}
+
 func (c *Context) SetInMap(data map[string]string) *Context {
 	c.inMap = data
 	return c
@@ -226,6 +236,7 @@ func (c *Context) sessionInit() {
 //向Session里面设置一个字符串
 func (c *Context) SessionSetStr(key string, value string) *Context {
 	c.sessionInit()
+	c.sessionHasSet = true
 	c.sessionMap[key] = value
 	return c
 }
@@ -258,6 +269,7 @@ func (c *Context) SessionGetJson(key string, obj interface{}) (err error) {
 //更换Session的Id.
 func (c *Context) SessionClear() *Context {
 	c.sessionInit()
+	c.sessionHasSet = len(c.sessionMap) > 0
 	c.sessionMap = map[string]string{}
 	return c
 }
@@ -288,24 +300,24 @@ func (c *Context) WriteString(s string) {
 	c.responseBuffer.WriteString(s)
 }
 
+func (c *Context) WriteByte(s []byte) {
+	c.responseBuffer.Write(s)
+}
+
 func (c *Context) WriteAttachmentFile(b []byte, fileName string) {
 	c.responseBuffer.Write(b)
 	c.SetResponseHeader("Content-Disposition", "attachment;filename="+fileName)
 }
 
 func (c *Context) WriteJson(obj interface{}) {
-	json, err := json.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	c.responseBuffer.Write(json)
+	c.responseBuffer.Write(kmgJson.MustMarshal(obj))
 }
 
 func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request) {
 	for key, value := range c.responseHeader {
 		w.Header().Set(key, value)
 	}
-	if c.sessionMap != nil {
+	if c.sessionMap != nil && c.sessionHasSet {
 		http.SetCookie(w, &http.Cookie{
 			Name:  "kmgSession",
 			Value: kmgBase64.Base64EncodeByteToString(kmgCrypto.EncryptV2(SessionKey, kmgJson.MustMarshal(c.sessionMap))),
@@ -359,6 +371,46 @@ func (c *Context) GetResponseByteList() []byte {
 
 func (c *Context) GetResponseString() string {
 	return c.responseBuffer.String()
+}
+
+type ContextLog struct {
+	Method          string            `json:",omitempty"`
+	ResponseCode    int               `json:",omitempty"`
+	Url             string            `json:",omitempty"`
+	RemoteAddr      string            `json:",omitempty"`
+	UA              string            `json:",omitempty"`
+	Refer           string            `json:",omitempty"`
+	RedirectUrl     string            `json:",omitempty"`
+	InMap           map[string]string `json:",omitempty"`
+	ProcessTime     string            `json:",omitempty"`
+	RequestSize     int               `json:",omitempty"`
+	ResponseSize    int               `json:",omitempty"`
+	ResponseContent string            `json:",omitempty"`
+}
+
+func (c *Context) Log() *ContextLog {
+	out := &ContextLog{
+		Method:       c.method,
+		ResponseCode: c.responseCode,
+		Url:          c.requestUrl,
+		RedirectUrl:  c.redirectUrl,
+		InMap:        c.inMap,
+		ResponseSize: c.responseBuffer.Len(),
+	}
+	if c.req != nil {
+		out.RemoteAddr = c.req.RemoteAddr
+		out.UA = c.req.UserAgent()
+		out.Refer = c.req.Referer()
+		out.RequestSize = int(c.req.ContentLength)
+	}
+	//小于64个字节,并且都是utf8,就输出到log里面
+	if out.ResponseSize <= 64 {
+		out.ResponseContent = c.responseBuffer.String()
+		if !utf8.ValidString(out.ResponseContent) {
+			out.ResponseContent = ""
+		}
+	}
+	return out
 }
 
 /*
