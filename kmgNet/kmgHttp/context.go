@@ -36,7 +36,8 @@ const (
 	defaultMaxMemory = 32 << 20 // 32 MB
 )
 
-var SessionKey = kmgBase64.MustStdBase64DecodeStringToByte("JOr7fL1TBkU/VqatYYc0D2wERVNUoECzM78HYWaJhIE=")
+var SessionCookieName = "kmgSession"
+var SessionPsk = [32]byte{0xd8, 0x51, 0xea, 0x81, 0xb9, 0xe, 0xf, 0x2f, 0x8c, 0x85, 0x5f, 0xb6, 0x14, 0xb2}
 
 func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 	context := &Context{
@@ -205,7 +206,7 @@ func (c *Context) sessionInit() {
 	if c.sessionMap != nil {
 		return
 	}
-	cookie, err := c.req.Cookie("kmgSession")
+	cookie, err := c.req.Cookie(SessionCookieName)
 	if err != nil {
 		//kmgErr.LogErrorWithStack(err)
 		// 这个地方没有cookie是正常情况
@@ -213,13 +214,7 @@ func (c *Context) sessionInit() {
 		//没有Cooke
 		return
 	}
-	output, err := kmgBase64.Base64DecodeStringToByte(cookie.Value)
-	if err != nil {
-		kmgErr.LogErrorWithStack(err)
-		c.sessionMap = map[string]string{}
-		return
-	}
-	output, err = kmgCrypto.DecryptV2(SessionKey, output)
+	output, err := kmgCrypto.CompressAndEncryptBase64Decode(&SessionPsk, cookie.Value)
 	if err != nil {
 		kmgErr.LogErrorWithStack(err)
 		c.sessionMap = map[string]string{}
@@ -319,8 +314,8 @@ func (c *Context) WriteToResponseWriter(w http.ResponseWriter, req *http.Request
 	}
 	if c.sessionMap != nil && c.sessionHasSet {
 		http.SetCookie(w, &http.Cookie{
-			Name:  "kmgSession",
-			Value: kmgBase64.Base64EncodeByteToString(kmgCrypto.EncryptV2(SessionKey, kmgJson.MustMarshal(c.sessionMap))),
+			Name:  SessionCookieName,
+			Value: kmgCrypto.CompressAndEncryptBase64Encode(&SessionPsk, kmgJson.MustMarshal(c.sessionMap)),
 		})
 	}
 	if c.redirectUrl != "" {
@@ -419,3 +414,14 @@ func (c *Context)InArray(key string)[]string{
     return nil
 }
 */
+
+func init() {
+	kmgCrypto.RegisterPskChangeCallback(pskchange)
+}
+func pskchange() {
+	psk1 := kmgCrypto.GetPskFromDefaultPsk(6, "kmgHttp.SessionCookieName")
+	SessionCookieName = "kmgSession" + kmgBase64.Base64EncodeByteToString(psk1)
+
+	psk2 := kmgCrypto.GetPskFromDefaultPsk(32, "kmgHttp.SessionPsk")
+	copy(SessionPsk[:], psk2)
+}

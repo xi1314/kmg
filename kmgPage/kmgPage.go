@@ -37,13 +37,13 @@ func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
 	return page.runSelectCommand(req.Select)
 }
 
-//func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
-//	page.init()
-//	page.BaseUrl = baseUrl
-//	page.ItemPerPage = itemPerPage
-//	page.TotalItem = len(data)
-//	return page
-//}
+func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
+	page.BaseUrl = baseUrl
+	page.ItemPerPage = itemPerPage
+	page.TotalItem = len(data)
+	page.init()
+	return page
+}
 
 func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *KmgPage {
 	if page.BaseUrl == "" {

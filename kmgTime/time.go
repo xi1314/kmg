@@ -48,8 +48,11 @@ func MustFromMysqlFormatInLocation(timeString string, loc *time.Location) time.T
 	return t
 }
 
-//使用默认时区解释
+//使用默认时区解释mysql 数据结构
 func MustFromMysqlFormatDefaultTZ(timeString string) time.Time {
+	if timeString == "0000-00-00 00:00:00" {
+		return time.Time{}
+	}
 	t, err := time.ParseInLocation(FormatMysql, timeString, DefaultTimeZone)
 	if err != nil {
 		panic(err)

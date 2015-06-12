@@ -7,11 +7,12 @@ import (
 )
 
 //flate压缩,panic+buffer实现
+// 会由于
 func FlateMustCompress(inb []byte) (outb []byte) {
 	buf := &bytes.Buffer{}
 	w, err := flate.NewWriter(buf, -1)
 	if err != nil {
-		panic(err)
+		panic(err) //只会由于加密level设置错误而报错 但是上面明显是对的.
 	}
 	_, err = w.Write(inb)
 	if err != nil {
@@ -20,7 +21,7 @@ func FlateMustCompress(inb []byte) (outb []byte) {
 	}
 	err = w.Close()
 	if err != nil {
-		panic(err)
+		panic(err) // 全部代码看过,只会由于w.Write错误而报错, 但是明显w.Write 不会报错.
 	}
 	return buf.Bytes()
 }
