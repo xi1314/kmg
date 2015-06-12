@@ -58,13 +58,23 @@ func MustGetCurrentIpWithPortList(port uint16) (sList []string) {
 }
 
 func getCurrentDeviceAddrFromIPAddr(cmdReturn []byte) (ipnets []DeviceAddr, err error) {
+	//可能性1 inet 127.0.0.1/8 scope host lo
+	//可能性2 inet 10.169.224.99/21 brd 10.169.231.255 scope global eth0
+	//可能性3 inet 172.20.0.1 peer 172.20.0.2/32 scope global ppp0
 	reg := regexp.MustCompile(`inet ([^ ]+).* ([^\s]+)`)
 	out := reg.FindAllSubmatch(cmdReturn, -1)
 	ipnets = make([]DeviceAddr, len(out))
 	for i := range out {
 		ip, ipnet, err := net.ParseCIDR(string(out[i][1]))
 		if err != nil {
-			return nil, err
+			_, ok := err.(*net.ParseError)
+			if !ok {
+				return nil, err
+			}
+			ip = net.ParseIP(string(out[i][1]))
+			if ip == nil {
+				return nil, fmt.Errorf("[getCurrentDeviceAddrFromIPAddr] can not parse CIDR or IP [%s]", out[i][0])
+			}
 		}
 		ipnets[i] = DeviceAddr{
 			IP:        ip,
