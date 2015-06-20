@@ -22,6 +22,7 @@ type Context struct {
 	method         string
 	requestUrl     string
 	inMap          map[string]string
+	DataMap        map[string]string //上下文里面可以携带一些信息
 	requestFile    map[string]*multipart.FileHeader
 	responseBuffer bytes.Buffer
 	redirectUrl    string
@@ -86,6 +87,12 @@ func NewContextFromHttp(w http.ResponseWriter, req *http.Request) *Context {
 
 //返回一个新的测试上下文,这个上下文的所有参数都是空的
 func NewTestContext() *Context {
+	//调用 ctx 上的函数是不会更新这里的 buf 的
+	buf := []byte("test")
+	req, err := http.NewRequest("GET", "/testContext", bytes.NewReader(buf))
+	if err != nil {
+		panic(err)
+	}
 	return &Context{
 		requestUrl:   "/testContext",
 		inMap:        map[string]string{},
@@ -93,6 +100,7 @@ func NewTestContext() *Context {
 		responseCode: 200,
 		sessionMap:   map[string]string{},
 		method:       "GET",
+		req:          req,
 	}
 }
 
@@ -200,6 +208,19 @@ func (c *Context) GetInMap() map[string]string {
 func (c *Context) SetPost() *Context {
 	c.method = "POST"
 	return c
+}
+
+func (c *Context) GetDataStr(key string) string {
+	if c.DataMap == nil {
+		return ""
+	}
+	return c.DataMap[key]
+}
+func (c *Context) SetDataStr(key string, value string) {
+	if c.DataMap == nil {
+		c.DataMap = map[string]string{}
+	}
+	c.DataMap[key] = value
 }
 
 func (c *Context) sessionInit() {
@@ -343,6 +364,10 @@ func (c *Context) GetResponseWriter() io.Writer {
 	return &c.responseBuffer
 }
 
+func (c *Context) GetRequest() *http.Request {
+	return c.req //调用者可以拿去干一些高级的事情
+}
+
 func (c *Context) GetRequestUrl() string {
 	return c.requestUrl
 }
@@ -416,9 +441,9 @@ func (c *Context)InArray(key string)[]string{
 */
 
 func init() {
-	kmgCrypto.RegisterPskChangeCallback(pskchange)
+	kmgCrypto.RegisterPskChangeCallback(pskChange)
 }
-func pskchange() {
+func pskChange() {
 	psk1 := kmgCrypto.GetPskFromDefaultPsk(6, "kmgHttp.SessionCookieName")
 	SessionCookieName = "kmgSession" + kmgBase64.Base64EncodeByteToString(psk1)
 

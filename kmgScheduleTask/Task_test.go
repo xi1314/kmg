@@ -139,3 +139,24 @@ kmgScheduleTask: []
 		<-c
 	}
 }
+
+func TestPanic(ot *testing.T) {
+	kmgSql.MustSetTableDataYaml(`
+kmgScheduleTask: []
+`)
+	tm := taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	defer tm.Close()
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		panic(1)
+	})
+	tm.RegisterTask(Task{
+		FuncName:    "abc",
+		ExecuteTime: time.Now().Add(time.Millisecond),
+		InMap: map[string]string{
+			"a": "1",
+		},
+	})
+	time.Sleep(20 * time.Millisecond)
+}

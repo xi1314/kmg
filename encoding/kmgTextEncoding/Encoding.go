@@ -27,7 +27,7 @@ var encodingGuessList []encodingType = []encodingType{
 func HttpResponseToUtf8(res *http.Response) (out []byte) {
 	body := kmgHttp.MustResponseReadAllBody(res)
 	for _, encoding := range encodingGuessList {
-		if !isResponseEncodingBy(encoding, res) {
+		if !isResponseEncodingBy(encoding, res, body) {
 			continue
 		}
 		if encoding == ShiftJis {
@@ -43,11 +43,11 @@ func HttpResponseToUtf8(res *http.Response) (out []byte) {
 			return body
 		}
 	}
-	panic("[kmgHttp.ResponseToUtf8] Unknown Encoding Type")
-	return
+	//没猜到，原样返回
+	return body
 }
 
-func isResponseEncodingBy(encoding encodingType, res *http.Response) bool {
+func isResponseEncodingBy(encoding encodingType, res *http.Response, responseBody []byte) bool {
 	contentType := res.Header.Get("Content-Type")
 	charset := getCharsetFromHttpContentType(contentType)
 	if charset == string(encoding) {
@@ -56,8 +56,7 @@ func isResponseEncodingBy(encoding encodingType, res *http.Response) bool {
 	if charset != "" {
 		return false
 	}
-	buf := kmgHttp.MustResponseReadAllBody(res)
-	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(buf))
+	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(responseBody))
 	if err != nil {
 		panic(err)
 	}

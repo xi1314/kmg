@@ -165,7 +165,7 @@ func (ot *OverseaTrade) MustReturnPage(ctx *kmgHttp.Context) (info OverseaTradeT
 	return info
 }
 
-// 异步回调,请不要在f中输出任何支付串.
+// 异步回调,请不要在f中输出任何支付串.(字符串？)
 // 调用前请清除您自己的参数.
 func (ot *OverseaTrade) MustNotifyAction(ctx *kmgHttp.Context, f func(info OverseaTradeTransaction) (err error)) {
 	kmgLog.Log("Alipay", "Oversea PayNotifyAction", ctx.GetInMap())

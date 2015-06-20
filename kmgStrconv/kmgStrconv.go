@@ -1,6 +1,9 @@
 package kmgStrconv
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 func AtoIDefault0(s string) int {
 	i, _ := strconv.Atoi(s)
@@ -61,4 +64,9 @@ func MustParseBool(f string) bool {
 		panic(err)
 	}
 	return out
+}
+
+func InterfaceToString(m interface{}) string {
+	s := fmt.Sprint(m)
+	return s
 }

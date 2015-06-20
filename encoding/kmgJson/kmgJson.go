@@ -88,6 +88,17 @@ func MustUnmarshal(r []byte, obj interface{}) {
 	return
 }
 
+func MustUnmarshalIgnoreEmptyString(jsonStr string, obj interface{}) {
+	if jsonStr == "" {
+		return
+	}
+	err := json.Unmarshal([]byte(jsonStr), &obj)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
 func MustUnmarshalToMap(r []byte) (obj map[string]interface{}) {
 	err := json.Unmarshal(r, &obj)
 	if err != nil {

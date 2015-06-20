@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgJson"
+	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgLog"
 	"github.com/bronze1man/kmg/kmgRand"
 	"github.com/bronze1man/kmg/kmgSql"
@@ -35,6 +36,7 @@ func RegisterTask(task Task) {
 	defaultTaskManager.RegisterTask(task)
 }
 
+// 任务内部抛出的异常,处理方式和kmgControllerRunner差不多.会全部截取掉,然后写个log
 func RegisterTaskFunc(FuncName string, Func func(task Task)) {
 	defaultTaskManager.RegisterTaskFunc(FuncName, Func)
 }
@@ -86,6 +88,7 @@ func (tm *taskManager) RegisterTask(task Task) {
 		"InMap":       string(kmgJson.MustMarshal(task.InMap)),
 		"FuncName":    task.FuncName,
 	})
+	kmgLog.Log("kmgScheduleTask", "register", task)
 }
 
 // 请先Init 后注册任务
@@ -159,7 +162,14 @@ func (tm *taskManager) runOne() {
 		}
 		kmgSql.MustDeleteById("kmgScheduleTask", "Id", task.Id)
 		//不需要做是否正在运行的东西.正在运行的都从列表中删除了.
-		go f(task)
+		go func(task Task) {
+			err := kmgErr.PanicToError(func() {
+				f(task)
+			})
+			if err != nil {
+				kmgErr.LogErrorWithStack(err)
+			}
+		}(task)
 		kmgLog.Log("kmgScheduleTask", "run", task)
 	}
 }

@@ -8,17 +8,19 @@ import (
 
 func tplPager(kmgPage *KmgPage) string {
 	var _buffer bytes.Buffer
-	_buffer.WriteString("\n<ul class=\"pagination\">\n    <li class=\"disabled\">\n        <a href=\"\">\n            共 ")
-	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.TotalPage))
-	_buffer.WriteString(" 页\n        </a>\n    </li>\n    <li class=\"")
+	_buffer.WriteString("\n<ul class=\"pagination\">\n    ")
 	if !kmgPage.IsBeforePageActive() {
 
-		_buffer.WriteString("disabled")
+		_buffer.WriteString("<li class=\"disabled\" >\n            <a href=\"javascript:\">&laquo;</a>\n        </li>")
+
+	} else {
+
+		_buffer.WriteString("<li>\n            <a href=\"")
+		_buffer.WriteString(gorazor.HTMLEscape(kmgPage.GetBeforePageUrl()))
+		_buffer.WriteString("\">&laquo;</a>\n        </li>")
 
 	}
-	_buffer.WriteString("\" >\n        <a href=\"")
-	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.GetBeforePageUrl()))
-	_buffer.WriteString("\">&laquo;</a>\n    </li>\n    ")
+	_buffer.WriteString("\n    ")
 	for _, opt := range kmgPage.GetShowPageArray() {
 
 		_buffer.WriteString("<li class=\"")
@@ -28,35 +30,47 @@ func tplPager(kmgPage *KmgPage) string {
 
 		}
 		_buffer.WriteString("\">\n        <a href=\"")
-		_buffer.WriteString(gorazor.HTMLEscape(opt.Url))
+		if opt.IsCurrent {
+
+			_buffer.WriteString("javascript:")
+
+		} else {
+
+			_buffer.WriteString(gorazor.HTMLEscape(opt.Url))
+
+		}
 		_buffer.WriteString("\">")
 		_buffer.WriteString(gorazor.HTMLEscape(opt.PageNum))
 		_buffer.WriteString("\n            <span class=\"sr-only\">(current)</span></a>\n        </li>")
 
 	}
-	_buffer.WriteString("\n    <li class=\"")
+	_buffer.WriteString("\n    ")
 	if !kmgPage.IsAfterPageActive() {
 
-		_buffer.WriteString("disabled")
+		_buffer.WriteString("<li class=\"disabled\" >\n            <a href=\"javascript:\">&raquo;</a>\n        </li>")
+
+	} else {
+
+		_buffer.WriteString("<li>\n            <a href=\"")
+		_buffer.WriteString(gorazor.HTMLEscape(kmgPage.GetAfterPageUrl()))
+		_buffer.WriteString("\">&raquo;</a>\n        </li>")
 
 	}
-	_buffer.WriteString("\">\n        <a href=\"")
-	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.GetAfterPageUrl()))
-	_buffer.WriteString("\">&raquo;</a>\n    </li>\n    <li>\n        <form action=\"")
+	_buffer.WriteString("\n    <li>\n        <form action=\"")
 	_buffer.WriteString(gorazor.HTMLEscape(kmgPage.BaseUrl))
 	_buffer.WriteString("\" method=\"GET\" style=\"position: relative;margin-left:10px;float:left;\">\n            ")
-	array, err := url.ParseRequestURI(kmgPage.BaseUrl)
-	if err != nil {
-
-	}
+	u, _ := url.ParseRequestURI(kmgPage.BaseUrl)
 
 	_buffer.WriteString("\n            ")
-	for key, value := range array.Query() {
+	for key, valueList := range u.Query() {
+		if key == kmgPage.PageKeyName {
+			continue
+		}
 
 		_buffer.WriteString("<input type=\"hidden\" name=\"")
 		_buffer.WriteString(gorazor.HTMLEscape(key))
 		_buffer.WriteString("\" value=\"")
-		_buffer.WriteString(gorazor.HTMLEscape(value))
+		_buffer.WriteString(gorazor.HTMLEscape(valueList[0]))
 		_buffer.WriteString("\"/>")
 
 	}

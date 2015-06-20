@@ -31,6 +31,10 @@ func MustParseAutoInDefault(sTime string) (t time.Time) {
 	return t
 }
 
+func ParseAutoInDefault(sTime string) (t time.Time, err error) {
+	return ParseAutoInLocation(sTime, DefaultTimeZone)
+}
+
 //utc time
 func MustFromMysqlFormat(timeString string) time.Time {
 	t, err := time.Parse(FormatMysql, timeString)
