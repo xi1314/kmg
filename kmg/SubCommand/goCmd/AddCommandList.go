@@ -28,4 +28,5 @@ func AddCommandList() {
 		Desc:   "递归目录的go test",
 		Runner: runGoTest,
 	})
+	kmgConsole.AddCommandWithName("GoEnv",GoEnvCmd)
 }
