@@ -1,6 +1,7 @@
 package kmgCache
 
 import (
+	"encoding/hex"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgCrypto"
@@ -9,8 +10,9 @@ import (
 	"path/filepath"
 )
 
+//这个测试要用到.
 func getFileChangeCachePath(key string) string {
-	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", key)
+	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", hex.EncodeToString([]byte(key)))
 }
 
 func MustMd5FileChangeCache(key string, pathList []string, f func()) {
@@ -23,6 +25,7 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 		//忽略缓存读取的任何错误
 		cacheInfo = map[string]string{}
 	}
+	hasReadFileMap := map[string]bool{}
 	for _, path := range pathList {
 		statList, err := kmgFile.GetAllFileAndDirectoryStat(path)
 		if err != nil {
@@ -33,11 +36,12 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 			}
 			panic(err)
 		}
+
 		for _, stat := range statList {
 			if stat.Fi.IsDir() {
 				continue
 			}
-
+			hasReadFileMap[stat.FullPath] = true
 			cacheMd5 := cacheInfo[stat.FullPath]
 			if kmgCrypto.MustMd5File(stat.FullPath) != cacheMd5 {
 				toChange = true
@@ -47,6 +51,13 @@ func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 			}
 		}
 		if toChange {
+			break
+		}
+	}
+	//删除一个已经存储在缓存列表里面的文件,是一个修改.
+	for fullPath := range cacheInfo {
+		if !hasReadFileMap[fullPath] {
+			toChange = true
 			break
 		}
 	}

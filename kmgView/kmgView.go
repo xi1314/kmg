@@ -3,6 +3,7 @@ package kmgView
 import (
 	"bytes"
 	"github.com/bronze1man/kmg/kmgXss"
+	"github.com/bronze1man/kmg/typeTransform"
 )
 
 type HtmlRenderer interface {
@@ -12,11 +13,18 @@ type HtmlRenderer interface {
 type HtmlRendererList []HtmlRenderer
 
 func (l HtmlRendererList) HtmlRender() string {
-	_buffer := &bytes.Buffer{}
+	var _buffer bytes.Buffer
 	for _, renderer := range l {
 		_buffer.WriteString(renderer.HtmlRender())
 	}
 	return _buffer.String()
+}
+
+//使用泛型帮你解决各种无聊的类型转换
+func NewHtmlRendererListFromList(obj interface{}) HtmlRendererList {
+	out := HtmlRendererList{}
+	typeTransform.MustTransform(obj, &out)
+	return out
 }
 
 type String string

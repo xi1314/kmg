@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+// 以命令行方式运行应用.这个函数会阻塞执行.
+// http方式运行 ./MainApp -http=:80
+// https 方式 加http跳转运行 (必须绑一个域名,如果有更复杂的需求,此处无法完成)
+//    ./MainApp -https=:443 -http=:80 -type=Both -certFile=xxx.crt -keyFile=xxx.key domain=xxx.com
 func StartServerCommand() {
 	req := ServerRequest{}
 	flag.StringVar(&req.HttpAddr, "http", ":8080", "listen addr") //默认值应该不需要root权限.
@@ -19,7 +23,6 @@ func StartServerCommand() {
 	flag.Parse()
 	req.Type = ServerType(t)
 	StartServer(req)
-
 }
 
 type ServerRequest struct {
@@ -75,7 +78,8 @@ func StartServer(sReq ServerRequest) {
 			}))
 			panic(err)
 		}()
-		err := http.ListenAndServeTLS(sReq.HttpsAddr, sReq.HttpsCertFilePath, sReq.HttpsKeyFilePath, nil)
+		err := http.ListenAndServeTLS(sReq.HttpsAddr, sReq.HttpsCertFilePath, sReq.HttpsKeyFilePath,
+			nil)
 		if err != nil {
 			panic(err)
 		}

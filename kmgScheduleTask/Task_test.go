@@ -1,92 +1,162 @@
 package kmgScheduleTask
 
 import (
-	"fmt"
 	"github.com/bronze1man/kmg/kmgSql"
-	"github.com/bronze1man/kmg/kmgTime"
+	"github.com/bronze1man/kmg/kmgTest"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
 
-func TestSelectUsage(t *testing.T) {
-	c := make(chan int)
-	go foo(c)
-	select {
-	case <-c:
-		fmt.Println("Task foo Done!")
-	case <-time.After(5 * time.Second):
-		fmt.Println("Timed out!")
+func init() {
+	kmgSql.MustLoadTestConfig()
+
+}
+
+func TestRun(ot *testing.T) {
+	kmgSql.MustSetTableDataYaml(`
+kmgScheduleTask: []
+`)
+	tm := taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	defer tm.Close()
+	var a = 1
+	c := make(chan struct{})
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		a++
+		kmgTest.Equal(task.InMap["a"], "1")
+		c <- struct{}{}
+	})
+	for i := 0; i < 2; i++ {
+		a = 1
+		tm.RegisterTask(Task{
+			FuncName:    "abc",
+			ExecuteTime: time.Now().Add(time.Millisecond),
+			InMap: map[string]string{
+				"a": "1",
+			},
+		})
+		kmgTest.Equal(a, 1)
+		<-c
+		kmgTest.Equal(a, 2)
 	}
 }
 
-func foo(ch chan int) {
-	time.Sleep(10 * time.Second)
-	ch <- 1
-}
-
-func TestRun(t *testing.T) {
-	kmgTime.NowTime = kmgTime.NewFixedNower(kmgTime.MustFromMysqlFormatDefaultTZ("2000-01-15 00:00:00"))
-	RegisterTask(Task{
-		ExecuteTime: kmgTime.MustFromMysqlFormatDefaultTZ("2000-06-15 00:00:00"),
+func TestRunRecoverFromDb(ot *testing.T) {
+	kmgSql.MustSetTableDataYaml(`
+kmgScheduleTask: []
+`)
+	tm := taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	a := 1
+	wg := sync.WaitGroup{}
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		a = 2
+		kmgTest.Equal(task.InMap["a"], "1")
+		wg.Done()
 	})
-	RegisterTask(Task{
-		ExecuteTime: kmgTime.MustFromMysqlFormatDefaultTZ("1999-06-15 00:00:00"),
-		IsDone:      true,
-	})
-	RegisterTask(Task{
-		ExecuteTime:           kmgTime.MustFromMysqlFormatDefaultTZ("1999-06-15 00:00:00"),
-		MaxAllowNumberOfRetry: 3,
-		Func: func(isDone chan bool, task Task) {
-			time.Sleep(2 * time.Second)
-			fmt.Println("hi task")
-			isDone <- false
+	wg.Add(1)
+	tm.RegisterTask(Task{
+		FuncName:    "abc",
+		ExecuteTime: time.Now().Add(20 * time.Millisecond),
+		InMap: map[string]string{
+			"a": "1",
 		},
 	})
-	RegisterTask(Task{
-		ExecuteTime: kmgTime.MustFromMysqlFormatDefaultTZ("2999-06-15 00:00:00"),
-		IsDone:      true,
+	tm.Close()
+	rowList := kmgSql.MustGetAllInTable("kmgScheduleTask")
+	kmgTest.Equal(len(rowList), 1)
+
+	tm = taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		a = 3
+		kmgTest.Equal(task.InMap["a"], "1")
+		wg.Done()
 	})
-	run()
-}
+	wg.Wait()
 
-func TestStart(t *testing.T) {
-	kmgTime.NowTime = kmgTime.NewFixedNower(kmgTime.MustFromMysqlFormatDefaultTZ("2000-01-15 00:00:00"))
-	RegisterTask(Task{
-		ExecuteTime:           kmgTime.MustFromMysqlFormatDefaultTZ("1999-06-15 00:00:00"),
-		MaxAllowNumberOfRetry: 3,
-		Func: FooTaskFunc,
+	kmgTest.Equal(a, 3)
+	tm.RegisterTask(Task{
+		FuncName:    "abc",
+		ExecuteTime: time.Now().Add(30 * time.Millisecond),
+		InMap: map[string]string{
+			"a": "1",
+		},
 	})
-	RegisterTaskFunc(FooTaskFunc)
-	Start()
-	fmt.Println("Start Done!")
+	tm.Close()
+	rowList = kmgSql.MustGetAllInTable("kmgScheduleTask")
+	kmgTest.Equal(len(rowList), 1)
+
+	a = 1
+	time.Sleep(20 * time.Millisecond)
+	wg.Add(1)
+	tm = taskManager{}
+	tm.pullDuration = time.Millisecond
+
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		a = 4
+		kmgTest.Equal(task.InMap["a"], "1")
+		wg.Done()
+	})
+	tm.Init()
+	time.Sleep(20 * time.Millisecond)
+
+	wg.Wait()
+	kmgTest.Equal(a, 4)
 }
 
-func FooTaskFunc(isDone chan bool, task Task) {
-	time.Sleep(2 * time.Second)
-	fmt.Println("hi task")
-	isDone <- false
-}
+func TestHeap(ot *testing.T) {
+	kmgSql.MustSetTableDataYaml(`
+kmgScheduleTask: []
+`)
+	tm := taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	a := 0
+	c := make(chan struct{})
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		kmgTest.Equal(task.InMap["a"], strconv.Itoa(a))
+		a++
+		c <- struct{}{}
+	})
 
-func TestReflectFunc(t *testing.T) {
-	RegisterTaskFunc(boo)
-	for n, f := range taskFuncMap {
-		fmt.Println(n)
-		f(make(chan bool), Task{})
+	for i := 0; i < 5; i++ {
+		tm.RegisterTask(Task{
+			FuncName:    "abc",
+			ExecuteTime: time.Now().Add(time.Duration(i) * 3 * time.Millisecond),
+			InMap: map[string]string{
+				"a": strconv.Itoa(i),
+			},
+		})
+	}
+
+	for i := 0; i < 5; i++ {
+		<-c
 	}
 }
 
-func boo(isDone chan bool, task Task) {
-	fmt.Println(12)
-}
-
-func setDb() {
-	kmgSql.MustLoadTestConfig()
+func TestPanic(ot *testing.T) {
 	kmgSql.MustSetTableDataYaml(`
-KmgScheduleTask:
-  - IsDone: true
-    ExecuteTime: "1999-06-15 00:00:00"
-    Parameter: "{\"a\":1,\"b\":2}"
-    MaxAllowExecuteSecond: 0
-    MaxAllowNumberOfRetry: 0
+kmgScheduleTask: []
 `)
+	tm := taskManager{}
+	tm.pullDuration = 10 * time.Millisecond
+	tm.Init()
+	defer tm.Close()
+	tm.RegisterTaskFunc("abc", func(task Task) {
+		panic(1)
+	})
+	tm.RegisterTask(Task{
+		FuncName:    "abc",
+		ExecuteTime: time.Now().Add(time.Millisecond),
+		InMap: map[string]string{
+			"a": "1",
+		},
+	})
+	time.Sleep(20 * time.Millisecond)
 }

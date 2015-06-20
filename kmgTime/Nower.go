@@ -15,11 +15,23 @@ type FixedNower struct {
 var NowTime Nower = tDefaultNower{}
 
 func GetDefaultNower() Nower {
-	return DefaultNower
+	return NowTime
+}
+
+func NowFromDefaultNower() time.Time {
+	return GetDefaultNower().Now()
+}
+
+func MysqlNowFromDefaultNower() string {
+	return GetDefaultNower().Now().Format(FormatMysql)
 }
 
 func NewFixedNower(time time.Time) Nower {
 	return FixedNower{time}
+}
+
+func SetFixNowFromString(s string) {
+	NowTime = NewFixedNower(MustParseAutoInDefault(s))
 }
 
 func (nower tDefaultNower) Now() time.Time {

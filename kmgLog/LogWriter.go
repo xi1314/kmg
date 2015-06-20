@@ -3,6 +3,7 @@ package kmgLog
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"os"
 	"time"
 )
@@ -40,5 +41,5 @@ type LogRow struct {
 }
 
 func (r LogRow) Marshal() (b []byte, err error) {
-	return json.Marshal(r)
+	return kmgJson.MarshalIndent(r)
 }

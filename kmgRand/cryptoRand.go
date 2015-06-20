@@ -26,12 +26,14 @@ func MustCryptoRandToHex(length int) string {
 	return string(buf[:length])
 }
 
+// (长度62)
 const alphaNumMap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 func MustCryptoRandToAlphaNum(length int) string {
 	return MustCryptoRandFromByteList(length, alphaNumMap)
 }
 
+//里面没有大小写问题,没有ilIL1问题 没有 0oO 问题. (长度32)
 const realableAlphaNumMap = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 
 func MustCryptoRandToReadableAlphaNum(length int) string {

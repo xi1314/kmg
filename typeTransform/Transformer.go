@@ -69,7 +69,8 @@ func (t Transformer) Transform(in interface{}, out interface{}) (err error) {
 func (t Transformer) Tran(in reflect.Value, out reflect.Value) (err error) {
 	iKind := GetReflectKind(in)
 	oKind := GetReflectKind(out)
-	//fmt.Println(iKind,oKind,in.Type().String(),out.Type().String())
+
+	//	fmt.Println(iKind,oKind,in.Type().String(),out.Type().String())
 	m1, ok := t[iKind]
 	if !ok {
 		return fmt.Errorf("[typeTransform.tran] not support tran kind: [%s] to [%s]", in.Kind(), out.Kind())
@@ -174,6 +175,7 @@ var DefaultTransformer = Transformer{
 		Int:       FloatToInt,
 		Float:     FloatToFloat,
 		Ptr:       NonePtrToPtr,
+		String:    FloatToString,
 		Interface: NoneInterfaceToInterface,
 	},
 	Time: map[Kind]TransformerFunc{

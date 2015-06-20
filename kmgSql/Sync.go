@@ -7,6 +7,8 @@ import (
 	//"github.com/bronze1man/kmg/kmgDebug"
 )
 
+//读取数据库的表字段,不区分大小写(某些系统的mysql不区分大小写)
+//写入数据库的表字段,区分大小写
 type Table struct {
 	Name       string
 	FieldList  map[string]DbType
@@ -81,6 +83,7 @@ func (t DbType) GetMysqlFieldType() MysqlFieldType {
 }
 
 func MustSyncTable(tableConf Table) {
+	MustVerifyTableConfig(tableConf)
 	if MustIsTableExist(tableConf.Name) {
 		MustModifyTable(tableConf)
 	} else {
@@ -89,6 +92,7 @@ func MustSyncTable(tableConf Table) {
 }
 
 func MustForceSyncTable(tableConf Table) {
+	MustVerifyTableConfig(tableConf)
 	if MustIsTableExist(tableConf.Name) {
 		MustForceModifyTable(tableConf)
 	} else {
@@ -102,6 +106,18 @@ func MustIsTableExist(tableName string) bool {
 		return false
 	} else {
 		return true
+	}
+}
+
+func MustVerifyTableConfig(tableConf Table) {
+	fieldNameFieldMap := map[string]bool{}
+	for name := range tableConf.FieldList {
+		name := strings.ToLower(name)
+		if fieldNameFieldMap[name] {
+			panic(fmt.Errorf("[MustVerifyTableConfig] Table[%s] Field[%s] 两个字段名只有大小写不一致",
+				tableConf.Name, name))
+		}
+		fieldNameFieldMap[name] = true
 	}
 }
 
@@ -143,15 +159,14 @@ func MustCreateTable(tableConf Table) {
 
 func MustModifyTable(tableConf Table) {
 	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
-	//kmgDebug.Println(MysqlFieldTypeList)
 	dbFieldNameList := []string{}
 	for _, row := range MysqlFieldTypeList {
-		dbFieldNameList = append(dbFieldNameList, row.Name)
+		dbFieldNameList = append(dbFieldNameList, strings.ToLower(row.Name))
 	}
 	for _, f1 := range dbFieldNameList {
 		found := false
 		for f2 := range tableConf.FieldList {
-			if f2 == f1 {
+			if strings.EqualFold(f2, f1) {
 				found = true
 				break
 			}
@@ -161,25 +176,29 @@ func MustModifyTable(tableConf Table) {
 		}
 	}
 	for fieldName, fieldType := range tableConf.FieldList {
-		if kmgStrings.IsInSlice(dbFieldNameList, fieldName) {
-			for _, row := range MysqlFieldTypeList {
-				if row.Name == fieldName {
-					if !fieldType.GetMysqlFieldType().Equal(row.Type) {
-						fmt.Printf("[kmgSql.SyncTable] Table[%s] Field[%s] OldType[%s] NewType[%s] 数据库字段类型不一致\n",
-							tableConf.Name, fieldName, row.Type.String(), fieldType.GetMysqlFieldType().String())
-					}
-					break
-				}
-			}
+		if !kmgStrings.IsInSlice(dbFieldNameList, strings.ToLower(fieldName)) {
+			MustAddNewField(tableConf, fieldName)
 			continue
 		}
-		MustAddNewField(tableConf, fieldName)
+		for _, row := range MysqlFieldTypeList {
+			if row.Name == fieldName {
+				if !fieldType.GetMysqlFieldType().Equal(row.Type) {
+					fmt.Printf("[kmgSql.SyncTable] Table[%s] Field[%s] OldType[%s] NewType[%s] 数据库字段类型不一致\n",
+						tableConf.Name, fieldName, row.Type.String(), fieldType.GetMysqlFieldType().String())
+				}
+				break
+			}
+			if strings.EqualFold(row.Name, fieldName) {
+				fmt.Printf("[kmgSql.SyncTable] Table[%s] OldField[%s] NewField[%s] 数据库字段大小写不一致\n",
+					tableConf.Name, fieldName, row.Name)
+				break
+			}
+		}
 	}
 }
 
 func MustForceModifyTable(tableConf Table) {
 	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
-	//kmgDebug.Println(MysqlFieldTypeList)
 	dbFieldNameList := []string{}
 	for _, row := range MysqlFieldTypeList {
 		dbFieldNameList = append(dbFieldNameList, row.Name)

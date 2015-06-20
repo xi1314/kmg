@@ -29,35 +29,33 @@ func TestMustRequestToStringCanRead(ot *testing.T) {
 func TestAddFileToHttpPathToServeMux(t *testing.T) {
 	{
 		mux := http.NewServeMux()
-		err := AddFileToHttpPathToServeMux(mux, "/test/", "test")
-		Equal(err, nil)
-		err = AddFileToHttpPathToServeMux(mux, "/test2", "test")
-		Equal(err, nil)
-		err = AddFileToHttpPathToServeMux(mux, "/test2/2.html", "test/1.html")
-		Equal(err, nil)
-		mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {})
-		Equal(err, nil)
+		MustAddFileToHttpPathToServeMux(mux, "/test/", "test")
+		MustAddFileToHttpPathToServeMux(mux, "/test2", "test")
+		MustAddFileToHttpPathToServeMux(mux, "/test2/2.html", "test/1.html")
+		mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+			panic("should not run to here " + req.URL.String())
+		})
 		ts := httptest.NewServer(mux)
 		defer ts.Close()
 
-		b, err := UrlGetContent(ts.URL + "/test/1.html")
-		Equal(err, nil)
+		b := MustUrlGetContent(ts.URL + "/test/1.html")
 		Equal(b, []byte("1.html"))
 
-		b, err = UrlGetContent(ts.URL + "/test2/1.html")
-		Equal(err, nil)
+		b = MustUrlGetContent(ts.URL + "/test2/2.html")
 		Equal(b, []byte("1.html"))
+
+		resp, err := http.Get(ts.URL + "/test/2.html")
+		Equal(err, nil)
+		Equal(resp.StatusCode, 404)
 	}
 
 	{
 		mux := http.NewServeMux()
-		err := AddFileToHttpPathToServeMux(mux, "/test/1.html", "test/1.html")
-		Equal(err, nil)
+		MustAddFileToHttpPathToServeMux(mux, "/test/1.html", "test/1.html")
 		ts := httptest.NewServer(mux)
 		defer ts.Close()
 
-		b, err := UrlGetContent(ts.URL + "/test/1.html")
-		Equal(err, nil)
+		b := MustUrlGetContent(ts.URL + "/test/1.html")
 		Equal(b, []byte("1.html"))
 	}
 }

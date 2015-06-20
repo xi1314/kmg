@@ -3,6 +3,7 @@ package kmgTime
 import "time"
 
 const (
+	FormatMysqlZero  = "0000-00-00 00:00:00"
 	FormatMysql      = "2006-01-02 15:04:05"
 	FormatFileName   = "2006-01-02_15-04-05" //适合显示在文件上面的日期格式 @deprecated
 	FormatFileNameV2 = "2006-01-02-15-04-05" //版本2,更规整,方便使用正则取出
@@ -11,9 +12,13 @@ const (
 	Iso3339Minute    = "2006-01-02T15:04"
 	Iso3339Second    = "2006-01-02T15:04:05"
 	AppleJsonFormat  = "2006-01-02 15:04:05 Etc/MST" //仅解决GMT的这个特殊情况.其他不管,如果苹果返回的字符串换时区了就悲剧了
+
+	FormatMysqlMinute      = "2006-01-02 15:04"
+	FormatMysqlMouthAndDay = "01-02"
 )
 
 var ParseFormatGuessList = []string{
+	FormatMysqlZero,
 	FormatMysql,
 	FormatDateMysql,
 	Iso3339Hour,

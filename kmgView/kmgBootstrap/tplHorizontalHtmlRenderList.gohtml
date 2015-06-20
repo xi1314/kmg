@@ -1,0 +1,12 @@
+@{
+    var conf HorizontalHtmlRenderList
+}
+<table style="width: 100%;">
+    <tr>
+        @for _,elem:=range conf{
+            <td>
+                @raw(elem.HtmlRender())
+            </td>
+        }
+    </tr>
+</table>

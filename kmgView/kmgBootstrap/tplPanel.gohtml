@@ -1,0 +1,11 @@
+@{
+    var panel Panel
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>@panel.Title</h4>
+    </div>
+    <div class="panel-body">
+        @raw(panel.Body.HtmlRender())
+    </div>
+</div>

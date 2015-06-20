@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/bronze1man/kmg/typeTransform"
+	"strings"
 )
 
 func ReadFile(path string, obj interface{}) error {
@@ -87,6 +88,17 @@ func MustUnmarshal(r []byte, obj interface{}) {
 	return
 }
 
+func MustUnmarshalIgnoreEmptyString(jsonStr string, obj interface{}) {
+	if jsonStr == "" {
+		return
+	}
+	err := json.Unmarshal([]byte(jsonStr), &obj)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
 func MustUnmarshalToMap(r []byte) (obj map[string]interface{}) {
 	err := json.Unmarshal(r, &obj)
 	if err != nil {
@@ -104,8 +116,14 @@ func MustMarshalIndentToString(obj interface{}) string {
 	return string(output)
 }
 
+var htmlUnescapeReplacer = strings.NewReplacer(`\u003c`, "<", `\u003e`, ">", `\u0026`, "&")
+
 func MarshalIndent(obj interface{}) ([]byte, error) {
-	return json.MarshalIndent(obj, "", "  ")
+	b, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return []byte(htmlUnescapeReplacer.Replace(string(b))), nil
 }
 
 func MustMarshal(obj interface{}) []byte {

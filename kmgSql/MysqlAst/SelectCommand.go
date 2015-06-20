@@ -90,6 +90,7 @@ func (c *SelectCommand) From(text string) *SelectCommand {
 	c.tableReferenceList = Text(text)
 	return c
 }
+
 func (c *SelectCommand) Where(text string, parameterList ...string) *SelectCommand {
 	c.whereCondition = Prepare(text, parameterList...)
 	return c
