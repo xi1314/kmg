@@ -1,6 +1,7 @@
 package kmgBootstrap
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/kmgView"
 )
 
@@ -88,4 +89,24 @@ type NavTabOption struct {
 
 func (p NavTabList) HtmlRender() string {
 	return tplNavTabList(p)
+}
+
+type Image struct {
+	Src       string
+	MaxHeight int
+	MaxWidth  int
+}
+
+func (p Image) HtmlRender() string {
+	return tplImage(p)
+}
+
+func (p Image) getStyle() string {
+	if p.MaxHeight == 0 {
+		p.MaxHeight = 100
+	}
+	if p.MaxWidth == 0 {
+		p.MaxWidth = 100
+	}
+	return fmt.Sprintf("max-height: %dpx;max-width: %dpx;", p.MaxHeight, p.MaxWidth)
 }

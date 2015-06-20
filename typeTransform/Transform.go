@@ -73,6 +73,7 @@ func NewStringToTimeFunc(location *time.Location) TransformerFunc {
 		return
 	}
 }
+
 func StringToTime(traner Transformer, in reflect.Value, out reflect.Value) (err error) {
 	var t time.Time
 	t, err = kmgTime.ParseAutoInLocal(in.String())

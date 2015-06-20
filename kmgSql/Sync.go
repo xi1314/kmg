@@ -159,7 +159,6 @@ func MustCreateTable(tableConf Table) {
 
 func MustModifyTable(tableConf Table) {
 	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
-	//kmgDebug.Println(MysqlFieldTypeList)
 	dbFieldNameList := []string{}
 	for _, row := range MysqlFieldTypeList {
 		dbFieldNameList = append(dbFieldNameList, strings.ToLower(row.Name))
@@ -200,7 +199,6 @@ func MustModifyTable(tableConf Table) {
 
 func MustForceModifyTable(tableConf Table) {
 	MysqlFieldTypeList := mustMysqlGetTableFieldTypeList(tableConf.Name)
-	//kmgDebug.Println(MysqlFieldTypeList)
 	dbFieldNameList := []string{}
 	for _, row := range MysqlFieldTypeList {
 		dbFieldNameList = append(dbFieldNameList, row.Name)

@@ -28,11 +28,7 @@ func TestOverseaMd5Sign(ot *testing.T) {
 
 func TestOverseaPay(ot *testing.T) {
 	trade := OverseaTrade{
-		PartnerId: "20881234567890123",
-
-		NotifyUrl: "http://xxxx.com/?n=Xxx.Pay.NotifyAction",
-		ReturnUrl: "http://xxxx.com/?n=Xxx.Pay.ReturnPage",
-
+		PartnerId:    "20881234567890123",
 		SecurityCode: "56Tae2ZROl2DSw",
 	}
 	url := trade.Pay(&OverseaTradePayRequest{
@@ -42,8 +38,8 @@ func TestOverseaPay(ot *testing.T) {
 		Currency:   "JPY",
 		TotalFee:   10,
 	})
-	kmgTest.Ok(strings.Contains(url, "dfb0dc2bb904864781aad2a9cd14d531"))
-	//kmgTest.Equal(query["sign"],"b49d7f5e6341e66870473222edc5df0b")
+	kmgTest.Ok(strings.Contains(url, "8d927a97f15a2f40a31040267a1d9afe"))
+	//	kmgTest.Equal(query["sign"],"b49d7f5e6341e66870473222edc5df0b")
 }
 
 func TestOverseaMd5Verify(ot *testing.T) {
@@ -83,3 +79,21 @@ func TestOverseaMd5Verify(ot *testing.T) {
 	err = trade.md5Verify(query)
 	kmgTest.Equal(err, nil)
 }
+
+//func TestOverseaMustReturnPage(t *testing.T) {
+//	trade := OverseaTrade{
+//		PartnerId: "20881234567890123",
+//		SecurityCode: "56Tae2ZROl2DSw",
+//	}
+//	ctx := kmgHttp.NewTestContext().
+//	SetInStr("out_trade_no", "1433229365").
+//	SetInStr("currency", "JPY").
+//	SetInStr("total_fee","1.00").
+//	SetInStr("sign","bab35fb00e9e858a0265241a94375ec2").
+//	SetInStr("sign_type","MD5").
+//	SetInStr("trade_status", "TRADE_FINISHED").
+//	SetInStr("trade_no", "2015060200001000110056045982").
+//	SetPost()
+//	info := trade.MustReturnPage(ctx)
+//	kmgTest.Ok(strings.Contains(info.TradeNo, "1433229365"))
+//}

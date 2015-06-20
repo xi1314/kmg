@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
+	"github.com/bronze1man/kmg/kmgStrconv"
 	"strconv"
 	"strings"
 )
@@ -279,4 +280,14 @@ func argsStringToInterface(args ...string) []interface{} {
 		_args = append(_args, value)
 	}
 	return _args
+}
+
+func GetFirstIntFromRowList(rowList []map[string]string) int {
+	if len(rowList) == 0 {
+		return 0
+	}
+	for _, val := range rowList[0] {
+		return kmgStrconv.AtoIDefault0(val)
+	}
+	return 0
 }

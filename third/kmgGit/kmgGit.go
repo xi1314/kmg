@@ -88,7 +88,7 @@ func (repo *Repository) MustResetToCommitId(commitId string) {
 	kmgCmd.CmdSlice([]string{"git", "reset", commitId}).SetDir(repo.gitPath).MustStdioRun()
 }
 func (repo *Repository) MustIndexRemoveByPath(path string) {
-	kmgCmd.CmdSlice([]string{"git", "rm", "--cached", "-r", path}).SetDir(repo.gitPath).MustStdioRun()
+	kmgCmd.CmdSlice([]string{"git", "rm", "--cached", "-rf", path}).SetDir(repo.gitPath).MustStdioRun()
 }
 
 func (repo *Repository) MustIndexAddFile(path string) {

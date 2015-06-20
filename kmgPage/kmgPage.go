@@ -17,31 +17,46 @@ type KmgPage struct {
 	BaseUrl     string              // 不包含页码参数的url,具体渲染url的时候会把页面参数加上
 	Data        []map[string]string // 本次分页查询到的数据
 	TotalPage   int                 // 共有多少个页面
+	StartIndex  int
+	EndIndex    int
 }
 
-type CreateFromSelectCommandRequest struct {
-	Select      *MysqlAst.SelectCommand
-	Url         string
+func CreateFromSelectCommandAndHttpContext(Select *MysqlAst.SelectCommand, Ctx *kmgHttp.Context) *KmgPage {
+	page := &KmgPage{}
+	page.BaseUrl = Ctx.GetRequestUrl()
+	page.CurrentPage = Ctx.InNum("Page")
+	page.PageKeyName = "Page"
+	page.init()
+	return page.runSelectCommand(Select)
+}
+
+type CreateFromDataRequest struct {
+	Data        []map[string]string
+	BaseUrl     string
 	ItemPerPage int
 	CurrentPage int
+	StartIndex  int
+	EndIndex    int
 	PageKeyName string
+	DataSize    int
 }
 
-func CreateFromSelectCommand(req CreateFromSelectCommandRequest) *KmgPage {
+func CreateFromData(req CreateFromDataRequest) *KmgPage {
 	page := &KmgPage{}
-	page.BaseUrl = req.Url
+	page.BaseUrl = req.BaseUrl
 	page.ItemPerPage = req.ItemPerPage
 	page.CurrentPage = req.CurrentPage
 	page.PageKeyName = req.PageKeyName
+	page.TotalItem = req.DataSize
+	page.TotalPage = int(math.Ceil(float64(page.TotalItem) / float64(page.ItemPerPage)))
+	page.StartIndex = (req.CurrentPage - 1) * req.ItemPerPage
+	if req.CurrentPage*req.ItemPerPage > req.DataSize {
+		page.EndIndex = req.DataSize
+	} else {
+		page.EndIndex = req.CurrentPage * req.ItemPerPage
+	}
 	page.init()
-	return page.runSelectCommand(req.Select)
-}
-
-func (page *KmgPage) CreateFromData(data []map[string]string, baseUrl string, itemPerPage int) *KmgPage {
-	page.BaseUrl = baseUrl
-	page.ItemPerPage = itemPerPage
-	page.TotalItem = len(data)
-	page.init()
+	page.StartIndex = (page.CurrentPage - 1) * page.ItemPerPage
 	return page
 }
 
@@ -66,11 +81,13 @@ func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *Km
 
 func (page *KmgPage) init() {
 	if page.ItemPerPage == 0 {
-		page.ItemPerPage = 5
+		page.ItemPerPage = 10
 	}
-	page.ShowPageNum = 10
+	if page.ShowPageNum == 0 {
+		page.ShowPageNum = 10
+	}
 	if page.PageKeyName == "" {
-		page.PageKeyName = "page"
+		page.PageKeyName = "Page"
 	}
 	if page.CurrentPage == 0 {
 		page.CurrentPage = 1
@@ -78,10 +95,9 @@ func (page *KmgPage) init() {
 	if page.CurrentPage < 1 {
 		page.CurrentPage = 1
 	}
-	//	if page.CurrentPage > page.GetTotalPage() {
-	//		page.CurrentPage = page.GetTotalPage()
-	//	}
-
+	if page.CurrentPage > page.TotalPage && page.TotalPage > 0 {
+		page.CurrentPage = page.TotalPage
+	}
 }
 
 func (page *KmgPage) GetTotalPage() int {
@@ -123,6 +139,9 @@ func (page *KmgPage) GetBeforePageUrl() string {
 	if pageNumber < 1 {
 		pageNumber = 1
 	}
+	if pageNumber == 1 {
+		return "javascript:"
+	}
 	return page.GetUrlWithPage(pageNumber)
 }
 
@@ -131,6 +150,9 @@ func (page *KmgPage) GetAfterPageUrl() string {
 	pageNumber := page.CurrentPage + 1
 	if pageNumber > page.GetTotalPage() {
 		pageNumber = page.GetTotalPage()
+	}
+	if pageNumber == page.GetTotalPage() {
+		return "javascript:"
 	}
 	return page.GetUrlWithPage(pageNumber)
 }
@@ -142,13 +164,13 @@ func (page *KmgPage) GetShowPageArray() []UrlParam {
 		return page.getShowPageArrayFromNum(1, page.GetTotalPage())
 	}
 	start := page.CurrentPage - page.ShowPageNum/2
-	end := page.CurrentPage + page.ShowPageNum/2 - 1
+	end := page.CurrentPage + page.ShowPageNum/2
 	if start < 1 {
-		end += 1 - start
+		end = page.ShowPageNum
 		start = 1
 	}
 	if end > page.GetTotalPage() {
-		start = start - (end - page.GetTotalPage()) + 1
+		start = page.GetTotalPage() - page.ShowPageNum + 1
 		end = page.GetTotalPage()
 	}
 	return page.getShowPageArrayFromNum(start, end)

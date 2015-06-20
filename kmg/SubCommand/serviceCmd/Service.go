@@ -75,7 +75,10 @@ func Install(s *Service) (err error) {
 	}
 	return nil
 }
+
 func Uninstall(name string) (err error) {
+	Stop(name)
+	// TODO Stop 里面关闭不是错误.
 	confPath := getConfigPath(name)
 	pathList := []string{
 		confPath,
@@ -98,6 +101,8 @@ func Uninstall(name string) (err error) {
 func Start(name string) (err error) {
 	return kmgCmd.CmdSlice([]string{"service", name, "start"}).Run()
 }
+
+//TODO 已经关闭不是错误
 func Stop(name string) (err error) {
 	return kmgCmd.CmdSlice([]string{"service", name, "stop"}).Run()
 }

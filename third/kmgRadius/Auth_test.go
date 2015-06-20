@@ -137,7 +137,7 @@ func TestAuthMschapV2Step3(ot *testing.T) {
 	outPac := server.PacketHandler(inPac)
 	fmt.Println(outPac)
 	kmgTest.Equal(outPac.GetEAPMessage().(*eap.MSCHAPV2Packet).MSCHAPV2.OpCode(), MSCHAPV2.OpCodeSuccess)
-	kmgTest.Equal(kmgHex.EncodeToUpperString(outPac.GetEAPMessage().(*eap.MSCHAPV2Packet).MSCHAPV2.(*MSCHAPV2.SuccessPacket).Auth[:]), "689DE06F16B7AFFB04E8EDCC8C2DE8CCBA78E0A9")
+	kmgTest.Equal(kmgHex.UpperEncodeBytesToString(outPac.GetEAPMessage().(*eap.MSCHAPV2Packet).MSCHAPV2.(*MSCHAPV2.SuccessPacket).Auth[:]), "689DE06F16B7AFFB04E8EDCC8C2DE8CCBA78E0A9")
 	kmgTest.Equal(outPac.Code, CodeAccessChallenge)
 }
 
