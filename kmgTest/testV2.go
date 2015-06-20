@@ -7,25 +7,26 @@ import (
 	"reflect"
 )
 
-func Ok(expectTrue bool) {
+func Ok(expectTrue bool, objList ...interface{}) {
 	if !expectTrue {
-		panic("ok fail")
+		if len(objList) == 0 {
+			panic("ok fail")
+		} else {
+			panic("ok fail\n" + kmgDebug.Sprintln(objList...))
+		}
 	}
 }
 
-func Equal(get interface{}, expect interface{}) {
+func Equal(get interface{}, expect interface{}, objList ...interface{}) {
 	if isEqual(expect, get) {
 		return
 	}
-	msg := fmt.Sprintf("\tget1: %s\n\texpect2: %s", valueDetail(get), valueDetail(expect))
-	panic(msg)
-}
-
-func EqualMsg(get interface{}, expect interface{}, objList ...interface{}) {
-	if isEqual(expect, get) {
-		return
+	var msg string
+	if len(objList) == 0 {
+		msg = fmt.Sprintf("\tget1: %s\n\texpect2: %s", valueDetail(get), valueDetail(expect))
+	} else {
+		msg = fmt.Sprintf("\tget1: %s\n\texpect2: %s\n%s", valueDetail(get), valueDetail(expect), kmgDebug.Sprintln(objList...))
 	}
-	msg := fmt.Sprintf("\tget1: %s\n\texpect2: %s\n%s", valueDetail(get), valueDetail(expect), kmgDebug.Sprintln(objList...))
 	panic(msg)
 }
 

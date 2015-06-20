@@ -26,7 +26,7 @@ func Sprintln(objList ...interface{}) string {
 		}
 		switch obj := objList[i].(type) {
 		case []byte:
-			outList[i+1] = fmt.Sprint(obj)
+			outList[i+1] = fmt.Sprintf("%#v", obj)
 		default:
 			b, err := json.MarshalIndent(objList[i], "", " ")
 			if err != nil {

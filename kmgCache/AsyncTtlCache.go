@@ -12,14 +12,14 @@ var DoNotNeedCache = errors.New("do not need cache")
 
 //会在缓存超时的时候,异步更新缓存,并且返回前一个数据.
 type AsyncTtlCache struct {
-	cache       map[string]TtlCacheEntry
+	cache       map[string]ttlCacheEntry
 	lock        sync.RWMutex
 	singleGroup singleflight.Group
 }
 
 func NewAsyncCache() *AsyncTtlCache {
 	return &AsyncTtlCache{
-		cache: map[string]TtlCacheEntry{},
+		cache: map[string]ttlCacheEntry{},
 	}
 }
 
@@ -40,7 +40,7 @@ func (s *AsyncTtlCache) DoWithTtl(key string, f func() (value interface{}, ttl u
 		entryi, err := s.singleGroup.Do(key, func() (out interface{}, err error) {
 			value, ttl, canSave := f()
 			timeout := time.Now().Add(time.Duration(ttl) * time.Second)
-			out = TtlCacheEntry{
+			out = ttlCacheEntry{
 				Value:   value,
 				Timeout: timeout,
 			}
@@ -49,7 +49,7 @@ func (s *AsyncTtlCache) DoWithTtl(key string, f func() (value interface{}, ttl u
 			}
 			return
 		})
-		entryn := entryi.(TtlCacheEntry)
+		entryn := entryi.(ttlCacheEntry)
 		if err == nil {
 			s.save(key, entryn) //ttl 是0 也存进去,下次可以异步刷新
 		}
@@ -68,14 +68,14 @@ func (s *AsyncTtlCache) DoWithTtl(key string, f func() (value interface{}, ttl u
 	}
 }
 
-func (s *AsyncTtlCache) save(key string, entry TtlCacheEntry) {
+func (s *AsyncTtlCache) save(key string, entry ttlCacheEntry) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.cache[key] = entry
 	return
 }
 
-func (s *AsyncTtlCache) get(key string) (entry TtlCacheEntry, err error) {
+func (s *AsyncTtlCache) get(key string) (entry ttlCacheEntry, err error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	now := time.Now()

@@ -10,12 +10,12 @@ import (
 
 var CacheMiss = errors.New("cache miss")
 
-type TtlCacheEntry struct {
+type ttlCacheEntry struct {
 	Value   interface{}
 	Timeout time.Time
 }
 
-func (entry TtlCacheEntry) GetTtl() uint32 {
+func (entry ttlCacheEntry) GetTtl() uint32 {
 	ttlDur := entry.Timeout.Sub(time.Now())
 	if ttlDur < 0 {
 		ttlDur = 0
@@ -25,18 +25,18 @@ func (entry TtlCacheEntry) GetTtl() uint32 {
 
 //请调用 NewTtlCache() 初始化
 type TtlCache struct {
-	cache       map[string]TtlCacheEntry
+	cache       map[string]ttlCacheEntry
 	lock        sync.RWMutex
 	singleGroup singleflight.Group
 }
 
 func NewTtlCache() *TtlCache {
 	return &TtlCache{
-		cache: map[string]TtlCacheEntry{},
+		cache: map[string]ttlCacheEntry{},
 	}
 }
 
-//如果err不是空,则不会把数据保存在缓存里面,但是会返回另外2项.
+//如果f 返回的 err不是空,则不会把数据保存在缓存里面,但是会返回另外2项.
 func (s *TtlCache) DoWithTtl(key string, f func() (value interface{}, ttl uint32, err error)) (value interface{}, ttl uint32, err error) {
 	entry, err := s.get(key)
 	if err == nil {
@@ -48,12 +48,12 @@ func (s *TtlCache) DoWithTtl(key string, f func() (value interface{}, ttl uint32
 	entryi, err := s.singleGroup.Do(key, func() (interface{}, error) {
 		value, ttl, err := f()
 		timeout := time.Now().Add(time.Duration(ttl) * time.Second)
-		return TtlCacheEntry{
+		return ttlCacheEntry{
 			Value:   value,
 			Timeout: timeout,
 		}, err
 	})
-	entry = entryi.(TtlCacheEntry)
+	entry = entryi.(ttlCacheEntry)
 	ttl = entry.GetTtl()
 	if err == nil && ttl > 0 {
 		s.save(key, entry)
@@ -61,14 +61,14 @@ func (s *TtlCache) DoWithTtl(key string, f func() (value interface{}, ttl uint32
 	return entry.Value, ttl, nil
 }
 
-func (s *TtlCache) save(key string, entry TtlCacheEntry) {
+func (s *TtlCache) save(key string, entry ttlCacheEntry) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.cache[key] = entry
 	return
 }
 
-func (s *TtlCache) get(key string) (entry TtlCacheEntry, err error) {
+func (s *TtlCache) get(key string) (entry ttlCacheEntry, err error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	now := time.Now()

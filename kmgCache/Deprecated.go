@@ -13,6 +13,7 @@ import (
 // pathList表示需要监控的目录
 // 文件列表里面如果有文件不存在,会运行代码
 // 已知bug,小于1秒的修改不能被检测到.
+// @deprecated
 func MustFileChangeCache(key string, pathList []string, f func()) {
 	//读取文件修改时间缓存信息
 	toChange := false

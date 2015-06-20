@@ -1,6 +1,7 @@
 package kmgCmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -207,6 +208,17 @@ func (c *Cmd) MustHiddenRunAndIsSuccess() bool {
 		}
 	}
 	return c.cmd.ProcessState.Success()
+}
+
+func (c *Cmd) MustRunWithStdin(stdin []byte) {
+	c.PrintCmdLine()
+	c.cmd.Stdin = bytes.NewBuffer(stdin)
+	c.cmd.Stdout = os.Stdout
+	c.cmd.Stderr = os.Stderr
+	err := c.cmd.Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 type exitStatuser interface {

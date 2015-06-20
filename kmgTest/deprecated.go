@@ -118,3 +118,12 @@ func TestWarpper(T TestingTB, testObject TestingTBAware) {
 		tov.Method(i).Call([]reflect.Value{})
 	}
 }
+
+// @deprecated
+func EqualMsg(get interface{}, expect interface{}, objList ...interface{}) {
+	if isEqual(expect, get) {
+		return
+	}
+	msg := fmt.Sprintf("\tget1: %s\n\texpect2: %s\n%s", valueDetail(get), valueDetail(expect), kmgDebug.Sprintln(objList...))
+	panic(msg)
+}
