@@ -43,7 +43,8 @@ func tplInputString(config Input)string{
 <? }
 ?>
 ```
-output
+
+use the function `kmgGoTpl.MustBuildTplInDir("src/github.com/bronze1man/kmg/kmgView/testFile")` to compile the template in your make file.
 
 
 ### TODO
