@@ -1,0 +1,13 @@
+package example
+
+import (
+	"bytes"
+)
+
+func tplTest2() string {
+	var _buf bytes.Buffer
+	_buf.WriteString(`
+    <a href="http://www.google.com"></a>
+`)
+	return _buf.Bytes()
+}
