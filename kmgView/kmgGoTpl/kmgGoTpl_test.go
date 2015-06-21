@@ -15,8 +15,8 @@ func TestGoTpl(ot *testing.T) {
 		if filepath.Ext(file) != ".gotpl" {
 			continue
 		}
-		generated := kmgFile.MustReadFile(filepath.Join(filepath.Dir(file), "_"+kmgFile.GetFileBaseWithoutExt(file)+".go"))
-		correct := kmgFile.MustReadFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"))
+		generated := kmgFile.MustReadFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"))
+		correct := kmgFile.MustReadFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go.good"))
 		kmgTest.Equal(generated, correct, file)
 	}
 }
@@ -27,6 +27,6 @@ func setCurrentAsCorrect() {
 		if filepath.Ext(file) != ".gotpl" {
 			continue
 		}
-		kmgFile.MustCopyFile(filepath.Join(filepath.Dir(file), "_"+kmgFile.GetFileBaseWithoutExt(file)+".go"), filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"))
+		kmgFile.MustCopyFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"), filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go.good"))
 	}
 }

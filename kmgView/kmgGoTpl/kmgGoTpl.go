@@ -3,6 +3,7 @@ package kmgGoTpl
 import (
 	"bytes"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCache"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgStrings"
 	"go/format"
@@ -33,6 +34,12 @@ func MustBuildTplInDir(path string) {
 		outFilePath := kmgFile.PathTrimExt(val) + ".go"
 		kmgFile.MustWriteFile(outFilePath, out)
 	}
+}
+
+func MustBuildTplInDirWithCache(path string) {
+	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+path, []string{path}, func() {
+		MustBuildTplInDir(path)
+	})
 }
 
 type transformer struct {
@@ -104,7 +111,7 @@ func (t *transformer) msutTransform(in []byte) []byte {
 					t.isFuncOpenInScope = false
 					//函数的关闭符
 					if t.hasFuncOpenBetweenScope {
-						t.lastScopeBuf.WriteString("return _buf.Bytes()\n")
+						t.lastScopeBuf.WriteString("return _buf.String()\n")
 						t.hasFuncOpenBetweenScope = false
 					}
 				}
@@ -113,7 +120,10 @@ func (t *transformer) msutTransform(in []byte) []byte {
 		t.lastScopeBuf.WriteByte(t.in[t.pos])
 	}
 	if t.currentScope == currentScopeTpl {
-		t.endTplScope()
+		s := strings.TrimSpace(t.lastScopeBuf.String())
+		if s != "" {
+			panic("find tpl data after <? } ?>")
+		}
 	}
 	output := t.outBuf.Bytes()
 	output = addImportBytes(output)

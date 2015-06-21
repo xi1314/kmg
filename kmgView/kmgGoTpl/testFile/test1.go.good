@@ -15,7 +15,7 @@ type Input struct {
 	Id       string
 }
 
-func tplInputString(config Input) string { //函数开头(需要想办法判断当前后面的内容是否处于某个函数里面)
+func tplInputString(config Input) string {
 	var _buf bytes.Buffer
 	_buf.WriteString(`
 <div class="form-group has-feedback">
@@ -57,5 +57,5 @@ func tplInputString(config Input) string { //函数开头(需要想办法判断�
     </div>
 </div>
 `)
-	return _buf.Bytes()
-} //需要根据 {} 匹配出来这个是函数结束,并且在函数结束的地方加入 return buf.String()
+	return _buf.String()
+}

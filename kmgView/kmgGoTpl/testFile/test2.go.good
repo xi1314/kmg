@@ -9,5 +9,5 @@ func tplTest2() string {
 	_buf.WriteString(`
     <a href="http://www.google.com"></a>
 `)
-	return _buf.Bytes()
+	return _buf.String()
 }

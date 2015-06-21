@@ -1,3 +1,11 @@
+kmg golang template engine
+=================
+A PHP like template engine write for golang.
+一个像PHP的golang模板引擎.
+
+### example
+template file.
+```
 <?
 package example
 import (
@@ -34,3 +42,14 @@ func tplInputString(config Input)string{
 </div>
 <? }
 ?>
+```
+output
+
+
+### TODO
+* 对html的3种xss转义自动支持(kmgXss.H kmxXss.Urlv kmgXss.Jsonv)
+* 自动golang类型分析(确定是否直接渲染字符串,慢?)
+* 允许在golang的字符串,注释,部分出现语法引擎使用过的关键字(<?= <? ?> func { } import ( ) 等)
+
+### reference
+* the idea of this type template engine is come from https://github.com/sipin/gorazor
