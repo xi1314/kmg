@@ -5,6 +5,7 @@ import (
 	"github.com/bronze1man/kmg/kmgStrings"
 )
 
+/*
 type importStatus int
 
 const (
@@ -15,9 +16,10 @@ const (
 	importStatusImportList   importStatus = 4
 	importStatusParentheses2 importStatus = 5
 )
+*/
 
 // 添加bytes的import项.
-// 近似实现搞不定了.
+// 这个是近似实现,golang的语法树确实有点复杂.
 func addImport(in []byte, pkgList []string) (out []byte) {
 	var isLastImportToken bool
 	var isInImportParentheses bool
