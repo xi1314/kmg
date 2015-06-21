@@ -1,7 +1,15 @@
 kmg golang template engine
 =================
 A PHP like template engine write for golang.
+
 一个像PHP的golang模板引擎.
+
+当前版本不稳定,随时会产生不向前兼容.
+
+* 大幅度减少学习成本,你只需要知道,在 <? ?> 里面写golang语句, 在 <?= ?> 里面写需要渲染的golang表达式即可.
+* .gotpl 表示普通文本模板,此处不做任何自动转义 .gotplhtml 表示html模板,此处做3种xss的自动转义.
+* 报错要有行号.
+* 对html的3种xss转义自动支持(kmgXss.H kmxXss.Urlv kmgXss.Jsonv)
 
 ### example
 template file.
@@ -48,9 +56,8 @@ use the function `kmgGoTpl.MustBuildTplInDir("src/github.com/bronze1man/kmg/kmgV
 
 
 ### TODO
-* 对html的3种xss转义自动支持(kmgXss.H kmxXss.Urlv kmgXss.Jsonv)
-* 自动golang类型分析(确定是否直接渲染字符串,慢?)
 * 允许在golang的字符串,注释,部分出现语法引擎使用过的关键字(<?= <? ?> func { } import ( ) 等)
+* 自动golang类型分析(确定是否直接渲染字符串,慢?)
 
 ### reference
-* the idea of this type template engine is come from https://github.com/sipin/gorazor
+* 大部分点子来源于 https://github.com/sipin/gorazor

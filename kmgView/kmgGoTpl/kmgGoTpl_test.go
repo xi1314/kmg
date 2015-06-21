@@ -9,10 +9,9 @@ import (
 
 func TestGoTpl(ot *testing.T) {
 	MustBuildTplInDir("testFile")
-
 	files := kmgFile.MustGetAllFiles("testFile")
 	for _, file := range files {
-		if filepath.Ext(file) != ".gotpl" {
+		if filepath.Ext(file) != ".gotplhtml" {
 			continue
 		}
 		generated := kmgFile.MustReadFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"))
@@ -24,7 +23,7 @@ func TestGoTpl(ot *testing.T) {
 func setCurrentAsCorrect() {
 	files := kmgFile.MustGetAllFiles("testFile")
 	for _, file := range files {
-		if filepath.Ext(file) != ".gotpl" {
+		if filepath.Ext(file) != ".gotplhtml" {
 			continue
 		}
 		kmgFile.MustCopyFile(filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go"), filepath.Join(filepath.Dir(file), kmgFile.GetFileBaseWithoutExt(file)+".go.good"))

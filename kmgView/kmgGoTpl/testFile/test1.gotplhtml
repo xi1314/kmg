@@ -1,8 +1,6 @@
 <?
 package example
-import (
-    "github.com/bronze1man/kmg/kmgXss"
-)
+
 type Input struct{
 	Name     string
 	Value    string
@@ -23,11 +21,11 @@ func tplInputString(config Input)string{
     <div class="col-sm-8">
         <input type="text" autocomplete="off" class="form-control"
                <? if config.ReadOnly{ ?>readonly<? } ?>
-               name="<?=kmgXss.H(config.Name)?>"
-        value="<?=kmgXss.H(config.Value)?>"/>
+               name="<?=config.Name?>"
+        value="<?=config.Value?>"/>
         <span style="font-size:12px;color:red">
             <? if config.Comment!=""{ ?>
-                提示: <?=kmgXss.H(config.Comment)?>
+                提示: <?=config.Comment?>
             <? } ?>
         </span>
     </div>
