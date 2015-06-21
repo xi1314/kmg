@@ -57,3 +57,11 @@ func GetAllFiles(root string) (out []string, err error) {
 	})
 	return
 }
+
+func MustGetAllFiles(root string) (out []string) {
+	out, err := GetAllFiles(root)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
