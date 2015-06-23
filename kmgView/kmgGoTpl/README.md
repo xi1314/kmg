@@ -13,7 +13,7 @@ A PHP like template engine write for golang.
 
 ### example
 template file.
-```
+```html
 <?
 package example
 type Input struct{
