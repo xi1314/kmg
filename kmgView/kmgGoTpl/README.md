@@ -8,7 +8,7 @@ A PHP like template engine write for golang.
 
 * 大幅度减少学习成本,你只需要知道,在 <? ?> 里面写golang语句, 在 <?= ?> 里面写需要渲染的golang表达式即可.
 * .gotpl 表示普通文本模板,此处不做任何自动转义 .gotplhtml 表示html模板,此处做3种xss的自动转义.
-* 报错要有行号.
+* 报错有文件名和行号.
 * 对html的3种xss转义自动支持(kmgXss.H kmxXss.Urlv kmgXss.Jsonv)
 
 ### example
@@ -16,9 +16,6 @@ template file.
 ```
 <?
 package example
-import (
-    "github.com/bronze1man/kmg/kmgXss"
-)
 type Input struct{
 	Name     string
 	Value    string
@@ -39,11 +36,11 @@ func tplInputString(config Input)string{
     <div class="col-sm-8">
         <input type="text" autocomplete="off" class="form-control"
                <? if config.ReadOnly{ ?>readonly<? } ?>
-               name="<?=kmgXss.H(config.Name)?>"
-        value="<?=kmgXss.H(config.Value)?>"/>
+               name="<?=config.Name?>"
+        value="<?=config.Value?>"/>
         <span style="font-size:12px;color:red">
             <? if config.Comment!=""{ ?>
-                提示: <?=kmgXss.H(config.Comment)?>
+                提示: <?=config.Comment?>
             <? } ?>
         </span>
     </div>
