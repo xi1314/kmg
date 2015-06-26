@@ -17,13 +17,14 @@ func MustCryptoRandBytes(length int) []byte {
 //读出给定长度的加密的已经Hex过的字符串(结果字符串就是那么长)
 func MustCryptoRandToHex(length int) string {
 	readLen := length/2 + length%2
-	buf := make([]byte, length+length%2)
-	_, err := rand.Read(buf[:readLen])
+	readbuf := make([]byte, readLen)
+	_, err := rand.Read(readbuf[:readLen])
 	if err != nil {
 		panic(err)
 	}
-	hex.Encode(buf, buf[:readLen])
-	return string(buf[:length])
+	outBuf := make([]byte, readLen*2)
+	hex.Encode(outBuf, readbuf[:readLen])
+	return string(outBuf[:length])
 }
 
 // (长度62)

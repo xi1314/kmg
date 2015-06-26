@@ -97,7 +97,6 @@ type ArgumentNameTypePair struct {
 	ObjectTypeStr string
 }
 
-/*
 func tplGenerateCode(config tplConfig) []byte {
 	return kmgTextTemplate.MustRenderToByte(`package {{.OutPackageName}}
 
@@ -302,4 +301,3 @@ func (c *Client_{{$.ObjectName}}) {{.Name}}( {{range .InArgsList}} {{.Name}} {{.
 
 `, config)
 }
-*/
