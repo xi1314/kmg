@@ -2,10 +2,8 @@ package kmgRpc
 
 import (
 	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTextTemplate"
-	"go/format"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
 	"strings"
-	//"fmt"
 )
 
 type GenerateRequest struct {
@@ -20,9 +18,10 @@ type GenerateRequest struct {
 // 会把Object上面所有的公开函数都拿去生成一遍
 func MustGenerateCode(req GenerateRequest) {
 	config := reflectToTplConfig(req)
-	outB := tplGenerateCode(config)
-	//fmt.Println(string(outB))
-	outB1, err := format.Source(outB)
+	outBs := tplGenerateCode(config)
+	//outBs=strings.Replace(outBs,"\n    \n","\n",-1)
+	outB := []byte(outBs)
+	outB1, err := kmgFormat.Source(outB)
 	if err == nil {
 		outB = outB1
 	}
@@ -32,7 +31,7 @@ func MustGenerateCode(req GenerateRequest) {
 
 type tplConfig struct {
 	OutPackageName string          //生成的package的名字 testPackage
-	OutKeyBase64   string          //生成的key的base64的值
+	OutKeyByteList string          //生成的key的base64的值
 	ObjectName     string          //对象名字	如 Demo
 	ObjectTypeStr  string          //对象的类型表示	如 *Demo
 	ImportPathMap  map[string]bool //ImportPath列表
@@ -97,6 +96,7 @@ type ArgumentNameTypePair struct {
 	ObjectTypeStr string
 }
 
+/*
 func tplGenerateCode(config tplConfig) []byte {
 	return kmgTextTemplate.MustRenderToByte(`package {{.OutPackageName}}
 
@@ -301,3 +301,4 @@ func (c *Client_{{$.ObjectName}}) {{.Name}}( {{range .InArgsList}} {{.Name}} {{.
 
 `, config)
 }
+*/

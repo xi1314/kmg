@@ -41,6 +41,8 @@ type SprintfWrapError struct {
 func (err *SprintfWrapError) Error() string {
 	return fmt.Sprintf(err.format, err.args...)
 }
+
+//fmt.Errorf
 func Sprintf(format string, args ...interface{}) error {
 	return &SprintfWrapError{format: format, args: args}
 }
@@ -52,6 +54,7 @@ func (err stringWrapError) Error() string {
 }
 
 // @deprecated
+// errors.New
 func New(s string) error {
 	return stringWrapError(s)
 }

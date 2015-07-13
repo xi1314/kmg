@@ -1,0 +1,14 @@
+<? package kmgChart
+func tplChart(chartData Chart)string{
+?>
+<div id="<?= chartData.domId ?>" style="width: <?=chartData.Width?>;height: <?=chartData.Height?>;">
+</div>
+<script>
+    (function () {
+        var chart = echarts.init(document.getElementById(<?= chartData.domId ?>));
+        var option = <?= raw(chartData.GetOptionString()) ?>;
+        <?= raw(chartData.JS) ?>
+        chart.setOption(option);
+    })();
+</script>
+<? } ?>

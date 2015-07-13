@@ -89,6 +89,11 @@ func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 	apiName := ctx.InStr("n")
 	if apiName == "" && EnterPointApiName != "" {
+		if ctx.GetRequestUrl() == "/favicon.ico" {
+			// 避免网站图标请求,占用大量资源.
+			ctx.NotFound("api not found")
+			return
+		}
 		apiName = EnterPointApiName
 	}
 	apiFunc, ok := controllerObjMap[apiName]

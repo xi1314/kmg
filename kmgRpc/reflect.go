@@ -2,7 +2,6 @@ package kmgRpc
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/encoding/kmgBase64"
 	"github.com/bronze1man/kmg/kmgGoSource"
 	"golang.org/x/tools/go/types"
 	"path"
@@ -10,22 +9,24 @@ import (
 )
 
 func reflectToTplConfig(req GenerateRequest) tplConfig {
+
 	config := tplConfig{
 		ObjectName:     req.ObjectName,
 		OutPackageName: path.Base(req.OutPackageImportPath),
-		OutKeyBase64:   kmgBase64.Base64EncodeByteToString(req.Key[:]),
 		ImportPathMap: map[string]bool{
 			"encoding/json": true,
 			"errors":        true,
 			"fmt":           true,
-			"github.com/bronze1man/kmg/encoding/kmgBase64": true,
-			"github.com/bronze1man/kmg/kmgCrypto":          true,
-			"github.com/bronze1man/kmg/kmgLog":             true,
-			"github.com/bronze1man/kmg/kmgNet/kmgHttp":     true,
+			"github.com/bronze1man/kmg/kmgCrypto":      true,
+			"github.com/bronze1man/kmg/kmgLog":         true,
+			"github.com/bronze1man/kmg/kmgNet/kmgHttp": true,
 			"net/http": true,
 			"bytes":    true,
 		},
 	}
+	OutKeyByteList := fmt.Sprintf("%#v", req.Key[:])
+	config.OutKeyByteList = OutKeyByteList[7 : len(OutKeyByteList)-1]
+
 	ObjTyp := kmgGoSource.MustGetGoTypesFromReflect(reflect.TypeOf(req.Object))
 	var importPathList []string
 	config.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, ObjTyp)

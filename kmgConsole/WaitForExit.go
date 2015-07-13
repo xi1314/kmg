@@ -1,6 +1,7 @@
 package kmgConsole
 
 import (
+	"github.com/bronze1man/kmg/kmgErr"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,6 +24,15 @@ var exitActionList = []func(){}
 //TODO 这个地方过于不直观
 func AddExitAction(f func()) {
 	exitActionList = append(exitActionList, f)
+}
+
+func AddExitActionWithError(f func() error) {
+	exitActionList = append(exitActionList, func() {
+		err := f()
+		if err != nil {
+			kmgErr.LogError(err)
+		}
+	})
 }
 
 //调用这个函数来保证使用AddExitAction方法来注册进程退出请求.

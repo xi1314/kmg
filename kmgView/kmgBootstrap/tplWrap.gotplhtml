@@ -1,0 +1,14 @@
+<? package kmgBootstrap
+func tplWrap (w Wrap) string { ?>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><?= w.Title ?></title>
+    <?= raw(w.Head.HtmlRender()) ?>
+</head>
+<body style="padding:20px;">
+<?= raw(w.Body.HtmlRender()) ?>
+</body>
+</html>
+<? } ?>

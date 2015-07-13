@@ -129,3 +129,14 @@ func IntBetween(min int, max int) int {
 func HappendBaseOnPossibility(possibility float64) bool {
 	return globalRand.HappendBaseOnPossibility(possibility)
 }
+
+// 将字符串数组里面的东西打乱顺序返回
+func PermStringSlice(slice []string) (output []string) {
+	thisLen := len(slice)
+	output = make([]string, thisLen)
+	permSlice := globalRand.Perm(thisLen)
+	for i := 0; i < thisLen; i++ {
+		output[i] = slice[permSlice[i]]
+	}
+	return
+}

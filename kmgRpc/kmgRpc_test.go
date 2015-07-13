@@ -28,9 +28,9 @@ func TestReflectToTplConfig(t *testing.T) {
 			OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
 		},
 	)
-	kmgTest.Equal(len(conf.ApiList), 5)
+	kmgTest.Equal(len(conf.ApiList), 6)
 	for i, name := range []string{
-		"DemoFunc2", "DemoFunc3", "DemoFunc4", "DemoFunc5", "PostScoreInt",
+		"DemoFunc2", "DemoFunc3", "DemoFunc4", "DemoFunc5", "DemoFunc7", "PostScoreInt",
 	} {
 		kmgTest.Equal(conf.ApiList[i].Name, name)
 	}
@@ -39,7 +39,7 @@ func TestReflectToTplConfig(t *testing.T) {
 func TestTplGenerateCode(t *testing.T) {
 	out := tplGenerateCode(tplConfig{
 		OutPackageName: "testPackage",
-		OutKeyBase64:   "wwbo0EGSB6IVKFEy4dH6my1DIaxCCtzPUM9vfx2Hbog=",
+		OutKeyByteList: "1,2",
 		ObjectName:     "Demo",
 		ObjectTypeStr:  "*Demo",
 		ApiList: []Api{
@@ -71,15 +71,14 @@ func TestTplGenerateCode(t *testing.T) {
 			"encoding/json": true,
 			"errors":        true,
 			"fmt":           true,
-			"github.com/bronze1man/kmg/encoding/kmgBase64": true,
-			"github.com/bronze1man/kmg/kmgCrypto":          true,
-			"github.com/bronze1man/kmg/kmgLog":             true,
-			"github.com/bronze1man/kmg/kmgNet/kmgHttp":     true,
+			"github.com/bronze1man/kmg/kmgCrypto":      true,
+			"github.com/bronze1man/kmg/kmgLog":         true,
+			"github.com/bronze1man/kmg/kmgNet/kmgHttp": true,
 			"net/http": true,
 			"bytes":    true,
 		},
 	})
 	kmgFile.MustDeleteFile("testPackage/generated.go")
-	kmgFile.MustWriteFileWithMkdir("testPackage/generated.go", out)
+	kmgFile.MustWriteFileWithMkdir("testPackage/generated.go", []byte(out))
 	kmgCmd.CmdString("kmg go test").SetDir("testPackage").Run()
 }

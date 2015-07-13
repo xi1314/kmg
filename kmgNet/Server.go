@@ -6,6 +6,7 @@ import (
 )
 
 //这个接口只需要 Close就可以了.
+// 删除这个对象的所有引用.
 type Server interface {
 	//异步开启服务器
 	Start() error

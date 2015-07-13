@@ -18,69 +18,90 @@ const (
 )
 */
 
+type addImportStatus int
+
+const (
+	addImportStatusNot                addImportStatus = 0
+	addImportStatusPackageToken       addImportStatus = 1 //package
+	addImportStatusPackageLine        addImportStatus = 2
+	addImportStatusImportToken        addImportStatus = 3
+	addImportStatusImportParentheses1 addImportStatus = 4
+	addImportStatusImportParentheses2 addImportStatus = 6
+	addImportStatusImportImpossible   addImportStatus = 7
+)
+
 // 添加bytes的import项.
 // 这个是近似实现,golang的语法树确实有点复杂.
 func addImport(in []byte, pkgList []string) (out []byte) {
-	var isLastImportToken bool
-	var isInImportParentheses bool
-	var lastImportParenthesesPos int
+	status := addImportStatus(0)
 	var hasFoundImport bool
-	var hadAddImport bool
+	var lastImportParenthesesPos int
 	outBuf := &bytes.Buffer{}
 	for pos := 0; pos < len(in); pos++ {
-		if !hadAddImport {
+		switch status {
+		case addImportStatusNot:
+			if bytes.HasPrefix(in[pos:], []byte("package")) {
+				status = addImportStatusPackageToken
+			}
+		case addImportStatusPackageToken:
+			if in[pos] == '\n' {
+				status = addImportStatusPackageLine
+			}
+		case addImportStatusPackageLine:
 			if bytes.HasPrefix(in[pos:], []byte("import")) {
-				if isLastImportToken {
-					panic("import and ( not match")
+				status = addImportStatusImportToken
+			} else if bytes.HasPrefix(in[pos:], []byte("func ")) {
+				status = addImportStatusImportImpossible
+			} else if bytes.HasPrefix(in[pos:], []byte("type ")) {
+				status = addImportStatusImportImpossible
+			} else if bytes.HasPrefix(in[pos:], []byte("var ")) {
+				status = addImportStatusImportImpossible
+			}
+		case addImportStatusImportToken:
+			if in[pos] == '(' {
+				status = addImportStatusImportParentheses1
+				lastImportParenthesesPos = pos
+			}
+		case addImportStatusImportParentheses1:
+			if in[pos] == ')' {
+				status = addImportStatusImportParentheses2
+				hasFoundImport = true
+				var readedImportPathList []string
+				importPkgPath := bytes.Split(in[lastImportParenthesesPos+1:pos], []byte{'\n'})
+				for _, p := range importPkgPath {
+					p = bytes.TrimSpace(p)
+					if len(p) == 0 {
+						continue
+					}
+					readedImportPathList = append(readedImportPathList, string(p))
 				}
-				isLastImportToken = true
-			} else if in[pos] == '(' {
-				if isLastImportToken {
-					if isInImportParentheses {
-						panic("import ( and ) not match")
+				for _, pkg := range pkgList {
+					if !kmgStrings.IsInSlice(readedImportPathList, "\""+pkg+"\"") {
+						outBuf.WriteString("\"" + pkg + "\"\n")
 					}
-					isInImportParentheses = true
-					lastImportParenthesesPos = pos
-					isLastImportToken = false
-					hasFoundImport = true
-				}
-			} else if in[pos] == ')' {
-				if isInImportParentheses {
-					var readedImportPathList []string
-					importPkgPath := bytes.Split(in[lastImportParenthesesPos+1:pos], []byte{'\n'})
-					for _, p := range importPkgPath {
-						p = bytes.TrimSpace(p)
-						if len(p) == 0 {
-							continue
-						}
-						readedImportPathList = append(readedImportPathList, string(p))
-					}
-					for _, pkg := range pkgList {
-						if !kmgStrings.IsInSlice(readedImportPathList, "\""+pkg+"\"") {
-							outBuf.WriteString("\"" + pkg + "\"\n")
-						}
-					}
-					hadAddImport = true
-					isInImportParentheses = false
 				}
 			}
 		}
 		outBuf.WriteByte(in[pos])
 	}
-	if !hasFoundImport {
+	if !hasFoundImport || status == addImportStatusImportImpossible {
 		outBuf.Reset()
 		isLastPackageToken := false
+		hadAddImport := false
 		for pos := 0; pos < len(in); pos++ {
-			if bytes.HasPrefix(in[pos:], []byte("package ")) {
-				isLastPackageToken = true
-			} else if in[pos] == '\n' {
-				if isLastPackageToken {
-					outBuf.WriteString("\nimport (")
-					for _, pkg := range pkgList {
-						outBuf.WriteString("\"" + pkg + "\"\n")
+			if !hadAddImport {
+				if bytes.HasPrefix(in[pos:], []byte("package ")) {
+					isLastPackageToken = true
+				} else if in[pos] == '\n' {
+					if isLastPackageToken {
+						outBuf.WriteString("\nimport (")
+						for _, pkg := range pkgList {
+							outBuf.WriteString("\"" + pkg + "\"\n")
+						}
+						outBuf.WriteString(")")
+						isLastPackageToken = false
+						hadAddImport = true
 					}
-					outBuf.WriteString(")")
-					isLastPackageToken = false
 				}
 			}
 			outBuf.WriteByte(in[pos])

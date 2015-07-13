@@ -3,6 +3,7 @@ package kmgProxy
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"net"
 	"time"
@@ -22,6 +23,12 @@ func Socks4aDialTimeout(proxyAddr string, targetAddr string, timeout time.Durati
 }
 func Socks4aDial(proxyAddr string, targetAddr string) (conn net.Conn, err error) {
 	return Socks4aDialTimeout(proxyAddr, targetAddr, 0)
+}
+
+func NewSocks4aDialer(proxyAddr string) kmgNet.Dialer {
+	return func(network, address string) (net.Conn, error) {
+		return Socks4aDialTimeout(proxyAddr, address, 0)
+	}
 }
 
 //按照socks4a接口,连接到那个地址去,后面可以当成这个连接已经连接到了对方主机,本实现没有用户密码功能
