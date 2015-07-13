@@ -34,8 +34,8 @@ func MustCryptoRandToAlphaNum(length int) string {
 	return MustCryptoRandFromByteList(length, alphaNumMap)
 }
 
-//里面没有大小写问题,没有ilIL1问题 没有 0oO 问题. (长度32)
-const realableAlphaNumMap = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+//里面没有大小写问题,没有ilIL1问题 没有 0oO 问题. (长度31)
+const realableAlphaNumMap = "23456789abcdefghjkmnpqrstuvwxyz"
 
 func MustCryptoRandToReadableAlphaNum(length int) string {
 	return MustCryptoRandFromByteList(length, realableAlphaNumMap)
