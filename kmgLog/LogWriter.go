@@ -18,7 +18,7 @@ type loggerWithWriter struct {
 func (logger loggerWithWriter) Log(cat string, data ...interface{}) {
 	logRow := LogRow{
 		Cat:  cat,
-		Time: time.Now().Format(time.RFC3339),
+		Time: time.Now().Format(time.RFC3339Nano),
 		Data: make([]json.RawMessage, len(data)),
 	}
 

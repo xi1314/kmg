@@ -1,0 +1,31 @@
+package example
+
+import (
+	"bytes"
+	"github.com/bronze1man/kmg/kmgXss"
+)
+
+// xss 测试
+func tplTest4() string {
+	a := "http://www.google.com/"
+	html := "<br/>"
+	var _buf bytes.Buffer
+	_buf.WriteString(`<a href="`)
+	_buf.WriteString(kmgXss.H(a))
+	_buf.WriteString(`">`)
+	_buf.WriteString(kmgXss.H(a))
+	_buf.WriteString(`</a>`)
+	_buf.WriteString(html)
+	_buf.WriteString(`<a href="http://www.google.com/?v1=`)
+	_buf.WriteString(kmgXss.Urlv(a))
+	_buf.WriteString(`"></a>
+<a href="http://www.google.com/?v1=a&v2=`)
+	_buf.WriteString(kmgXss.Urlv(a))
+	_buf.WriteString(`"></a>
+<script>
+    var jsA = `)
+	_buf.WriteString(kmgXss.Jsonv(a))
+	_buf.WriteString(`;
+</script>`)
+	return _buf.String()
+}

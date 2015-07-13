@@ -1,0 +1,8 @@
+<?
+package example
+// 文件结束后面的空格和换行不会渲染出来.
+func tplTest3()string{
+?>
+<a href="http://www.google.com"></a>
+<? }
+?>

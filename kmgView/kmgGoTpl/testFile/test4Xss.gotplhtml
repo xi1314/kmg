@@ -1,0 +1,16 @@
+<?
+package example
+// xss 测试
+func tplTest4()string{
+    a:="http://www.google.com/"
+    html:="<br/>"
+?>
+<a href="<?=a?>"><?=a?></a>
+<?=raw(html)?>
+<a href="http://www.google.com/?v1=<?=a?>"></a>
+<a href="http://www.google.com/?v1=a&v2=<?=a?>"></a>
+<script>
+    var jsA = <?=a?>;
+</script>
+<? }
+?>

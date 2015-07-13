@@ -1,8 +1,6 @@
 <?
 package example
-import (
-    "github.com/bronze1man/kmg/kmgXss"
-)
+
 type Input struct{
 	Name     string
 	Value    string
@@ -12,7 +10,7 @@ type Input struct{
 	ReadOnly bool
 	Id       string
 }
-func tplInputString(config Input)string{ //函数开头(需要想办法判断当前后面的内容是否处于某个函数里面)
+func tplInputString(config Input)string{
 ?>
 <div class="form-group has-feedback">
     <label class="col-sm-2 control-label"><?=config.ShowName?>
@@ -23,14 +21,14 @@ func tplInputString(config Input)string{ //函数开头(需要想办法判断当
     <div class="col-sm-8">
         <input type="text" autocomplete="off" class="form-control"
                <? if config.ReadOnly{ ?>readonly<? } ?>
-               name="<?=kmgXss.H(config.Name)?>"
-        value="<?=kmgXss.H(config.Value)?>"/>
+               name="<?=config.Name?>"
+        value="<?=config.Value?>"/>
         <span style="font-size:12px;color:red">
             <? if config.Comment!=""{ ?>
-                提示: <?=kmgXss.H(config.Comment)?>
+                提示: <?=config.Comment?>
             <? } ?>
         </span>
     </div>
 </div>
-<? } //需要根据 {} 匹配出来这个是函数结束,并且在函数结束的地方加入 return buf.String()
+<? }
 ?>

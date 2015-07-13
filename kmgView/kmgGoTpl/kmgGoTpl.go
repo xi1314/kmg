@@ -3,8 +3,9 @@ package kmgGoTpl
 import (
 	"bytes"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCache"
+	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgStrings"
 	"go/format"
 	"path/filepath"
 	"strings"
@@ -18,26 +19,52 @@ const (
 	currentScopeTpl        scope = 3
 )
 
-func MustBuildTplOneFile(in []byte) (out []byte) {
+func BuildTplOneFile(in []byte, isHtml bool) (out []byte, err error) {
 	var transformer transformer
-	return transformer.mustTransform(in)
+	transformer.isHtml = isHtml
+	err = kmgErr.PanicToError(func() {
+		out = transformer.mustTransform(in)
+	})
+	if err != nil {
+		return nil, fmt.Errorf(":%d %s", transformer.lineNum, err)
+	}
+	return out, err
 }
 
 func MustBuildTplInDir(path string) {
 	pathList := kmgFile.MustGetAllFiles(path)
 	for _, val := range pathList {
-		if filepath.Ext(val) != ".gotpl" {
-			continue
+		ext := filepath.Ext(val)
+		if ext == ".gotpl" {
+			out, err := BuildTplOneFile(kmgFile.MustReadFile(val), false)
+			if err != nil {
+				panic(fmt.Sprintf("%s %s", val, err.Error()))
+			}
+			outFilePath := kmgFile.PathTrimExt(val) + ".go"
+			kmgFile.MustWriteFile(outFilePath, out)
+		} else if ext == ".gotplhtml" {
+			out, err := BuildTplOneFile(kmgFile.MustReadFile(val), true)
+			if err != nil {
+				panic(fmt.Sprintf("%s %s", val, err.Error()))
+			}
+			outFilePath := kmgFile.PathTrimExt(val) + ".go"
+			kmgFile.MustWriteFile(outFilePath, out)
 		}
-		out := MustBuildTplOneFile(kmgFile.MustReadFile(val))
-		outFilePath := kmgFile.PathTrimExt(val) + ".go"
-		kmgFile.MustWriteFile(outFilePath, out)
 	}
 }
 
+func MustBuildTplInDirWithCache(path string) {
+	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+path, []string{path}, func() {
+		MustBuildTplInDir(path)
+	})
+}
+
 type transformer struct {
+	isHtml bool
+
 	in           []byte
 	pos          int
+	lineNum      int
 	currentScope scope
 	lastScopeBuf bytes.Buffer
 	outBuf       bytes.Buffer
@@ -48,12 +75,33 @@ type transformer struct {
 	isFuncOpenInScope                 bool //在当前这个scope里面是否有一个函数在里面打开
 	hasFuncOpenBetweenScope           bool //是否在scope之间有一个函数正在打开?
 	lastFuncBraceLevel                int
+
+	hasBytesPackage  bool
+	hasKmgXssPackage bool
+
+	// xss 目前简单采用排除法解决这个问题,很少使用的不考虑,并且信任写模板的人. 不是script,不是urlv 就是kmgXss.H
+	isInScript        bool
+	isLastScriptToken bool
+	urlvStatus        urlvStatus
 }
+
+
+type urlvStatus int
+
+const (
+	urlvStatusNot      urlvStatus = 0
+	urlvStatusQuestion urlvStatus = 1
+	urlvStatusKey      urlvStatus = 2
+	urlvStatusEqual    urlvStatus = 3
+	urlvStatusValue    urlvStatus = 4
+	urlvStatusAndSign  urlvStatus = 5
+)
 
 func (t *transformer) mustTransform(in []byte) []byte {
 	t.in = in
 	t.currentScope = currentScopeTpl
 	t.lastFuncBraceLevel = -1
+	t.lineNum = 1
 	for t.pos = 0; t.pos < len(t.in); t.pos++ {
 		if t.isMatchString("<?=") {
 			if t.currentScope != currentScopeTpl {
@@ -76,6 +124,7 @@ func (t *transformer) mustTransform(in []byte) []byte {
 				panic("<? and ?> not match")
 			}
 			t.endNotTplScope()
+			t.hasBytesPackage = true
 			t.currentScope = currentScopeTpl
 			t.pos += 1
 			continue
@@ -104,19 +153,88 @@ func (t *transformer) mustTransform(in []byte) []byte {
 					t.isFuncOpenInScope = false
 					//函数的关闭符
 					if t.hasFuncOpenBetweenScope {
-						t.lastScopeBuf.WriteString("return _buf.Bytes()\n")
+						t.lastScopeBuf.WriteString("return _buf.String()\n")
 						t.hasFuncOpenBetweenScope = false
 					}
 				}
 			}
+		} else if t.currentScope == currentScopeTpl {
+			if t.isHtml {
+				// script
+				if t.isMatchString("<script") { //暂时只支持小写
+					if t.isLastScriptToken {
+						panic("<script and > not match")
+					}
+					t.isLastScriptToken = true
+				} else if t.isMatchString("</script>") {
+					t.isInScript = false
+				} else if in[t.pos] == '>' {
+					if t.isLastScriptToken {
+						t.isLastScriptToken = false
+						t.isInScript = true
+					}
+				}
+				// urlv
+				if in[t.pos] == '?' {
+					// 忽略开头的状态错误
+					t.urlvStatus = urlvStatusQuestion
+				} else if t.urlvStatus == urlvStatusQuestion { //此处恰好是对的,后面不会匹配到?
+					if isAlphanum(in[t.pos]) {
+						t.urlvStatus = urlvStatusKey
+					} else {
+						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
+					}
+				} else if t.urlvStatus == urlvStatusKey {
+					if isAlphanum(in[t.pos]) {
+						t.urlvStatus = urlvStatusKey
+					} else if in[t.pos] == '=' {
+						t.urlvStatus = urlvStatusEqual
+					} else {
+						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
+					}
+				} else if t.urlvStatus == urlvStatusEqual {
+					if isAlphanum(in[t.pos]) {
+						t.urlvStatus = urlvStatusValue
+					} else {
+						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
+					}
+				} else if t.urlvStatus == urlvStatusValue {
+					if isAlphanum(in[t.pos]) {
+						t.urlvStatus = urlvStatusValue
+					} else if in[t.pos] == '&' {
+						t.urlvStatus = urlvStatusAndSign
+					} else {
+						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
+					}
+				} else if t.urlvStatus == urlvStatusAndSign {
+					if isAlphanum(in[t.pos]) {
+						t.urlvStatus = urlvStatusKey
+					} else {
+						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
+					}
+				}
+			}
+		}
+		if in[t.pos] == '\n' {
+			t.lineNum++
 		}
 		t.lastScopeBuf.WriteByte(t.in[t.pos])
 	}
 	if t.currentScope == currentScopeTpl {
-		t.endTplScope()
+		s := strings.TrimSpace(t.lastScopeBuf.String())
+		if s != "" {
+			panic("find tpl data after <? } ?>")
+		}
 	}
 	output := t.outBuf.Bytes()
-	output = addImport(output, []string{"bytes", "github.com/bronze1man/kmg/kmgXss"})
+	addPkgList := []string{}
+	if t.hasBytesPackage {
+		addPkgList = append(addPkgList, "bytes")
+	}
+	if t.hasKmgXssPackage {
+		addPkgList = append(addPkgList, "github.com/bronze1man/kmg/kmgXss")
+	}
+	output = addImport(output, addPkgList)
 	f, err := format.Source(output)
 	if err != nil {
 		return output
@@ -128,6 +246,9 @@ func (t *transformer) endTplScope() {
 	if t.lastScopeBuf.Len() > 0 {
 		t.outBuf.WriteString("_buf.WriteString(")
 		s := t.lastScopeBuf.String()
+		if t.isHtml {
+			s = strings.Trim(s, "\n")
+		}
 		if !strings.Contains(s, "`") {
 			t.outBuf.WriteString("`")
 			t.outBuf.WriteString(s)
@@ -151,7 +272,30 @@ func (t *transformer) endNotTplScope() {
 		}
 	} else if t.currentScope == currentScopeExpression {
 		t.outBuf.WriteString("_buf.WriteString(")
-		t.outBuf.WriteString(strings.TrimSpace(t.lastScopeBuf.String()))
+		s := strings.TrimSpace(t.lastScopeBuf.String())
+		if t.isHtml {
+			// raw
+			if strings.HasPrefix(s, "raw(") && strings.HasSuffix(s, ")") {
+				t.outBuf.WriteString(s[4 : len(s)-1])
+			} else if t.urlvStatus == urlvStatusValue || t.urlvStatus == urlvStatusEqual {
+				t.hasKmgXssPackage = true
+				t.outBuf.WriteString("kmgXss.Urlv(")
+				t.outBuf.WriteString(s)
+				t.outBuf.WriteString(")")
+			} else if t.isInScript {
+				t.hasKmgXssPackage = true
+				t.outBuf.WriteString("kmgXss.Jsonv(")
+				t.outBuf.WriteString(s)
+				t.outBuf.WriteString(")")
+			} else {
+				t.hasKmgXssPackage = true
+				t.outBuf.WriteString("kmgXss.H(")
+				t.outBuf.WriteString(s)
+				t.outBuf.WriteString(")")
+			}
+		} else {
+			t.outBuf.WriteString(s)
+		}
 		t.outBuf.WriteString(")\n")
 	}
 	t.lastScopeBuf.Reset()
@@ -161,64 +305,6 @@ func (t *transformer) isMatchString(token string) bool {
 	return bytes.HasPrefix(t.in[t.pos:], []byte(token))
 }
 
-func addImport(in []byte, pkgList []string) (out []byte) {
-	var isLastImportToken bool
-	var isInImportParentheses bool
-	var lastImportParenthesesPos int
-	var hasFoundImport bool
-	outBuf := &bytes.Buffer{}
-	for pos := 0; pos < len(in); pos++ {
-		if bytes.HasPrefix(in[pos:], []byte("\nimport")) {
-			if isLastImportToken {
-				panic("import and ( not match")
-			}
-			isLastImportToken = true
-		} else if in[pos] == '(' {
-			if isLastImportToken {
-				if isInImportParentheses {
-					panic("import ( and ) not match")
-				}
-				isInImportParentheses = true
-				lastImportParenthesesPos = pos
-				isLastImportToken = false
-				hasFoundImport = true
-			}
-		} else if in[pos] == ')' {
-			if isInImportParentheses {
-				var readedImportPathList []string
-				importPkgPath := bytes.Split(in[lastImportParenthesesPos+1:pos], []byte{'\n'})
-				for _, p := range importPkgPath {
-					p = bytes.TrimSpace(p)
-					if len(p) == 0 {
-						continue
-					}
-					readedImportPathList = append(readedImportPathList, string(p))
-				}
-				for _, pkg := range pkgList {
-					if !kmgStrings.IsInSlice(readedImportPathList, "\""+pkg+"\"") {
-						outBuf.WriteString("\"" + pkg + "\"\n")
-					}
-				}
-
-				isInImportParentheses = false
-			}
-		}
-		outBuf.WriteByte(in[pos])
-	}
-	if !hasFoundImport {
-		outBuf.Reset()
-		isLastPackageToken := false
-		for pos := 0; pos < len(in); pos++ {
-			if bytes.HasPrefix(in[pos:], []byte("package ")) {
-				isLastPackageToken = true
-			} else if in[pos] == '\n' {
-				if isLastPackageToken {
-					outBuf.WriteString("\nimport (\n\"bytes\"\n)")
-					isLastPackageToken = false
-				}
-			}
-			outBuf.WriteByte(in[pos])
-		}
-	}
-	return outBuf.Bytes()
+func isAlphanum(b byte) bool {
+	return (b >= '0' && b <= '9') || (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z')
 }

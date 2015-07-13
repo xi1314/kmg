@@ -44,7 +44,7 @@ func main() {
 
 ### implemented
 * a radius server can handle AccessRequest request from strongswan with ikev1-xauth-psk
-# a radius server that can handle AccessRequest request from strongswan with ikev2-eap-psk with ms-chap-v2
+* a radius server that can handle AccessRequest request from strongswan with ikev2-eap-psk with ms-chap-v2
 * a radius server can handle AccountingRequest request from strongswan with ikev1-xauth-psk
 
 ### notice
