@@ -20,7 +20,7 @@ const (
 
 func MustBuildTplOneFile(in []byte) (out []byte) {
 	var transformer transformer
-	return transformer.msutTransform(in)
+	return transformer.mustTransform(in)
 }
 
 func MustBuildTplInDir(path string) {
@@ -50,7 +50,7 @@ type transformer struct {
 	lastFuncBraceLevel                int
 }
 
-func (t *transformer) msutTransform(in []byte) []byte {
+func (t *transformer) mustTransform(in []byte) []byte {
 	t.in = in
 	t.currentScope = currentScopeTpl
 	t.lastFuncBraceLevel = -1
@@ -116,7 +116,7 @@ func (t *transformer) msutTransform(in []byte) []byte {
 		t.endTplScope()
 	}
 	output := t.outBuf.Bytes()
-	output = addImportBytes(output)
+	output = addImport(output, []string{"bytes", "github.com/bronze1man/kmg/kmgXss"})
 	f, err := format.Source(output)
 	if err != nil {
 		return output
@@ -161,7 +161,7 @@ func (t *transformer) isMatchString(token string) bool {
 	return bytes.HasPrefix(t.in[t.pos:], []byte(token))
 }
 
-func addImportBytes(in []byte) (out []byte) {
+func addImport(in []byte, pkgList []string) (out []byte) {
 	var isLastImportToken bool
 	var isInImportParentheses bool
 	var lastImportParenthesesPos int
@@ -194,9 +194,12 @@ func addImportBytes(in []byte) (out []byte) {
 					}
 					readedImportPathList = append(readedImportPathList, string(p))
 				}
-				if !kmgStrings.IsInSlice(readedImportPathList, "\"bytes\"") {
-					outBuf.WriteString("\"bytes\"\n")
+				for _, pkg := range pkgList {
+					if !kmgStrings.IsInSlice(readedImportPathList, "\""+pkg+"\"") {
+						outBuf.WriteString("\"" + pkg + "\"\n")
+					}
 				}
+
 				isInImportParentheses = false
 			}
 		}
