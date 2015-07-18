@@ -64,6 +64,14 @@ func NewPeriod(Start time.Time, End time.Time) (period Period, err error) {
 	return Period{Start: Start, End: End}, nil
 }
 
+func MustNewPeriod(Start time.Time, End time.Time) (period Period) {
+	period, err := NewPeriod(Start, End)
+	if err != nil {
+		panic(err)
+	}
+	return period
+}
+
 //SortedList should sort by start time and should not overlap each other
 func GetPeriodFromSortedList(t time.Time, SortedList []Period) (index int, ok bool) {
 	n := len(SortedList)

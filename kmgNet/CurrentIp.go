@@ -48,19 +48,29 @@ func MustGetCurrentIpList() (ipList []net.IP) {
 }
 
 func MustGetCurrentIpWithPortList(port uint16) (sList []string) {
-	ipList := MustGetCurrentIpList()
-	sList = make([]string, len(ipList))
+	deviceAddrList, err := GetCurrentDeviceAddr()
+	if err != nil {
+		panic(err)
+	}
+	if len(deviceAddrList) == 0 {
+		panic(errors.New("[MustGetCurrentIpList] do not find any ip address."))
+	}
+	sList = make([]string, 0, len(deviceAddrList))
 	sPort := strconv.Itoa(int(port))
-	for i, ip := range ipList {
-		sList[i] = ip.String() + ":" + sPort
+	for _, addr := range deviceAddrList {
+		ones, size := addr.IPNet.Mask.Size()
+		if ones == size { // 实践表明 不能监听这种子网只有一个ip的地址.
+			continue
+		}
+		sList = append(sList, net.JoinHostPort(addr.IP.String(), sPort))
 	}
 	return sList
 }
 
 func getCurrentDeviceAddrFromIPAddr(cmdReturn []byte) (ipnets []DeviceAddr, err error) {
-	//可能性1 inet 127.0.0.1/8 scope host lo
-	//可能性2 inet 10.169.224.99/21 brd 10.169.231.255 scope global eth0
-	//可能性3 inet 172.20.0.1 peer 172.20.0.2/32 scope global ppp0
+	//可能性1 本地回路     inet 127.0.0.1/8 scope host lo
+	//可能性2 物理网卡     inet 10.169.224.99/21 brd 10.169.231.255 scope global eth0
+	//可能性3 pptp虚拟网卡 inet 172.20.0.1 peer 172.20.0.2/32 scope global ppp0
 	reg := regexp.MustCompile(`inet ([^ ]+).* ([^\s]+)`)
 	out := reg.FindAllSubmatch(cmdReturn, -1)
 	ipnets = make([]DeviceAddr, len(out))
@@ -71,8 +81,8 @@ func getCurrentDeviceAddrFromIPAddr(cmdReturn []byte) (ipnets []DeviceAddr, err 
 			if !ok {
 				return nil, err
 			}
-			ip = net.ParseIP(string(out[i][1]))
-			if ip == nil {
+			ip, ipnet, err = net.ParseCIDR(string(out[i][1]) + "/32")
+			if err != nil {
 				return nil, fmt.Errorf("[getCurrentDeviceAddrFromIPAddr] can not parse CIDR or IP [%s]", out[i][0])
 			}
 		}

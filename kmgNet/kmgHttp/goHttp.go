@@ -7,6 +7,7 @@ import (
 	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -117,7 +118,7 @@ func HttpRoundTrip(req *http.Request) (resp *http.Response, err error) {
 	if req.URL.Scheme == "" {
 		req.URL.Scheme = "http"
 	}
-	resp, err = http.DefaultTransport.RoundTrip(req)
+	resp, err = http.DefaultTransport.RoundTrip(req) //使用这个避免跟进 redirect
 	if err != nil {
 		return nil, err
 	}
@@ -235,4 +236,40 @@ func printProgress(get int64, total int64, dur time.Duration, lastBytes int) {
 	fmt.Printf("%s%s %.2f%% %s/%s %s     \r",
 		strings.Repeat("#", showNum), strings.Repeat(" ", notShowNum), percent*100,
 		kmgNet.SizeString(get), kmgNet.SizeString(total), kmgNet.SpeedString(lastBytes, dur))
+}
+
+func MustGoHttpAsyncListenAndServeWithCloser(addr string, handler http.Handler) (closer func() error) {
+	srv := &http.Server{Addr: addr, Handler: handler}
+	if addr == "" {
+		addr = ":80"
+	}
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+	go func() {
+		err := srv.Serve(tcpKeepAliveListener{ln.(*net.TCPListener)})
+		if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+			panic(err)
+		}
+	}()
+	return ln.Close
+}
+
+// tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
+// connections. It's used by ListenAndServe and ListenAndServeTLS so
+// dead TCP connections (e.g. closing laptop mid-download) eventually
+// go away.
+type tcpKeepAliveListener struct {
+	*net.TCPListener
+}
+
+func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
+	tc, err := ln.AcceptTCP()
+	if err != nil {
+		return
+	}
+	tc.SetKeepAlive(true)
+	tc.SetKeepAlivePeriod(3 * time.Minute)
+	return tc, nil
 }

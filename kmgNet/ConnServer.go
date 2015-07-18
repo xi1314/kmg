@@ -67,3 +67,31 @@ func NewTCPServer(listenAddr string, hander ConnHandler, closer io.Closer) (s *C
 	s.Closer = closer
 	return s, nil
 }
+
+func RunTCPServerV2(Listener net.Listener, handle ConnHandlerFunc) (closer func() error) {
+	go func() {
+		for {
+			conn, err := Listener.Accept()
+			if err != nil {
+				if strings.Contains(err.Error(), "use of closed network connection") {
+					break
+				}
+				panic(err)
+			}
+			go handle(conn)
+		}
+	}()
+	return Listener.Close
+}
+
+func RunTCPServerListenAddr(listenAddr string, handle ConnHandlerFunc) (closer func() error) {
+	return RunTCPServerV2(MustListen("tcp", listenAddr), handle)
+}
+
+func MustListen(network string, address string) net.Listener {
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic(err)
+	}
+	return listener
+}
