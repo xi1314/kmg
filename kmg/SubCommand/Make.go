@@ -42,8 +42,10 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 	kmgFile.MustWriteFile(thisLogFilePath, []byte{})
 	if !kmgPlatform.GetCompiledPlatform().Compatible(kmgPlatform.WindowsAmd64) {
 		lastLogPath := filepath.Join(logDir, "last.log")
-		kmgFile.MustDeleteFile(lastLogPath)
-		kmgCmd.ProxyRun("ln -s " + filepath.Base(thisLogFilePath) + " " + lastLogPath)
+		if kmgFile.MustFileExist(lastLogPath){
+			kmgFile.MustSymlink(kmgFile.MustReadSymbolLink(lastLogPath),filepath.Join(logDir, "last2.log"))
+		}
+		kmgFile.MustSymlink(filepath.Base(thisLogFilePath),lastLogPath)
 	}
 	//TODO 大部分命令是 kmg gorun xxx 在这个地方可以直接调用gorun解决问题,这样可以少开一个进程加快了一些速度
 	// 问题: 上诉做法不靠谱,会导致last.log没有用处.

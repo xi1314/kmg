@@ -80,8 +80,8 @@ func installGolang() {
 	kmgCmd.ProxyRun("ln -s /usr/local/go/bin/godoc /bin/godoc")
 	kmgFile.MustDeleteFile("/bin/gofmt")
 	kmgCmd.ProxyRun("ln -s /usr/local/go/bin/gofmt /bin/gofmt")
-	kmgCmd.MustEnsureBinPath("/bin/go")
-	kmgCmd.MustEnsureBinPath("/bin/godoc")
-	kmgCmd.MustEnsureBinPath("/bin/gofmt")
+	kmgFile.MustEnsureBinPath("/bin/go")
+	kmgFile.MustEnsureBinPath("/bin/godoc")
+	kmgFile.MustEnsureBinPath("/bin/gofmt")
 
 }

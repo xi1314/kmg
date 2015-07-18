@@ -1,12 +1,12 @@
-package kmgCmd
+package kmgFile
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTime"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 func MustEnsureBinPath(finalPath string) {
@@ -20,7 +20,7 @@ func MustEnsureBinPath(finalPath string) {
 	}
 	if path != finalPath {
 		backPathDir := "/var/backup/bin/" + basePath + time.Now().Format(kmgTime.FormatFileName)
-		kmgFile.MustMkdirAll(backPathDir)
-		MustRun("mv " + path + " " + backPathDir)
+		MustMkdirAll(backPathDir)
+		kmgCmd.MustRun("mv " + path + " " + backPathDir)
 	}
 }

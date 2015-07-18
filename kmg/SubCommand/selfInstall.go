@@ -1,8 +1,8 @@
 package SubCommand
 
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConsole"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 func AddSelfInstallCommand() {
@@ -16,5 +16,5 @@ func AddSelfInstallCommand() {
 
 //由于bash过度难用,直接安装kmg的时候又会遇到很复杂的情况,此处用于处理某些复杂情况
 func selfInstallCmd() {
-	kmgCmd.MustEnsureBinPath("/bin/kmg")
+	kmgFile.MustEnsureBinPath("/bin/kmg")
 }
