@@ -34,9 +34,9 @@ func tplTable(table Table) string {
 		_buffer.WriteString("<tr>\n            ")
 		for _, cell := range row {
 
-			_buffer.WriteString("<th>")
+			_buffer.WriteString("<td>")
 			_buffer.WriteString((cell.HtmlRender()))
-			_buffer.WriteString("</th>")
+			_buffer.WriteString("</td>")
 
 		}
 		_buffer.WriteString("\n        </tr>")

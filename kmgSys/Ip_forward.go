@@ -1,4 +1,4 @@
-package kmgLinux
+package kmgSys
 
 import (
 	"bytes"

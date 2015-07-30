@@ -48,7 +48,10 @@ func newDevice(ifName string, deviceType DeviceType) (ifce Interface, err error)
 		//一个一个尝试
 		for i := 0; i <= 15; i++ {
 			iifce.name = devTypeString + strconv.Itoa(i)
-			iifce.file, err = os.OpenFile("/dev/"+iifce.name, os.O_RDWR, 0)
+			fmt.Println("Open tun ", iifce.name, "start")
+			iifce.file, err = os.OpenFile("/dev/"+iifce.name, os.O_RDWR, 0) // 这个调用有时候会卡死,换一个名字往往能好.
+			fmt.Println("Open tun ", iifce.name, "finish")
+
 			if err == nil {
 				return iifce, nil
 			}

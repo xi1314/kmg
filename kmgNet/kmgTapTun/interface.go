@@ -28,12 +28,16 @@ type Interface interface {
 }
 
 //set tun p2p ip and up this device
-func SetP2PIpAndUp(ifac Interface, srcIp string, destIp string) error {
+// mtu default to 1500
+func SetP2PIpAndUp(ifac Interface, srcIp string, destIp string, mtu int) error {
+	if mtu == 0 {
+		mtu = 1500
+	}
 	switch runtime.GOOS {
 	case "darwin":
-		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, destIp, "up"})
+		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, destIp, "mtu", strconv.Itoa(mtu), "up"})
 	case "linux":
-		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, "pointopoint", destIp, "up"})
+		return kmgCmd.StdioSliceRun([]string{"ifconfig", ifac.Name(), srcIp, "pointopoint", destIp, "mtu", strconv.Itoa(mtu), "up"})
 	default:
 		return ErrPlatformNotSupport
 	}

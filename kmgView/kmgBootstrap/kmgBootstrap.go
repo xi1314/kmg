@@ -125,3 +125,14 @@ func (p A) HtmlRender() string {
 	}
 	return s + `>` + kmgXss.H(p.Title) + `</a>`
 }
+
+type NavBar struct {
+	Title           kmgView.HtmlRenderer //可以是 Log 或者文字
+	ActiveName      string
+	OptionList      []NavTabOption
+	RightOptionList []NavTabOption
+}
+
+func (navBar NavBar) HtmlRender() string {
+	return tplNavBar(navBar)
+}

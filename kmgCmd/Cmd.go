@@ -228,3 +228,12 @@ type exitStatuser interface {
 func GetExecCmdExitStatus(cmd *exec.Cmd) int {
 	return cmd.ProcessState.Sys().(exitStatuser).ExitStatus()
 }
+
+func Exist(cmd string) bool {
+	err := Run("which " + cmd)
+	if err == nil {
+		return true
+	} else {
+		return false
+	}
+}

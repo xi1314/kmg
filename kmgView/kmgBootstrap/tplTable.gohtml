@@ -18,7 +18,7 @@
     @for _,row:=range table.DataList{
         <tr>
             @for _,cell:=range row{
-                <th>@raw(cell.HtmlRender())</th>
+                <td>@raw(cell.HtmlRender())</td>
             }
         </tr>
     }

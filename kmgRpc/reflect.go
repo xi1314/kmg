@@ -3,9 +3,9 @@ package kmgRpc
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgGoSource"
+	"github.com/bronze1man/kmg/kmgStrings"
 	"golang.org/x/tools/go/types"
 	"path"
-	"reflect"
 )
 
 func reflectToTplConfig(req GenerateRequest) tplConfig {
@@ -27,7 +27,10 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 	OutKeyByteList := fmt.Sprintf("%#v", req.Key[:])
 	config.OutKeyByteList = OutKeyByteList[7 : len(OutKeyByteList)-1]
 
-	ObjTyp := kmgGoSource.MustGetGoTypesFromReflect(reflect.TypeOf(req.Object))
+	ObjTyp := kmgGoSource.MustGetGoTypeFromPkgPathAndTypeName(req.ObjectPkgPath, req.ObjectName)
+	if req.ObjectIsPointer {
+		ObjTyp = types.NewPointer(ObjTyp)
+	}
 	var importPathList []string
 	config.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, ObjTyp)
 	config.mergeImportPath(importPathList)
@@ -45,7 +48,7 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 		for i := 0; i < methodTyp.Params().Len(); i++ {
 			pairObj := methodTyp.Params().At(i)
 			pair := ArgumentNameTypePair{
-				Name: pairObj.Name(),
+				Name: kmgStrings.FirstLetterToUpper(pairObj.Name()),
 			}
 			pair.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, pairObj.Type())
 			config.mergeImportPath(importPathList)
@@ -53,10 +56,10 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 		}
 		for i := 0; i < methodTyp.Results().Len(); i++ {
 			pairObj := methodTyp.Results().At(i)
-			name := pairObj.Name()
+			name := kmgStrings.FirstLetterToUpper(pairObj.Name())
 			if name == "" {
 				if pairObj.Type().String() == "error" { //TODO 不要特例
-					name = "err"
+					name = "Err"
 				} else {
 					name = fmt.Sprintf("out_%d", i)
 				}

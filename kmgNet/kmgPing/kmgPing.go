@@ -19,8 +19,11 @@ type Echo struct {
 	Address string
 }
 
+var MaxRtt time.Duration = time.Duration(1e9)
+
 func Ping(address string) Echo {
 	p := fastping.NewPinger()
+	p.MaxRTT = MaxRtt
 	ra, err := net.ResolveIPAddr("ip4:icmp", address)
 	handleErr(err)
 	p.AddIPAddr(ra)

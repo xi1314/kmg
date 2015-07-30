@@ -46,3 +46,11 @@ func (s *Demo) demoFunc6(Req1 DemoRequest, Req2 *DemoRequest) (Info string) {
 func (s *Demo) DemoFunc7(Req1 DemoRequest, Req2 *DemoRequest) (Response string) {
 	return ""
 }
+
+// 允许有 小写的参数名
+func (s *Demo) DemoFunc8(req1 DemoRequest, req2 *DemoRequest, req3 int) (info string, err error) {
+	if req3 == 1 {
+		return "info1", nil
+	}
+	return "info", nil
+}

@@ -21,6 +21,9 @@ func MustAddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localF
 	if !strings.HasPrefix(httpPath, "/") {
 		httpPath = "/" + httpPath
 	}
+	if !strings.HasSuffix(httpPath, "/") {
+		httpPath = httpPath + "/"
+	}
 	mux.HandleFunc(httpPath, CompressHandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		urlPath := req.URL.Path
 		relPath := strings.TrimPrefix(urlPath, httpPath)

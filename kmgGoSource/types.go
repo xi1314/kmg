@@ -29,6 +29,14 @@ func MustGetGoTypesFromReflect(typ reflect.Type) types.Type {
 	}
 }
 
+// 类型名称定义
+// github.com/bronze1man/kmg/kmgGoSource/testPackage.Demo
+func MustGetGoTypeFromPkgPathAndTypeName(pkgPath string, typ string) types.Type {
+	pkg := MustNewGoTypesMainPackageFromImportPath(pkgPath)
+	typObj := pkg.Scope().Lookup(typ)
+	return typObj.Type()
+}
+
 func MustWriteGoTypes(thisPackagePath string, typi types.Type) (s string, addPkgPathList []string) {
 	switch typ := typi.(type) {
 	case *types.Basic:
@@ -75,6 +83,7 @@ func MustGetMethodListFromGoTypes(typ types.Type) (output []*types.Selection) {
 //返回这个导入路径的主Package的types.Package对象
 //TODO 解决测试package的问题
 func MustNewGoTypesMainPackageFromImportPath(importPath string) *types.Package {
+	//TODO 去掉可编译要求?
 	kmgCmd.CmdSlice([]string{"kmg", "go", "install", importPath}).MustRun()
 	kmgCmd.CmdSlice([]string{"kmg", "go", "test", "-i", importPath}).MustRun()
 	//TODO 解决需要预先创建pkg的问题.

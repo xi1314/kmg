@@ -42,3 +42,13 @@ type LogRow struct {
 func (r LogRow) Marshal() (b []byte, err error) {
 	return json.Marshal(r)
 }
+
+func (r LogRow) UnmarshalData(index int, obj interface{}) (err error) {
+	return json.Unmarshal(r.Data[index], obj)
+}
+func (r LogRow) MustUnmarshalData(index int, obj interface{}) {
+	err := json.Unmarshal(r.Data[index], obj)
+	if err != nil {
+		panic(err)
+	}
+}

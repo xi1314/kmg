@@ -26,7 +26,7 @@ import (
 type Client_`)
 	_buf.WriteString(config.ObjectName)
 	_buf.WriteString(` struct {
-	RemoteUrl string //只有主机和地址
+	RemoteUrl string // http://kmg.org:1234/
 }
 
 
@@ -46,8 +46,14 @@ const (
 )
 
 //server
-func ListenAndServe_Demo(addr string, obj *Demo) (closer func()error) {
-	s := &generateServer_Demo{
+func ListenAndServe_`)
+	_buf.WriteString(config.ObjectName)
+	_buf.WriteString(`(addr string, obj *`)
+	_buf.WriteString(config.ObjectName)
+	_buf.WriteString(`) (closer func()error) {
+	s := &generateServer_`)
+	_buf.WriteString(config.ObjectName)
+	_buf.WriteString(`{
 		obj: obj,
 	}
 	return kmgHttp.MustGoHttpAsyncListenAndServeWithCloser(addr, s)
@@ -212,7 +218,7 @@ func (s *generateServer_`)
 	    `)
 		}
 		_buf.WriteString(`
-		var err error
+		var Err error
 		reqData := &struct {
             `)
 		for _, args := range api.InArgsList {
@@ -226,9 +232,9 @@ func (s *generateServer_`)
 		}
 		_buf.WriteString(`
 		}{}
-		err = json.Unmarshal(b2, reqData)
-		if err != nil {
-			return nil, err
+		Err = json.Unmarshal(b2, reqData)
+		if Err != nil {
+			return nil, Err
 		}
 		`)
 		if api.HasReturnArgument() {
@@ -244,8 +250,8 @@ func (s *generateServer_`)
 				_buf.WriteString(`,`)
 			}
 			_buf.WriteString(` )
-            if err != nil {
-                return nil, err
+            if Err != nil {
+                return nil, Err
             }
 		`)
 		} else {
@@ -357,10 +363,10 @@ func (c *Client_`)
 	    var respData `)
 			_buf.WriteString(api.OutArgsList[0].ObjectTypeStr)
 			_buf.WriteString(`
-        err = c.sendRequest("`)
+        Err = c.sendRequest("`)
 			_buf.WriteString(api.Name)
 			_buf.WriteString(`", reqData, &respData)
-        return respData,err
+        return respData,Err
 	`)
 		} else {
 			_buf.WriteString(`
@@ -377,7 +383,7 @@ func (c *Client_`)
 			}
 			_buf.WriteString(`
         }{}
-        err = c.sendRequest("`)
+        Err = c.sendRequest("`)
 			_buf.WriteString(api.Name)
 			_buf.WriteString(`", reqData, &respData)
         return `)
@@ -386,7 +392,7 @@ func (c *Client_`)
 				_buf.WriteString(arg.Name)
 				_buf.WriteString(`,`)
 			}
-			_buf.WriteString(` err
+			_buf.WriteString(` Err
     `)
 		}
 		_buf.WriteString(`

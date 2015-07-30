@@ -30,7 +30,8 @@ func TestAddFileToHttpPathToServeMux(t *testing.T) {
 	{
 		mux := http.NewServeMux()
 		MustAddFileToHttpPathToServeMux(mux, "/test/", "test")
-		MustAddFileToHttpPathToServeMux(mux, "/test2", "test")
+		MustAddFileToHttpPathToServeMux(mux, "/test3", "test")
+		MustAddFileToHttpPathToServeMux(mux, "test4", "test")
 		MustAddFileToHttpPathToServeMux(mux, "/test2/2.html", "test/1.html")
 		mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 			panic("should not run to here " + req.URL.String())
@@ -42,6 +43,12 @@ func TestAddFileToHttpPathToServeMux(t *testing.T) {
 		Equal(b, []byte("1.html"))
 
 		b = MustUrlGetContent(ts.URL + "/test2/2.html")
+		Equal(b, []byte("1.html"))
+
+		b = MustUrlGetContent(ts.URL + "/test3/1.html")
+		Equal(b, []byte("1.html"))
+
+		b = MustUrlGetContent(ts.URL + "/test4/1.html")
 		Equal(b, []byte("1.html"))
 
 		resp, err := http.Get(ts.URL + "/test/2.html")
