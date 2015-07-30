@@ -1,12 +1,13 @@
 package kmgGoSource
 
 import (
-	"github.com/bronze1man/kmg/kmgConfig"
 	"go/ast"
 	"go/doc"
 	"go/parser"
 	"go/token"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgConfig"
 )
 
 // 这个东西目前 有2个问题,

@@ -1,11 +1,12 @@
 package kmgPage_test
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgPage"
 	"github.com/bronze1man/kmg/kmgSql"
 	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 func test_init() []map[string]string {

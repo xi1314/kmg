@@ -2,11 +2,12 @@ package kmgGit
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgRand"
-	"os"
-	"path/filepath"
 )
 
 type SubRepositoryInfo struct {

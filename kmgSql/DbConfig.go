@@ -2,8 +2,10 @@ package kmgSql
 
 import (
 	"fmt"
+
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 type DbConfig struct {
@@ -53,6 +55,13 @@ type TestDbConf struct {
 	Db *DbConfig
 }
 
+func HasTestConfig() bool {
+	return kmgFile.MustFileExist(kmgConfig.DefaultEnv().PathInConfig("Test.yml"))
+}
+
+func HasProdConfig() bool {
+	return kmgFile.MustFileExist(kmgConfig.DefaultEnv().PathInConfig("Prod.yml"))
+}
 func MustLoadTestConfig() {
 	mustLoadConfigByFilename("Test.yml")
 }

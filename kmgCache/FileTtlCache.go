@@ -2,15 +2,16 @@ package kmgCache
 
 import (
 	"encoding/hex"
+	"path/filepath"
+	"time"
+
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
-	"path/filepath"
-	"time"
 )
 
-type fileTtlCacheEntry struct {
-	Content []byte
+type ttlCacheEntryV2 struct {
+	Value   []byte
 	Timeout time.Time
 }
 
@@ -24,18 +25,18 @@ func getFileTtlCachePath(key string) string {
 // 4.每一次使用都会读取文件
 // 5.当某一次缓存拉取出现错误的时候,直接返回错误给调用者
 func FileTtlCache(key string, f func() (b []byte, ttl time.Duration, err error)) (b []byte, err error) {
-	entry := fileTtlCacheEntry{}
+	entry := ttlCacheEntryV2{}
 	cacheFilePath := getFileTtlCachePath(key)
-	err = kmgGob.ReadFile(cacheFilePath, &entry)
 	now := time.Now()
+	err = kmgGob.ReadFile(cacheFilePath, &entry)
 	if err == nil && entry.Timeout.After(now) {
-		return entry.Content, nil
+		return entry.Value, nil
 	}
 	b, ttl, err := f()
 	if err != nil {
 		return nil, err
 	}
-	entry.Content = b
+	entry.Value = b
 	entry.Timeout = now.Add(ttl)
 	err = kmgFile.MkdirForFile(cacheFilePath)
 	if err != nil {

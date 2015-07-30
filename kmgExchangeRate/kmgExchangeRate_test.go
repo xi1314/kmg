@@ -1,8 +1,9 @@
 package kmgExchangeRate
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestMustGetExchangeRate(ot *testing.T) {

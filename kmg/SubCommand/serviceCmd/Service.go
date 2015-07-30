@@ -1,13 +1,14 @@
 package serviceCmd
 
 import (
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTextTemplate"
-	"os"
-	"os/exec"
-	"strings"
 )
 
 var ErrServiceExist = errors.New("Service already exist")
@@ -75,7 +76,10 @@ func Install(s *Service) (err error) {
 	}
 	return nil
 }
+
 func Uninstall(name string) (err error) {
+	Stop(name)
+	// TODO Stop 里面关闭不是错误.
 	confPath := getConfigPath(name)
 	pathList := []string{
 		confPath,
@@ -98,6 +102,8 @@ func Uninstall(name string) (err error) {
 func Start(name string) (err error) {
 	return kmgCmd.CmdSlice([]string{"service", name, "start"}).Run()
 }
+
+//TODO 已经关闭不是错误
 func Stop(name string) (err error) {
 	return kmgCmd.CmdSlice([]string{"service", name, "stop"}).Run()
 }

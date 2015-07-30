@@ -2,10 +2,11 @@ package kmgErr
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgDebug"
-	"github.com/bronze1man/kmg/kmgLog"
 	"runtime/debug"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgDebug"
+	"github.com/bronze1man/kmg/kmgLog"
 )
 
 // useful in test

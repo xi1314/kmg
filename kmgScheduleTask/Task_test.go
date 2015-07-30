@@ -1,12 +1,13 @@
 package kmgScheduleTask
 
 import (
-	"github.com/bronze1man/kmg/kmgSql"
-	"github.com/bronze1man/kmg/kmgTest"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgSql"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func init() {

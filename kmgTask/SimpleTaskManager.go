@@ -28,3 +28,38 @@ func (t *SimpleTaskManager) Wait() {
 func (t *SimpleTaskManager) Close() {
 	t.Wait()
 }
+
+func RunTaskRepeat(f func(), num int) {
+	var wg sync.WaitGroup
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			f()
+		}()
+	}
+	wg.Wait()
+}
+
+func RunTaskRepeatWithLimitThread(f func(), taskNum int, threadNum int) {
+	var wg sync.WaitGroup
+	taskChan := make(chan func())
+	for i := 0; i < threadNum; i++ {
+		go func() {
+			for {
+				task, ok := <-taskChan
+				if ok == false {
+					return
+				}
+				task()
+				wg.Done()
+			}
+		}()
+	}
+	wg.Add(taskNum)
+	for i := 0; i < taskNum; i++ {
+		taskChan <- f
+	}
+	close(taskChan)
+	wg.Wait()
+}

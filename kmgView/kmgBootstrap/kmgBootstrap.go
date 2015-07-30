@@ -2,7 +2,9 @@ package kmgBootstrap
 
 import (
 	"fmt"
+
 	"github.com/bronze1man/kmg/kmgView"
+	"github.com/bronze1man/kmg/kmgXss"
 )
 
 type Panel struct {
@@ -109,4 +111,29 @@ func (p Image) getStyle() string {
 		p.MaxWidth = 100
 	}
 	return fmt.Sprintf("max-height: %dpx;max-width: %dpx;", p.MaxHeight, p.MaxWidth)
+}
+
+type A struct {
+	Href        string
+	Title       string
+	IsNewWindow bool
+}
+
+func (p A) HtmlRender() string {
+	s := `<a href="` + kmgXss.H(p.Href) + `"`
+	if p.IsNewWindow {
+		s += ` target="_blank" `
+	}
+	return s + `>` + kmgXss.H(p.Title) + `</a>`
+}
+
+type NavBar struct {
+	Title           kmgView.HtmlRenderer //可以是 Log 或者文字
+	ActiveName      string
+	OptionList      []NavTabOption
+	RightOptionList []NavTabOption
+}
+
+func (navBar NavBar) HtmlRender() string {
+	return tplNavBar(navBar)
 }

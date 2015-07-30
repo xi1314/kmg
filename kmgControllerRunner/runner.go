@@ -2,17 +2,19 @@ package kmgControllerRunner
 
 import (
 	//"fmt"
+	"net/http"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgLog"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgReflect"
 	"github.com/bronze1man/kmg/kmgTime"
-	"net/http"
-	"reflect"
-	"strings"
-	"time"
 )
 
+// EnterPointApiName 最前面不要加 /?n=
 var EnterPointApiName = ""
 var controllerObjMap = map[string]func(ctx *kmgHttp.Context){} //key 带点号的完整的类名.
 var controllerFuncType = reflect.TypeOf((func(ctx *kmgHttp.Context))(nil))
@@ -89,6 +91,11 @@ func PanicHandler(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 	apiName := ctx.InStr("n")
 	if apiName == "" && EnterPointApiName != "" {
+		if ctx.GetRequestUrl() == "/favicon.ico" {
+			// 避免网站图标请求,占用大量资源.
+			ctx.NotFound("api not found")
+			return
+		}
 		apiName = EnterPointApiName
 	}
 	apiFunc, ok := controllerObjMap[apiName]

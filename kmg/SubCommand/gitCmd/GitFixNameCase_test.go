@@ -3,12 +3,13 @@
 package gitCmd
 
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestGitFixNameCaseWithFile(ot *testing.T) {

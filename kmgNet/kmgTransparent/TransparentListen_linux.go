@@ -1,16 +1,16 @@
 package kmgTransparent
 
 import (
-	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
-	"golang.org/x/sys/unix"
 	"net"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
+	"golang.org/x/sys/unix"
 )
 
 //linux transparent listen
-//network is useless, it can only be tcp4
 //use for iptables TProxy
-func TransparentListen(network string, listenAddr string) (listener net.Listener, err error) {
+func TransparentListen(listenAddr string) (listener net.Listener, err error) {
 	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM, 0)
 	if err != nil {
 		return nil, err

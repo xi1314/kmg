@@ -7,12 +7,31 @@ import (
 )
 
 func Realpath(inPath string) (string, error) {
-	path, err := innerRealPath(inPath)
+	if filepath.IsAbs(inPath) {
+		return inPath, nil
+	}
+	wd, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
+	return filepath.Join(wd, inPath), nil
+}
+
+func MustRealPath(inPath string) string {
+	outPath, err := Realpath(inPath)
+	if err != nil {
+		panic(err)
+	}
+	return outPath
+}
+
+func MustReadSymbolLink(inPath string) string {
+	path, err := innerRealPath(inPath)
+	if err != nil {
+		panic(err)
+	}
 	path = filepath.Clean(path)
-	return path, nil
+	return path
 }
 
 //come from github.com/yookoala/realpath/realpath

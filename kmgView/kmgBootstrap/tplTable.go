@@ -6,7 +6,7 @@ import (
 
 func tplTable(table Table) string {
 	var _buffer bytes.Buffer
-	_buffer.WriteString("\n<table class=\"table\">\n    ")
+	_buffer.WriteString("\n<table class=\"table table-hover\">\n    ")
 	if table.Caption != nil {
 
 		_buffer.WriteString("<caption>")
@@ -34,9 +34,9 @@ func tplTable(table Table) string {
 		_buffer.WriteString("<tr>\n            ")
 		for _, cell := range row {
 
-			_buffer.WriteString("<th>")
+			_buffer.WriteString("<td>")
 			_buffer.WriteString((cell.HtmlRender()))
-			_buffer.WriteString("</th>")
+			_buffer.WriteString("</td>")
 
 		}
 		_buffer.WriteString("\n        </tr>")

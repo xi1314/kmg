@@ -1,9 +1,10 @@
 package kmgDebug_test
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgDebug"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 func TestSprintln(ot *testing.T) {

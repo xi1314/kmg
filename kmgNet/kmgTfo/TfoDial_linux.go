@@ -1,12 +1,13 @@
 package kmgTfo
 
 import (
-	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
-	"golang.org/x/sys/unix"
 	"net"
 	"os"
 	"sync"
+
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
+	"golang.org/x/sys/unix"
 )
 
 // dial tcp with tcp fastopen

@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"fmt"
+	"sync"
+
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
 	"github.com/bronze1man/kmg/kmgFile"
-	"sync"
 )
 
 //if you init it like &Context{xxx},please call Init()
@@ -149,4 +150,9 @@ func DefaultEnv() *Env {
 		}
 	})
 	return env
+}
+
+func IsWdHaveEnv() bool {
+	_, err := LoadEnvFromWd()
+	return err == nil
 }

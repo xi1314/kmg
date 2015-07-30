@@ -3,12 +3,13 @@ package kmgEmail
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgNet/kmgProxy"
 	"net"
 	"net/smtp"
 	"strings"
 	"text/template"
+
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgNet/kmgProxy"
 )
 
 func SmtpSendEmail(req *SmtpRequest) (err error) {

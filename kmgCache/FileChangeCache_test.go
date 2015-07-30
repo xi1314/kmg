@@ -1,10 +1,11 @@
 package kmgCache
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestFileChangeCacheOneFile(t *testing.T) {

@@ -2,9 +2,10 @@ package kmgSql
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgStrconv"
 	"strconv"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgStrconv"
 )
 
 type MysqlField struct {

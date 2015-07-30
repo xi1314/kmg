@@ -1,13 +1,14 @@
 package kmgGit
 
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgStrings"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgStrings"
 )
 
 func GetRepositoryFromPath(path string) (repo *Repository, err error) {
@@ -88,7 +89,7 @@ func (repo *Repository) MustResetToCommitId(commitId string) {
 	kmgCmd.CmdSlice([]string{"git", "reset", commitId}).SetDir(repo.gitPath).MustStdioRun()
 }
 func (repo *Repository) MustIndexRemoveByPath(path string) {
-	kmgCmd.CmdSlice([]string{"git", "rm", "--cached", "-r", path}).SetDir(repo.gitPath).MustStdioRun()
+	kmgCmd.CmdSlice([]string{"git", "rm", "--cached", "-rf", path}).SetDir(repo.gitPath).MustStdioRun()
 }
 
 func (repo *Repository) MustIndexAddFile(path string) {

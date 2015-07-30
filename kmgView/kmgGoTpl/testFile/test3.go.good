@@ -1,0 +1,12 @@
+package example
+
+import (
+	"bytes"
+)
+
+// 文件结束后面的空格和换行不会渲染出来.
+func tplTest3() string {
+	var _buf bytes.Buffer
+	_buf.WriteString(`<a href="http://www.google.com"></a>`)
+	return _buf.String()
+}

@@ -3,11 +3,12 @@ package gitCmd
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
-	"github.com/bronze1man/kmg/third/kmgGit"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgConsole"
+	"github.com/bronze1man/kmg/third/kmgGit"
 )
 
 func init() {

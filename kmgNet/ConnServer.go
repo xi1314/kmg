@@ -1,9 +1,11 @@
 package kmgNet
 
 import (
+	"github.com/bronze1man/kmg/kmgErr"
 	"io"
 	"net"
 	"strings"
+	"time"
 )
 
 type ConnHandler interface {
@@ -44,7 +46,9 @@ func (server *ConnServer) Start() (err error) {
 					strings.Contains(err.Error(), "accept on closed mux") {
 					break
 				}
-				panic(err)
+				kmgErr.LogErrorWithStack(err)
+				time.Sleep(time.Millisecond * 100)
+				continue
 			}
 			go server.Handler.ConnHandle(conn)
 		}
@@ -66,4 +70,35 @@ func NewTCPServer(listenAddr string, hander ConnHandler, closer io.Closer) (s *C
 	s.Handler = hander
 	s.Closer = closer
 	return s, nil
+}
+
+func RunTCPServerV2(Listener net.Listener, handle ConnHandlerFunc) (closer func() error) {
+	go func() {
+		for {
+			conn, err := Listener.Accept()
+			if err != nil {
+				errS := err.Error()
+				if strings.Contains(errS, "use of closed network connection") {
+					break
+				}
+				kmgErr.LogErrorWithStack(err)
+				time.Sleep(time.Millisecond * 100)
+				continue
+			}
+			go handle(conn)
+		}
+	}()
+	return Listener.Close
+}
+
+func RunTCPServerListenAddr(listenAddr string, handle ConnHandlerFunc) (closer func() error) {
+	return RunTCPServerV2(MustListen("tcp", listenAddr), handle)
+}
+
+func MustListen(network string, address string) net.Listener {
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic(err)
+	}
+	return listener
 }

@@ -3,8 +3,9 @@ package kmgControllerRunner
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net/http"
+
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
 // 以命令行方式运行应用.这个函数会阻塞执行.

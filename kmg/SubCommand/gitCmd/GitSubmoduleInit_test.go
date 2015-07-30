@@ -1,11 +1,12 @@
 package gitCmd
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTest"
 	"github.com/bronze1man/kmg/third/kmgGit"
-	"testing"
 )
 
 func TestGitSubmoduleInitIgnore(ot *testing.T) {

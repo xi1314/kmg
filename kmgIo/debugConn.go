@@ -2,6 +2,7 @@ package kmgIo
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgTime"
 	"io"
 	"sync/atomic"
 	"time"
@@ -10,43 +11,69 @@ import (
 //debug a io.ReadWriteCloser
 type debugRwc struct {
 	io.ReadWriteCloser
-	Name string
+	Name     string
+	showData bool
 }
 
 func NewDebugRwc(rwc io.ReadWriteCloser, name string) debugRwc {
 	return debugRwc{
 		ReadWriteCloser: rwc,
 		Name:            name,
+		showData:        true,
 	}
 }
 
 func (c debugRwc) Write(b []byte) (n int, err error) {
-	fmt.Printf("[debugConn] %s Write Start len: %d\n", c.Name, len(b))
+	fmt.Printf("[debugConn] [%s] %s Write Start len: %d\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b))
 	n, err = c.ReadWriteCloser.Write(b)
 	if err != nil {
-		fmt.Printf("[debugConn] %s Write finish len: %d err: %s content: %#v\n", c.Name, n, err, b)
+		if c.showData {
+			fmt.Printf("[debugConn] [%s] %s Write finish len: %d err: %s content: %#v\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, n, err, b)
+		} else {
+			fmt.Printf("[debugConn] [%s] %s Write finish len: %d err: %s\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, n, err)
+		}
 	} else {
-		fmt.Printf("[debugConn] %s Write finish len: %d content: %#v\n", c.Name, n, b)
+		if c.showData {
+			fmt.Printf("[debugConn] [%s] %s Write finish len: %d content: %#v\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, n, b)
+		} else {
+			fmt.Printf("[debugConn] [%s] %s Write finish len: %d\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, n)
+		}
 	}
 	return n, err
 }
 
 func (c debugRwc) Read(b []byte) (n int, err error) {
-	fmt.Printf("[debugConn] %s Read Start len: %d\n", c.Name, len(b))
+	fmt.Printf("[debugConn] [%s] %s Read Start len: %d\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b))
 	n, err = c.ReadWriteCloser.Read(b)
 	if err != nil {
-		fmt.Printf("[debugConn] %s Read finish iLen: %d oLen: %d err: %s content: %#v\n", c.Name, len(b), n, err, b[:n])
+		if c.showData {
+			fmt.Printf("[debugConn] [%s] %s Read finish iLen: %d oLen: %d err: %s content: %#v\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b), n, err, b[:n])
+		} else {
+			fmt.Printf("[debugConn] [%s] %s Read finish iLen: %d oLen: %d err: %s\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b), n, err)
+		}
 	} else {
-		fmt.Printf("[debugConn] %s Read finish iLen: %d oLen: %d content: %#v\n", c.Name, len(b), n, b[:n])
+		if c.showData {
+			fmt.Printf("[debugConn] [%s] %s Read finish iLen: %d oLen: %d content: %#v\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b), n, b[:n])
+		} else {
+			fmt.Printf("[debugConn] [%s] %s Read finish iLen: %d oLen: %d\n", kmgTime.MysqlUsNowFromDefaultNower(), c.Name, len(b), n)
+		}
 	}
 	return n, err
 }
 
 func (c debugRwc) Close() (err error) {
-	fmt.Println("[debugConn]", c.Name, "Close start err:", err)
+	fmt.Println("[debugConn]", "["+kmgTime.MysqlUsNowFromDefaultNower()+"]", c.Name, "Close start err:", err)
 	err = c.ReadWriteCloser.Close()
-	fmt.Println("[debugConn]", c.Name, "Close finish err:", err)
+	fmt.Println("[debugConn]", "["+kmgTime.MysqlUsNowFromDefaultNower()+"]", c.Name, "Close finish err:", err)
 	return err
+}
+
+func NewDebugRwcNoData(rwc io.ReadWriteCloser, name string) debugRwc {
+	return debugRwc{
+		ReadWriteCloser: rwc,
+		Name:            name,
+		showData:        false,
+	}
 }
 
 type sumSizeRwc struct {

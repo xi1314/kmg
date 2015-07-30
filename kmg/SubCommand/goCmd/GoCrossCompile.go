@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"os"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgFile"
-	"os"
 )
 
 /*

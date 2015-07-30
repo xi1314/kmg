@@ -7,13 +7,15 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"errors"
+
 	"github.com/bronze1man/kmg/kmgCompress"
 	"github.com/bronze1man/kmg/kmgRand"
 )
 
 /*
-先压缩,后加密,如果压缩了体积反而变大,就不压缩
-对称加密,正确包含psk的所有功能,会多增加32个字节的信息
+先压缩,后加密,
+对称加密,正确包含psk的所有功能,
+不管是否可以压缩.保证最多会比明文数据增加58个字节.
 */
 func CompressAndEncryptBytesEncode(key *[32]byte, data []byte) (output []byte) {
 	//先压缩 压缩不了只会多16个字节而已,不需要进行优化

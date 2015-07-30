@@ -4,9 +4,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/bronze1man/kmg/kmgErr"
 )
 
-//等用户按CTRL+c退出,或者等到被kill掉
+// wait for the system sign or ctrl-c or command kill.
+//等用户按CTRL+c退出,或者等到被kill掉,接受到这个信号之后还可以运行一些代码.
 func WaitForExit() {
 	//不要在这个地方检查WaitForExit和AddExitAction一起使用,因为程序自身会进行调用
 	ch := make(chan os.Signal)
@@ -22,6 +25,15 @@ var exitActionList = []func(){}
 //TODO 这个地方过于不直观
 func AddExitAction(f func()) {
 	exitActionList = append(exitActionList, f)
+}
+
+func AddExitActionWithError(f func() error) {
+	exitActionList = append(exitActionList, func() {
+		err := f()
+		if err != nil {
+			kmgErr.LogError(err)
+		}
+	})
 }
 
 //调用这个函数来保证使用AddExitAction方法来注册进程退出请求.

@@ -3,7 +3,6 @@ package kmgLog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"os"
 	"time"
 )
@@ -19,7 +18,7 @@ type loggerWithWriter struct {
 func (logger loggerWithWriter) Log(cat string, data ...interface{}) {
 	logRow := LogRow{
 		Cat:  cat,
-		Time: time.Now().Format(time.RFC3339),
+		Time: time.Now().Format(time.RFC3339Nano),
 		Data: make([]json.RawMessage, len(data)),
 	}
 
@@ -41,5 +40,15 @@ type LogRow struct {
 }
 
 func (r LogRow) Marshal() (b []byte, err error) {
-	return kmgJson.MarshalIndent(r)
+	return json.Marshal(r)
+}
+
+func (r LogRow) UnmarshalData(index int, obj interface{}) (err error) {
+	return json.Unmarshal(r.Data[index], obj)
+}
+func (r LogRow) MustUnmarshalData(index int, obj interface{}) {
+	err := json.Unmarshal(r.Data[index], obj)
+	if err != nil {
+		panic(err)
+	}
 }

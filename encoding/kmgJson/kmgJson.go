@@ -1,12 +1,11 @@
 package kmgJson
 
 import (
+	"bytes"
 	"encoding/json"
+	"github.com/bronze1man/kmg/typeTransform"
 	"io/ioutil"
 	"os"
-
-	"bytes"
-	"github.com/bronze1man/kmg/typeTransform"
 	"strings"
 )
 

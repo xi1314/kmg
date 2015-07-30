@@ -2,9 +2,10 @@ package kmgCrypto
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/bronze1man/kmg/encoding/kmgBase64"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 func TestAesCbc(ot *testing.T) {

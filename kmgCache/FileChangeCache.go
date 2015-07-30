@@ -1,18 +1,19 @@
 package kmgCache
 
 import (
-	"encoding/hex"
+	"os"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgFile"
-	"os"
-	"path/filepath"
 )
 
 //这个测试要用到.
 func getFileChangeCachePath(key string) string {
-	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", hex.EncodeToString([]byte(key)))
+	// 此处key长度不可控,所以用md5.
+	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", kmgCrypto.Md5HexFromString(key))
 }
 
 func MustMd5FileChangeCache(key string, pathList []string, f func()) {

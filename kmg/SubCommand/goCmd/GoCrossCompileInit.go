@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgConfig"
-	"github.com/bronze1man/kmg/kmgConsole"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgConsole"
 )
 
 func runGoCrossCompileInit() {

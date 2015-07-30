@@ -1,5 +1,12 @@
 package kmgStrings
 
+import (
+	"bytes"
+	"sort"
+	"strings"
+	"unicode"
+)
+
 func IsInSlice(slice []string, s string) bool {
 	for _, thisS := range slice {
 		if thisS == s {
@@ -55,4 +62,39 @@ func IsAllAphphabet(s string) bool {
 		}
 	}
 	return true
+}
+
+//仅对 UTF-8 有效
+func FirstLetterToUpper(s string) string {
+	b := []byte(s)
+	if len(b) == 0 {
+		return s
+	}
+	if b[0] > unicode.MaxASCII {
+		return s
+	}
+	firstLetter := bytes.ToUpper(b[0:1])
+	b = append(firstLetter, b[1:]...)
+	return string(b)
+}
+
+func MapStringBoolToSortedSlice(m map[string]bool) []string {
+	output := make([]string, len(m))
+	i := 0
+	for s := range m {
+		output[i] = s
+		i++
+	}
+	sort.Strings(output)
+	return output
+}
+
+// LastTwoPartSplit("github.com/bronze1man/kmg/kmgGoSource/testPackage.Demo",".") -> "github.com/bronze1man/kmg/kmgGoSource/testPackage","Demo",false
+// LastTwoPartSplit("Demo",".") -> "","",true
+func LastTwoPartSplit(originS string, splitS string) (p1 string, p2 string, ok bool) {
+	part := strings.Split(originS, splitS)
+	if len(part) < 2 {
+		return "", "", false
+	}
+	return strings.Join(part[:len(part)-1], splitS), part[len(part)-1], true
 }

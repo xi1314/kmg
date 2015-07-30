@@ -2,8 +2,9 @@ package kmgSql
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgStrings"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgStrings"
 	//"github.com/bronze1man/kmg/kmgDebug"
 )
 

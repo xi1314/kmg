@@ -1,10 +1,11 @@
 package netTester
 
 import (
-	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgTime"
 	"net"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 //client 只读取数据,不写入数据

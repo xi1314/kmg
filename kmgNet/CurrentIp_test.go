@@ -1,9 +1,10 @@
 package kmgNet
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"net"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestGetCurrentDeviceAddrFromIPAddr(ot *testing.T) {

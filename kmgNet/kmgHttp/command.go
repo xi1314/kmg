@@ -3,9 +3,10 @@ package kmgHttp
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
 	"net/http"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgConsole"
 )
 
 func AddCommandList() {
@@ -33,7 +34,7 @@ func runFileHttpServer() {
 	fmt.Println("start server at", listenAddr)
 	err = http.ListenAndServe(listenAddr, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "os.Getwd() fail %s", err)
+		fmt.Fprintf(os.Stderr, "http.ListenAndServe() fail %s", err)
 		return
 	}
 	return

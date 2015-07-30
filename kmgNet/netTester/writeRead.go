@@ -1,9 +1,10 @@
 package netTester
 
 import (
+	"time"
+
 	"github.com/bronze1man/kmg/kmgNet"
 	"github.com/bronze1man/kmg/kmgTime"
-	"time"
 )
 
 //client 先写后读

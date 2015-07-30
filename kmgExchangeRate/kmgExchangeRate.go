@@ -2,13 +2,14 @@ package kmgExchangeRate
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgCache"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgStrconv"
 	"github.com/bronze1man/kmg/kmgStrings"
 	"github.com/bronze1man/kmg/kmgTime"
-	"time"
 )
 
 type yqlRateResponse struct {

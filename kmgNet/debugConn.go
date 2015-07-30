@@ -2,9 +2,11 @@ package kmgNet
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgIo"
+	"github.com/bronze1man/kmg/kmgDebug"
 	"io"
 	"net"
+
+	"github.com/bronze1man/kmg/kmgIo"
 )
 
 // a net.Conn with Reader Writer Closer override
@@ -22,11 +24,31 @@ func (conn connRwcer) Write(p []byte) (n int, err error) {
 func (conn connRwcer) Close() (err error) {
 	return conn.rwc.Close()
 }
+func (conn connRwcer) GetUnderlyingConn() net.Conn {
+	return conn.Conn
+}
 
 func NewDebugConn(conn net.Conn, name string) net.Conn {
 	return connRwcer{
 		Conn: conn,
-		rwc:  kmgIo.NewDebugRwc(conn, name),
+		rwc:  kmgIo.NewDebugRwc(conn, name+"["+kmgDebug.NextIntIdString()+"]["+conn.LocalAddr().String()+"-"+conn.RemoteAddr().String()+"]"),
+	}
+}
+
+func NewDebugConnNoData(conn net.Conn) net.Conn {
+	return connRwcer{
+		Conn: conn,
+		rwc:  kmgIo.NewDebugRwcNoData(conn, "["+kmgDebug.NextIntIdString()+"]["+conn.LocalAddr().String()+"-"+conn.RemoteAddr().String()+"]"),
+	}
+}
+
+func NewDebugDialerNoData(parent Dialer) Dialer {
+	return func(network, address string) (net.Conn, error) {
+		conn, err := parent(network, address)
+		if err != nil {
+			return nil, err
+		}
+		return NewDebugConnNoData(conn), nil
 	}
 }
 
@@ -107,3 +129,12 @@ func NewStringDebugConn(conn net.Conn, name string) net.Conn {
 		name: name,
 	}
 }
+
+/*
+// a net.Conn with Reader Writer Closer override
+type packetConnRwcer struct {
+	net.PacketConn
+}
+
+func NewDebugPacketConn
+*/

@@ -2,11 +2,12 @@ package netTester
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgTime"
 	"io"
 	"net"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 //只dial,没有传输任何数据就挂掉了.

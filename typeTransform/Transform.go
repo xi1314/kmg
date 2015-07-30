@@ -2,14 +2,15 @@ package typeTransform
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgReflect"
-	"github.com/bronze1man/kmg/kmgStrconv"
-	"github.com/bronze1man/kmg/kmgTime"
 	"math"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgReflect"
+	"github.com/bronze1man/kmg/kmgStrconv"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 /*

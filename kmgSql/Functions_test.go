@@ -1,8 +1,9 @@
 package kmgSql
 
 import (
-	. "github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestConnectToDb(t *testing.T) {

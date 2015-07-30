@@ -1,0 +1,12 @@
+<?
+package example
+
+    import (
+        "strconv"
+    )
+// import 测试
+func tplTest6()string{
+    a:=1
+?>
+<p><?=strconv.Itoa(a)?></p>
+<? } ?>

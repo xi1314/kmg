@@ -1,19 +1,20 @@
 package kmgGoSource_test
 
 import (
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"reflect"
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgDebug"
 	"github.com/bronze1man/kmg/kmgGoSource"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgTest"
-	"go/ast"
-	"go/parser"
-	"go/token"
 	_ "golang.org/x/tools/go/gcimporter"
 	"golang.org/x/tools/go/types"
-	"reflect"
-	"testing"
 )
 
 func TestMustNewPackageFromImportPath(ot *testing.T) {

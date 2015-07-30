@@ -1,8 +1,9 @@
 package kmgGit
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 func GitTestCb(f func()) {

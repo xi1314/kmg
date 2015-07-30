@@ -19,11 +19,15 @@ func GetDefaultNower() Nower {
 }
 
 func NowFromDefaultNower() time.Time {
-	return GetDefaultNower().Now()
+	return NowTime.Now()
 }
 
 func MysqlNowFromDefaultNower() string {
-	return GetDefaultNower().Now().Format(FormatMysql)
+	return NowTime.Now().Format(FormatMysql)
+}
+
+func MysqlUsNowFromDefaultNower() string {
+	return NowTime.Now().Format(FormatMysqlUs)
 }
 
 func NewFixedNower(time time.Time) Nower {
@@ -35,7 +39,7 @@ func SetFixNowFromString(s string) {
 }
 
 func (nower tDefaultNower) Now() time.Time {
-	return time.Now()
+	return time.Now().In(DefaultTimeZone)
 }
 
 func (nower FixedNower) Now() time.Time {

@@ -33,6 +33,9 @@ func (c *RwcOverConn) Write(p []byte) (n int, err error) {
 func (c *RwcOverConn) Close() (err error) {
 	return c.Closer.Close()
 }
+func (c *RwcOverConn) GetUnderlyingConn() net.Conn {
+	return c.Conn
+}
 
 func RwcConn(rwc io.ReadWriteCloser) net.Conn {
 	return rwcConn{

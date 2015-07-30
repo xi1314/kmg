@@ -3,9 +3,10 @@ package kmgTfo
 import (
 	"golang.org/x/sys/unix"
 
-	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
 	"net"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
 )
 
 //network is useless ,it will always use tcp4

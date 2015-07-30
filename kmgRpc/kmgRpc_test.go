@@ -1,18 +1,22 @@
 package kmgRpc
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgRpc/testPackage"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
+
+	"github.com/bronze1man/kmg/kmgView/kmgGoTpl"
 )
 
 func TestMustGenerateCode(t *testing.T) {
-	kmgFile.MustDeleteFile("testPackage/generated.go")
+	kmgGoTpl.MustBuildTplInDirWithCache("src/github.com/bronze1man/kmg/kmgRpc") // 模板变化需要运行两次,才能看到结果.
+	kmgFile.MustDelete("testPackage/generated.go")
 	MustGenerateCode(GenerateRequest{
-		Object:               &testPackage.Demo{},
+		ObjectPkgPath:        "github.com/bronze1man/kmg/kmgRpc/testPackage",
 		ObjectName:           "Demo",
+		ObjectIsPointer:      true,
 		OutFilePath:          "testPackage/generated.go",
 		OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
 	})
@@ -22,15 +26,16 @@ func TestMustGenerateCode(t *testing.T) {
 func TestReflectToTplConfig(t *testing.T) {
 	conf := reflectToTplConfig(
 		GenerateRequest{
-			Object:               &testPackage.Demo{},
+			ObjectPkgPath:        "github.com/bronze1man/kmg/kmgRpc/testPackage",
 			ObjectName:           "Demo",
+			ObjectIsPointer:      true,
 			OutFilePath:          "testPackage/generated.go",
 			OutPackageImportPath: "github.com/bronze1man/kmg/kmgRpc/testPackage",
 		},
 	)
-	kmgTest.Equal(len(conf.ApiList), 5)
+	kmgTest.Equal(len(conf.ApiList), 7)
 	for i, name := range []string{
-		"DemoFunc2", "DemoFunc3", "DemoFunc4", "DemoFunc5", "PostScoreInt",
+		"DemoFunc2", "DemoFunc3", "DemoFunc4", "DemoFunc5", "DemoFunc7", "DemoFunc8", "PostScoreInt",
 	} {
 		kmgTest.Equal(conf.ApiList[i].Name, name)
 	}
@@ -38,8 +43,8 @@ func TestReflectToTplConfig(t *testing.T) {
 
 func TestTplGenerateCode(t *testing.T) {
 	out := tplGenerateCode(tplConfig{
-		OutPackageName: "testPackage",
-		OutKeyBase64:   "wwbo0EGSB6IVKFEy4dH6my1DIaxCCtzPUM9vfx2Hbog=",
+		OutPackageName: "tplTestPackage",
+		OutKeyByteList: "1,2",
 		ObjectName:     "Demo",
 		ObjectTypeStr:  "*Demo",
 		ApiList: []Api{
@@ -61,7 +66,7 @@ func TestTplGenerateCode(t *testing.T) {
 						ObjectTypeStr: "string",
 					},
 					{
-						Name:          "err",
+						Name:          "Err",
 						ObjectTypeStr: "error",
 					},
 				},
@@ -71,15 +76,14 @@ func TestTplGenerateCode(t *testing.T) {
 			"encoding/json": true,
 			"errors":        true,
 			"fmt":           true,
-			"github.com/bronze1man/kmg/encoding/kmgBase64": true,
-			"github.com/bronze1man/kmg/kmgCrypto":          true,
-			"github.com/bronze1man/kmg/kmgLog":             true,
-			"github.com/bronze1man/kmg/kmgNet/kmgHttp":     true,
+			"github.com/bronze1man/kmg/kmgCrypto":      true,
+			"github.com/bronze1man/kmg/kmgLog":         true,
+			"github.com/bronze1man/kmg/kmgNet/kmgHttp": true,
 			"net/http": true,
 			"bytes":    true,
 		},
 	})
-	kmgFile.MustDeleteFile("testPackage/generated.go")
-	kmgFile.MustWriteFileWithMkdir("testPackage/generated.go", out)
-	kmgCmd.CmdString("kmg go test").SetDir("testPackage").Run()
+	kmgFile.MustDeleteFile("tplTestPackage/generated.go")
+	kmgFile.MustWriteFileWithMkdir("tplTestPackage/generated.go", []byte(out))
+	kmgCmd.CmdString("kmg go test").SetDir("tplTestPackage").Run()
 }

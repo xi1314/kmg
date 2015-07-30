@@ -17,10 +17,14 @@ type listenerConnWrapper struct {
 }
 
 func (l listenerConnWrapper) Accept() (c net.Conn, err error) {
-	c, err = l.Listener.Accept()
+	c1, err := l.Listener.Accept()
 	if err != nil {
 		return nil, err
 	}
-	c, err = l.connWrapper(c)
-	return
+	c2, err := l.connWrapper(c1)
+	if err != nil {
+		c1.Close()
+		return nil, err
+	}
+	return c2, nil
 }

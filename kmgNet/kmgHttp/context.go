@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bronze1man/kmg/encoding/kmgBase64"
-	"github.com/bronze1man/kmg/encoding/kmgJson"
-	"github.com/bronze1man/kmg/kmgCrypto"
-	"github.com/bronze1man/kmg/kmgErr"
 	"io"
 	"mime"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 	"unicode/utf8"
+
+	"github.com/bronze1man/kmg/encoding/kmgBase64"
+	"github.com/bronze1man/kmg/encoding/kmgJson"
+	"github.com/bronze1man/kmg/kmgCrypto"
+	"github.com/bronze1man/kmg/kmgErr"
 )
 
 //该对象上的方法不应该被并发调用.

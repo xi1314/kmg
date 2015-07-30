@@ -2,8 +2,9 @@ package kmgPage
 
 import (
 	"bytes"
-	"github.com/sipin/gorazor/gorazor"
 	"net/url"
+
+	"github.com/sipin/gorazor/gorazor"
 )
 
 func tplPager(kmgPage *KmgPage) string {

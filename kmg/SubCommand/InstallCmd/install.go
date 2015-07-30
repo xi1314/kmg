@@ -6,6 +6,7 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	//"strings"
 	"fmt"
+
 	"github.com/bronze1man/kmg/kmgCompress"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
@@ -80,8 +81,8 @@ func installGolang() {
 	kmgCmd.ProxyRun("ln -s /usr/local/go/bin/godoc /bin/godoc")
 	kmgFile.MustDeleteFile("/bin/gofmt")
 	kmgCmd.ProxyRun("ln -s /usr/local/go/bin/gofmt /bin/gofmt")
-	kmgCmd.MustEnsureBinPath("/bin/go")
-	kmgCmd.MustEnsureBinPath("/bin/godoc")
-	kmgCmd.MustEnsureBinPath("/bin/gofmt")
+	kmgFile.MustEnsureBinPath("/bin/go")
+	kmgFile.MustEnsureBinPath("/bin/godoc")
+	kmgFile.MustEnsureBinPath("/bin/gofmt")
 
 }

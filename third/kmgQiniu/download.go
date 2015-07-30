@@ -1,10 +1,11 @@
 package kmgQiniu
 
 import (
-	"github.com/bronze1man/kmg/kmgErr"
-	"github.com/bronze1man/kmg/kmgFile"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgErr"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 var Download = DownloadDir

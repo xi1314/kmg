@@ -3,8 +3,9 @@
 package kmgUnix
 
 import (
-	"golang.org/x/sys/unix"
 	"net"
+
+	"golang.org/x/sys/unix"
 )
 
 func IPv4TcpAddrToUnixSocksAddr(addr string) (sa unix.Sockaddr, err error) {

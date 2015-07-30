@@ -2,8 +2,9 @@ package kmgCrypto
 
 import (
 	"bytes"
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestKmgCipherV2(ot *testing.T) {
