@@ -8,24 +8,24 @@ import (
 
 func Realpath(inPath string) (string, error) {
 	if filepath.IsAbs(inPath) {
-		return inPath,nil
+		return inPath, nil
 	}
-	wd,err:=os.Getwd()
-	if err!=nil{
-		return "",err
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
 	}
-	return filepath.Join(wd, inPath),nil
+	return filepath.Join(wd, inPath), nil
 }
 
-func MustRealPath(inPath string) string{
-	outPath,err:=Realpath(inPath)
-	if err!=nil{
+func MustRealPath(inPath string) string {
+	outPath, err := Realpath(inPath)
+	if err != nil {
 		panic(err)
 	}
 	return outPath
 }
 
-func MustReadSymbolLink(inPath string) string{
+func MustReadSymbolLink(inPath string) string {
 	path, err := innerRealPath(inPath)
 	if err != nil {
 		panic(err)

@@ -2,11 +2,12 @@ package kmgRadius
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/bronze1man/kmg/encoding/kmgHex"
 	"github.com/bronze1man/kmg/kmgTest"
 	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
 	"github.com/bronze1man/kmg/third/kmgRadius/eap"
-	"testing"
 )
 
 func TestAuthPap(ot *testing.T) {

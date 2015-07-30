@@ -3,11 +3,12 @@ package kmgRadius
 import (
 	"bytes"
 	"fmt"
+	"net"
+	"testing"
+
 	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
 	"github.com/bronze1man/kmg/third/kmgRadius/eap"
 	. "github.com/bronze1man/kmgTest"
-	"net"
-	"testing"
 )
 
 func TestAccessRequestPacket(ot *testing.T) {

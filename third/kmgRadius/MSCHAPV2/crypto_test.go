@@ -1,8 +1,9 @@
 package MSCHAPV2
 
 import (
-	. "github.com/bronze1man/kmgTest"
 	"testing"
+
+	. "github.com/bronze1man/kmgTest"
 )
 
 // rfc2759 Page 15 section 9.2 "9.2.  Hash Example"

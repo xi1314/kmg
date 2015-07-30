@@ -2,7 +2,6 @@ package kmgRedis
 
 import (
 	"fmt"
-	"gopkg.in/redis.v2"
 
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"

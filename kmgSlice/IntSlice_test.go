@@ -1,8 +1,9 @@
 package kmgSlice
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestIntSliceRemoveAt(ot *testing.T) {

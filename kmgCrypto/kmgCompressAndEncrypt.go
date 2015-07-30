@@ -7,6 +7,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"errors"
+
 	"github.com/bronze1man/kmg/kmgCompress"
 	"github.com/bronze1man/kmg/kmgRand"
 )

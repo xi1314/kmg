@@ -1,9 +1,10 @@
 package testPackage
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestGenerated(ot *testing.T) {

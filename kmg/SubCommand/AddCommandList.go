@@ -11,5 +11,5 @@ func AddCommandList() {
 将命令输出结果log到文件中`,
 		Runner: makeCmd,
 	})
-	kmgConsole.AddCommandWithName("NewPassword",NewPassowrd)
+	kmgConsole.AddCommandWithName("NewPassword", NewPassowrd)
 }

@@ -1,9 +1,11 @@
 package SubCommand
+
 import (
-	"github.com/bronze1man/kmg/kmgRand"
 	"fmt"
+
+	"github.com/bronze1man/kmg/kmgRand"
 )
 
-func NewPassowrd(){
+func NewPassowrd() {
 	fmt.Println(kmgRand.MustCryptoRandToReadableAlphaNum(10))
 }

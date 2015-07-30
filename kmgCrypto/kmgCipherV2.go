@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/sha512"
 	"errors"
+
 	"github.com/bronze1man/kmg/kmgRand"
 )
 

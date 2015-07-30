@@ -3,12 +3,18 @@ package kmgGob
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/bronze1man/kmg/kmgIo"
 	"io"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgIo"
 )
 
 func WriteFile(path string, obj interface{}) (err error) {
+	err = kmgFile.MkdirForFile(path)
+	if err != nil {
+		return err
+	}
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(0666))
 	if err != nil {
 		return

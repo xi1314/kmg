@@ -5,12 +5,13 @@ import (
 	//"fmt"
 	"bytes"
 	"crypto/tls"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgNet"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgTest"
-	"io/ioutil"
-	"net/http"
 )
 
 func TestMustTlsTestListen(ot *testing.T) {

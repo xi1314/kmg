@@ -3,8 +3,9 @@ package serviceCmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgConsole"
 )
 
 //kmg service.process start {"Name":"xxx",}

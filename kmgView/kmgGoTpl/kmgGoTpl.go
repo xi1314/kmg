@@ -3,12 +3,13 @@ package kmgGoTpl
 import (
 	"bytes"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgCache"
-	"github.com/bronze1man/kmg/kmgErr"
-	"github.com/bronze1man/kmg/kmgFile"
 	"go/format"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgCache"
+	"github.com/bronze1man/kmg/kmgErr"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 type scope int
@@ -84,7 +85,6 @@ type transformer struct {
 	isLastScriptToken bool
 	urlvStatus        urlvStatus
 }
-
 
 type urlvStatus int
 

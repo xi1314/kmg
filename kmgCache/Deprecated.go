@@ -1,10 +1,11 @@
 package kmgCache
 
 import (
-	"github.com/bronze1man/kmg/encoding/kmgGob"
-	"github.com/bronze1man/kmg/kmgFile"
 	"os"
 	"time"
+
+	"github.com/bronze1man/kmg/encoding/kmgGob"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 // 这个函数bug太多，以废弃，请使用 MustMd5FileChangeCache

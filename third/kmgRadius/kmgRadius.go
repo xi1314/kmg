@@ -1,9 +1,10 @@
 package kmgRadius
 
 import (
-	"github.com/bronze1man/kmg/kmgLog"
 	"io"
 	"net"
+
+	"github.com/bronze1man/kmg/kmgLog"
 )
 
 type AcctRequest struct {

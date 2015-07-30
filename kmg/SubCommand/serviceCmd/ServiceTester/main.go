@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTime"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgConsole"
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 var logFilePath string

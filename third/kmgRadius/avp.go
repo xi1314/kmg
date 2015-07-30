@@ -7,10 +7,11 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"github.com/bronze1man/kmg/third/kmgRadius/eap"
 	"net"
 	"reflect"
 	"strconv"
+
+	"github.com/bronze1man/kmg/third/kmgRadius/eap"
 )
 
 type AVP interface {

@@ -1,9 +1,10 @@
 package kmgRpc
 
 import (
+	"strings"
+
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
-	"strings"
 )
 
 type GenerateRequest struct {

@@ -1,13 +1,14 @@
 package kmgGit
 
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgStrings"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgStrings"
 )
 
 func GetRepositoryFromPath(path string) (repo *Repository, err error) {

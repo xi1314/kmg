@@ -3,8 +3,9 @@ package eap
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
 	"strconv"
+
+	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
 )
 
 type Code uint8

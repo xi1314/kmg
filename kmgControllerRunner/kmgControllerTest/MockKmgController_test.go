@@ -1,13 +1,14 @@
 package kmgControllerTest
 
 import (
-	"github.com/bronze1man/kmg/kmgControllerRunner"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
-	. "github.com/bronze1man/kmg/kmgTest"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgControllerRunner"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 var i int = 1

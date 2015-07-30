@@ -1,9 +1,10 @@
 package kmgFile
 
 import (
-	"github.com/bronze1man/kmg/errors"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/errors"
 )
 
 var NotFoundError = errors.New("Not found")

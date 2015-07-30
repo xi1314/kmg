@@ -2,6 +2,7 @@ package kmgChart
 
 import (
 	"bytes"
+
 	"github.com/bronze1man/kmg/kmgXss"
 )
 

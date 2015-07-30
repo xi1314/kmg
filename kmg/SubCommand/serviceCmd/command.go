@@ -2,9 +2,10 @@ package serviceCmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgConsole"
-	"os"
 )
 
 //TODO 统一进程输出的输出位置,默认不区分err和out.

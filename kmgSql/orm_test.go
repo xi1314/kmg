@@ -1,10 +1,11 @@
 package kmgSql
 
 import (
-	. "github.com/bronze1man/kmg/kmgTest"
-	"github.com/bronze1man/kmg/kmgTime"
 	"testing"
 	"time"
+
+	. "github.com/bronze1man/kmg/kmgTest"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 func TestOrmFromRow(t *testing.T) {

@@ -2,8 +2,6 @@ package kmgControllerTest
 
 import (
 	"bytes"
-	"github.com/bronze1man/kmg/kmgControllerRunner"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -11,6 +9,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgControllerRunner"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
 func CallApiByHttp(uri string, c *kmgHttp.Context) string {

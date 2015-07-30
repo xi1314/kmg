@@ -2,10 +2,11 @@ package kmgCache
 
 import (
 	"errors"
-	"github.com/bronze1man/kmg/kmgMath"
-	"github.com/golang/groupcache/singleflight"
 	"sync"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgMath"
+	"github.com/golang/groupcache/singleflight"
 )
 
 var CacheMiss = errors.New("cache miss")

@@ -1,9 +1,10 @@
 package kmgAlipay
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"strings"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestOverseaMd5Sign(ot *testing.T) {

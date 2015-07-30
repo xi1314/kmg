@@ -1,8 +1,9 @@
 package kmgBase64
 
 import (
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestV2(ot *testing.T) {

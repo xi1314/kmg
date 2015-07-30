@@ -2,9 +2,10 @@ package kmgTest
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/bronze1man/kmg/kmgDebug"
 	"github.com/bronze1man/kmg/kmgReflect"
-	"reflect"
 )
 
 func Ok(expectTrue bool, objList ...interface{}) {

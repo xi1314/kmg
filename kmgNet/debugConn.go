@@ -2,9 +2,10 @@ package kmgNet
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgIo"
 	"io"
 	"net"
+
+	"github.com/bronze1man/kmg/kmgIo"
 )
 
 // a net.Conn with Reader Writer Closer override

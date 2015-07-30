@@ -2,12 +2,13 @@ package kmgGoSource
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgCmd"
 	"go/ast"
-	_ "golang.org/x/tools/go/gcimporter"
-	"golang.org/x/tools/go/types"
 	"path"
 	"reflect"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	_ "golang.org/x/tools/go/gcimporter"
+	"golang.org/x/tools/go/types"
 )
 
 func MustGetGoTypesFromReflect(typ reflect.Type) types.Type {

@@ -1,9 +1,10 @@
 package kmgQiniu
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 var testContext *Context

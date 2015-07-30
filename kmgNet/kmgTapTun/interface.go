@@ -2,10 +2,11 @@ package kmgTapTun
 
 import (
 	"errors"
-	"github.com/bronze1man/kmg/kmgCmd"
 	"io"
 	"runtime"
 	"strconv"
+
+	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 type DeviceType string

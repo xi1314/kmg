@@ -1,9 +1,10 @@
 package kmgCache
 
 import (
-	"github.com/golang/groupcache/singleflight"
 	"sync"
 	"time"
+
+	"github.com/golang/groupcache/singleflight"
 )
 
 //请调用 NewTtlCache() 初始化

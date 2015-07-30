@@ -2,11 +2,12 @@ package kmgNet
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/errors"
-	"github.com/bronze1man/kmg/kmgCmd"
 	"net"
 	"regexp"
 	"strconv"
+
+	"github.com/bronze1man/kmg/errors"
+	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 //一个网络设备上面的地址

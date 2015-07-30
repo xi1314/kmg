@@ -1,11 +1,12 @@
 package kmgSubmail
 
 import (
-	"github.com/bronze1man/kmg/kmgLog"
-	"github.com/bronze1man/kmg/kmgStrconv"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/bronze1man/kmg/kmgLog"
+	"github.com/bronze1man/kmg/kmgStrconv"
 )
 
 type Mail struct {

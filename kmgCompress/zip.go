@@ -3,12 +3,13 @@ package kmgCompress
 import (
 	"archive/zip"
 	"bytes"
-	"github.com/bronze1man/kmg/kmgErr"
-	"github.com/bronze1man/kmg/kmgFile"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgErr"
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 func ZipUncompressFromBytesToDir(zipB []byte, dir string, trimPrefix string) (err error) {

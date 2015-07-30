@@ -3,9 +3,10 @@ package netTester
 import (
 	//"bytes"
 	"fmt"
+	"time"
+
 	"github.com/bronze1man/kmg/kmgTask"
 	"github.com/bronze1man/kmg/kmgTime"
-	"time"
 )
 
 //多线程测试

@@ -5,8 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bronze1man/kmg/typeTransform"
 	"strings"
+
+	"github.com/bronze1man/kmg/typeTransform"
 )
 
 func ReadFile(path string, obj interface{}) error {

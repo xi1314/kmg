@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	. "github.com/bronze1man/kmg/kmgTest"
 	"net/http/httptest"
+
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestMustRequestToStringCanRead(ot *testing.T) {

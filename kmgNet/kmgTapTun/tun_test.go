@@ -2,10 +2,11 @@ package kmgTapTun
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgCmd"
-	"github.com/bronze1man/kmg/kmgTest"
 	"os"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestTun(ot *testing.T) {

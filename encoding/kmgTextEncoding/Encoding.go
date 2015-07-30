@@ -2,13 +2,14 @@ package kmgTextEncoding
 
 import (
 	"bytes"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 type encodingType string

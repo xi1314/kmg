@@ -22,9 +22,9 @@ func (l listenerConnWrapper) Accept() (c net.Conn, err error) {
 		return nil, err
 	}
 	c2, err := l.connWrapper(c1)
-	if err!=nil{
+	if err != nil {
 		c1.Close()
-		return nil,err
+		return nil, err
 	}
-	return c2,nil
+	return c2, nil
 }

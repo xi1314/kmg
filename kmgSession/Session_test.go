@@ -1,15 +1,16 @@
 package kmgSession_test
 
 import (
-	"github.com/bronze1man/kmg/kmgControllerRunner"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
-	"github.com/bronze1man/kmg/kmgSession"
-	. "github.com/bronze1man/kmg/kmgTest"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgControllerRunner"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
+	"github.com/bronze1man/kmg/kmgSession"
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestNoCookie(t *testing.T) {

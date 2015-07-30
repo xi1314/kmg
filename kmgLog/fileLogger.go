@@ -2,9 +2,10 @@ package kmgLog
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgFile"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 //new file log, will mkdir if dir not exist.

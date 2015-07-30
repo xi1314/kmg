@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"io/ioutil"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
 )
 
 func NewRequestFromByte(r []byte) (req *http.Request, err error) {

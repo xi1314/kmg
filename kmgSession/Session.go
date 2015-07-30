@@ -1,9 +1,10 @@
 package kmgSession
 
 import (
-	"github.com/bronze1man/kmg/kmgRand"
 	"net/http"
 	"sync"
+
+	"github.com/bronze1man/kmg/kmgRand"
 )
 
 type Session struct {

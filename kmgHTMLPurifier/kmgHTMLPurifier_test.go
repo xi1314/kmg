@@ -1,10 +1,11 @@
 package kmgHTMLPurifier_test
 
 import (
-	"github.com/bronze1man/kmg/kmgHTMLPurifier"
-	"github.com/bronze1man/kmg/kmgTest"
 	"strings"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgHTMLPurifier"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 // 过滤 HTML的内容

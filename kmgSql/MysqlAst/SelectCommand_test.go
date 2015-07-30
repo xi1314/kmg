@@ -1,8 +1,9 @@
 package MysqlAst
 
 import (
-	. "github.com/bronze1man/kmg/kmgTest"
 	"testing"
+
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestSelectCommand1(t *testing.T) {

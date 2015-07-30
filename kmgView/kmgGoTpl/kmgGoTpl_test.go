@@ -1,10 +1,11 @@
 package kmgGoTpl
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTest"
 	"path/filepath"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestGoTpl(ot *testing.T) {

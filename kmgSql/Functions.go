@@ -3,10 +3,11 @@ package kmgSql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
-	"github.com/bronze1man/kmg/kmgStrconv"
 	"strconv"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgSql/MysqlAst"
+	"github.com/bronze1man/kmg/kmgStrconv"
 )
 
 func MustQuery(query string, args ...string) []map[string]string {

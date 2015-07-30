@@ -1,10 +1,11 @@
 package kmgConsole
 
 import (
-	"github.com/bronze1man/kmg/kmgErr"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/bronze1man/kmg/kmgErr"
 )
 
 // wait for the system sign or ctrl-c or command kill.

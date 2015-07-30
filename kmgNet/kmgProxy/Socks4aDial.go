@@ -3,10 +3,11 @@ package kmgProxy
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"net"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
 )
 
 func Socks4aDialTimeout(proxyAddr string, targetAddr string, timeout time.Duration) (conn net.Conn, err error) {

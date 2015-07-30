@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	//"github.com/bronze1man/kmg/console"
-	"github.com/bronze1man/kmg/kmgFile"
 	"go/build"
 	"os"
 	"path/filepath"
+
+	"github.com/bronze1man/kmg/kmgFile"
 
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"

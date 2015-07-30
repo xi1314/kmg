@@ -1,12 +1,13 @@
 package kmgFile
 
 import (
-	"github.com/bronze1man/kmg/kmgTime"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 func MustEnsureBinPath(finalPath string) {

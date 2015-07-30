@@ -2,10 +2,11 @@ package kmgHttp
 
 import (
 	"bytes"
-	"github.com/bronze1man/kmg/kmgTest"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestAlipayContentTypeBug(ot *testing.T) {

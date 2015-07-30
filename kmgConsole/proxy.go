@@ -1,8 +1,9 @@
 package kmgConsole
 
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 func ProxyCommand(args ...string) func() {

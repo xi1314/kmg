@@ -2,9 +2,10 @@ package kmgCache
 
 import (
 	"errors"
-	"github.com/golang/groupcache/singleflight"
 	"sync"
 	"time"
+
+	"github.com/golang/groupcache/singleflight"
 )
 
 var cacheExpire = errors.New("cache expire")

@@ -1,10 +1,11 @@
 package kmgTransparent
 
 import (
-	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
-	"golang.org/x/sys/unix"
 	"net"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgNet/kmgUnix"
+	"golang.org/x/sys/unix"
 )
 
 //linux transparent listen

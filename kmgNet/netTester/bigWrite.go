@@ -2,10 +2,11 @@ package netTester
 
 import (
 	"bytes"
-	"github.com/bronze1man/kmg/kmgNet"
-	"github.com/bronze1man/kmg/kmgTime"
 	"sync"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 //一次写入大量数据(超过mtu即可)

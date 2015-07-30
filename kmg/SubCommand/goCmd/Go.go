@@ -1,10 +1,11 @@
 package goCmd
 
 import (
+	"os"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
-	"os"
 )
 
 // run go command in current project

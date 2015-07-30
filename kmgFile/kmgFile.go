@@ -2,13 +2,14 @@ package kmgFile
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgRand"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgRand"
 )
 
 func IsDotFile(path string) bool {
@@ -214,6 +215,6 @@ func MustRename(oldpath string, newpath string) {
 	}
 }
 
-func MustSymlink(fromPath string,toPath string){
-	kmgCmd.CmdSlice([]string{"ln", "-sf",fromPath,toPath}).MustStdioRun()
+func MustSymlink(fromPath string, toPath string) {
+	kmgCmd.CmdSlice([]string{"ln", "-sf", fromPath, toPath}).MustStdioRun()
 }

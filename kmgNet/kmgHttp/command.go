@@ -3,9 +3,10 @@ package kmgHttp
 import (
 	"flag"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgConsole"
 	"net/http"
 	"os"
+
+	"github.com/bronze1man/kmg/kmgConsole"
 )
 
 func AddCommandList() {

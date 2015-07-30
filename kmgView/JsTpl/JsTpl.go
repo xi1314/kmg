@@ -2,9 +2,10 @@ package JsTpl
 
 import (
 	"bytes"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgFile"
-	"path/filepath"
 )
 
 func MustBuildTplOneFile(in []byte) (out []byte) {

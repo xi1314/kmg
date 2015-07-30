@@ -1,9 +1,10 @@
 package kmgChart
 
 import (
-	"github.com/bronze1man/kmg/kmgTime"
 	"sort"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 type TimeFloatPair struct {

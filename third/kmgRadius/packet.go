@@ -7,9 +7,10 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
-	"github.com/bronze1man/kmg/third/kmgRadius/eap"
 	"net"
 	"strconv"
+
+	"github.com/bronze1man/kmg/third/kmgRadius/eap"
 )
 
 var ErrMessageAuthenticatorCheckFail = fmt.Errorf("RADIUS Response-Authenticator verification failed")

@@ -1,8 +1,9 @@
 package MSCHAPV2
 
 import (
-	. "github.com/bronze1man/kmgTest"
 	"testing"
+
+	. "github.com/bronze1man/kmgTest"
 	//"fmt"
 )
 

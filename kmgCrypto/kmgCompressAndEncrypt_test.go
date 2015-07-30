@@ -3,9 +3,10 @@ package kmgCrypto
 import (
 	"bytes"
 	"fmt"
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgRand"
 	"github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 func TestCompressAndEncryptBytes(ot *testing.T) {

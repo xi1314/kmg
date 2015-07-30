@@ -3,6 +3,7 @@ package MSCHAPV2
 import (
 	"crypto"
 	_ "crypto/sha1"
+
 	_ "golang.org/x/crypto/md4"
 )
 

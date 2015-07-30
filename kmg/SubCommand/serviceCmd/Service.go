@@ -1,13 +1,14 @@
 package serviceCmd
 
 import (
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgTextTemplate"
-	"os"
-	"os/exec"
-	"strings"
 )
 
 var ErrServiceExist = errors.New("Service already exist")

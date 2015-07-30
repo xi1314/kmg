@@ -2,10 +2,11 @@ package kmgSql_test
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgSql"
-	. "github.com/bronze1man/kmg/kmgTest"
 	"strings"
 	"testing"
+
+	"github.com/bronze1man/kmg/kmgSql"
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 var testTableConfig = kmgSql.Table{

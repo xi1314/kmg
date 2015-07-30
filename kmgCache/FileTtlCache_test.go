@@ -2,10 +2,11 @@ package kmgCache
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgTest"
 	"testing"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTest"
 )
 
 func TestFileTtlCache(t *testing.T) {

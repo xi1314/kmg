@@ -1,9 +1,10 @@
 package kmgQiniu
 
 import (
+	"io"
+
 	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/qiniu/api/rsf"
-	"io"
 )
 
 // 列出所有前缀是xxx的数据,

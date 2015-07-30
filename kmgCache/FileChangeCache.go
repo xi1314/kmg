@@ -2,12 +2,13 @@ package kmgCache
 
 import (
 	"encoding/hex"
+	"os"
+	"path/filepath"
+
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgFile"
-	"os"
-	"path/filepath"
 )
 
 //这个测试要用到.

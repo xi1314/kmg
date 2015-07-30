@@ -2,9 +2,10 @@ package kmgHttp
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet"
 	"net"
 	"net/http"
+
+	"github.com/bronze1man/kmg/kmgNet"
 )
 
 //一个http的满足 kmgNet.Server接口的服务器

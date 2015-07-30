@@ -1,7 +1,6 @@
 package kmgPing
 
 import (
-	"github.com/tatsushid/go-fastping"
 	"net"
 	"time"
 )

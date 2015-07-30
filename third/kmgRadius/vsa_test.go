@@ -1,8 +1,9 @@
 package kmgRadius
 
 import (
-	. "github.com/bronze1man/kmgTest"
 	"testing"
+
+	. "github.com/bronze1man/kmgTest"
 )
 
 func TestVSAFromFreeRadius(ot *testing.T) {

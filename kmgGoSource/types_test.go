@@ -1,11 +1,12 @@
 package kmgGoSource
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgTest"
 	"golang.org/x/tools/go/types"
-	"reflect"
-	"testing"
 )
 
 type RpcDemo struct {

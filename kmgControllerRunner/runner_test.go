@@ -1,9 +1,10 @@
 package kmgControllerRunner
 
 import (
+	"testing"
+
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	. "github.com/bronze1man/kmg/kmgTest"
-	"testing"
 )
 
 func TestRegisterController(t *testing.T) {

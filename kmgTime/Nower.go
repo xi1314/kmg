@@ -26,7 +26,7 @@ func MysqlNowFromDefaultNower() string {
 	return NowTime.Now().Format(FormatMysql)
 }
 
-func MysqlUsNowFromDefaultNower() string{
+func MysqlUsNowFromDefaultNower() string {
 	return NowTime.Now().Format(FormatMysqlUs)
 }
 

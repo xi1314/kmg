@@ -1,16 +1,17 @@
 package SubCommand
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgPlatform"
 	"github.com/bronze1man/kmg/kmgTime"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 func makeCmd() {
@@ -42,10 +43,10 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 	kmgFile.MustWriteFile(thisLogFilePath, []byte{})
 	if !kmgPlatform.GetCompiledPlatform().Compatible(kmgPlatform.WindowsAmd64) {
 		lastLogPath := filepath.Join(logDir, "last.log")
-		if kmgFile.MustFileExist(lastLogPath){
-			kmgFile.MustSymlink(kmgFile.MustReadSymbolLink(lastLogPath),filepath.Join(logDir, "last2.log"))
+		if kmgFile.MustFileExist(lastLogPath) {
+			kmgFile.MustSymlink(kmgFile.MustReadSymbolLink(lastLogPath), filepath.Join(logDir, "last2.log"))
 		}
-		kmgFile.MustSymlink(filepath.Base(thisLogFilePath),lastLogPath)
+		kmgFile.MustSymlink(filepath.Base(thisLogFilePath), lastLogPath)
 	}
 	//TODO 大部分命令是 kmg gorun xxx 在这个地方可以直接调用gorun解决问题,这样可以少开一个进程加快了一些速度
 	// 问题: 上诉做法不靠谱,会导致last.log没有用处.

@@ -2,10 +2,11 @@ package kmgRpc
 
 import (
 	"fmt"
-	"github.com/bronze1man/kmg/kmgGoSource"
-	"golang.org/x/tools/go/types"
 	"path"
 	"reflect"
+
+	"github.com/bronze1man/kmg/kmgGoSource"
+	"golang.org/x/tools/go/types"
 )
 
 func reflectToTplConfig(req GenerateRequest) tplConfig {

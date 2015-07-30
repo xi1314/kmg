@@ -2,11 +2,12 @@ package kmgCache
 
 import (
 	"encoding/hex"
+	"path/filepath"
+	"time"
+
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
-	"path/filepath"
-	"time"
 )
 
 type ttlCacheEntryV2 struct {

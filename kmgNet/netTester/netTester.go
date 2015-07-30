@@ -3,10 +3,11 @@ package netTester
 import (
 	"bytes"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet"
 	"io"
 	"net"
 	"time"
+
+	"github.com/bronze1man/kmg/kmgNet"
 )
 
 type DirectDialer func() (net.Conn, error)

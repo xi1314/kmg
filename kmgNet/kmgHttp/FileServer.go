@@ -1,11 +1,12 @@
 package kmgHttp
 
 import (
-	"github.com/bronze1man/kmg/kmgFile"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgFile"
 )
 
 func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string) {

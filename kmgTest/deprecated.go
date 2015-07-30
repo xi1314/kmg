@@ -5,8 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bronze1man/kmg/kmgDebug" //TODO 移除这个依赖?
 	"strings"
+
+	"github.com/bronze1man/kmg/kmgDebug" //TODO 移除这个依赖?
 )
 
 // @deprecated

@@ -7,6 +7,7 @@ import (
 	"net/http/pprof"
 	"path/filepath"
 	"runtime/debug"
+
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
@@ -24,12 +25,12 @@ func RegisterProfile(prefixPath string) {
 }
 
 // 暂时使用默认http的handler
-func StartProfileOnAddr(prefixPath string,profileAddr string){
+func StartProfileOnAddr(prefixPath string, profileAddr string) {
 	kmgHttp.ClearHttpDefaultServer()
 	RegisterProfile("/48qcA6SYYyGGXg/")
-	go func(){
-		err:=http.ListenAndServe(profileAddr,nil)
-		if err!=nil{
+	go func() {
+		err := http.ListenAndServe(profileAddr, nil)
+		if err != nil {
 			panic(err)
 		}
 	}()
@@ -57,7 +58,7 @@ func GcHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("SUCCESS"))
 }
 
-func heap(w http.ResponseWriter, r *http.Request){
+func heap(w http.ResponseWriter, r *http.Request) {
 	debug.FreeOSMemory()
-	pprof.Handler("heap").ServeHTTP(w,r)
+	pprof.Handler("heap").ServeHTTP(w, r)
 }
