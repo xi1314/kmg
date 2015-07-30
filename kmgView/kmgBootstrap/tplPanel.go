@@ -2,7 +2,6 @@ package kmgBootstrap
 
 import (
 	"bytes"
-
 	"github.com/bronze1man/kmg/kmgXss"
 )
 

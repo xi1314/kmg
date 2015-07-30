@@ -1,6 +1,7 @@
 package kmgGoTpl
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgCache"
 	"github.com/bronze1man/kmg/kmgConfig"
