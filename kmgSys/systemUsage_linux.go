@@ -90,6 +90,24 @@ func disk(output string) (used float64, total int) {
 	return
 }
 
+//获取外网网卡
+func FindDeviceNameByIp(ip string) string {
+	o := string(kmgCmd.MustRunAndReturnOutput("ifconfig -s"))
+	lines := strings.Split(o, "\n")
+	for i, l := range lines {
+		if i == 0 {
+			continue
+		}
+		dn := strings.Split(l, " ")
+		deviceName := dn[0]
+		s := string(kmgCmd.MustRunAndReturnOutput("ifconfig " + deviceName))
+		if strings.Contains(s, ip) {
+			return deviceName
+		}
+	}
+	return ""
+}
+
 //byte
 func NetworkRXTX(deviceName string) (rx int, tx int) {
 	return networkRXTX(string(kmgCmd.MustRunAndReturnOutput("ifconfig " + deviceName)))

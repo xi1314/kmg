@@ -6,7 +6,7 @@ import (
 
 func tplTable(table Table) string {
 	var _buffer bytes.Buffer
-	_buffer.WriteString("\n<table class=\"table\">\n    ")
+	_buffer.WriteString("\n<table class=\"table table-hover\">\n    ")
 	if table.Caption != nil {
 
 		_buffer.WriteString("<caption>")
