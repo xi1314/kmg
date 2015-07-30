@@ -1,0 +1,11 @@
+<? package kmgBootstrap
+func tplPanel (panel Panel) string { ?>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <?= panel.Title ?>
+    </div>
+    <div class="panel-body">
+        <?= raw(panel.Body.HtmlRender()) ?>
+    </div>
+</div>
+<? } ?>

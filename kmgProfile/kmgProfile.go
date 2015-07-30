@@ -3,12 +3,11 @@ package kmgProfile
 import (
 	"expvar"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net/http"
 	"net/http/pprof"
 	"path/filepath"
 	"runtime/debug"
-
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
 // 可以使用PrefixPath提高安全性
@@ -18,6 +17,8 @@ func RegisterProfile(prefixPath string) {
 	http.Handle(filepath.Join(prefixPath, "/debug/pprof/symbol"), http.HandlerFunc(pprof.Symbol))
 	http.Handle(filepath.Join(prefixPath, "/debug/pprof/heap"), http.HandlerFunc(heap))
 	http.Handle(filepath.Join(prefixPath, "/debug/pprof/block"), pprof.Handler("block"))
+	http.Handle(filepath.Join(prefixPath, "/debug/pprof/goroutine"), pprof.Handler("goroutine"))
+	http.Handle(filepath.Join(prefixPath, "/debug/pprof/threadcreate"), pprof.Handler("threadcreate"))
 
 	http.Handle(filepath.Join(prefixPath, "/debug/pprof/"), http.HandlerFunc(pprof.Index))
 	http.Handle(filepath.Join(prefixPath, "/debug/vars"), http.HandlerFunc(ExpvarHandler))

@@ -16,8 +16,15 @@ func TestGenerated(ot *testing.T) {
 	kmgTest.Equal(info, "LbId")
 
 	info, err = client.PostScoreInt("LbId", 2)
-	kmgTest.Equal(err.Error(), "Score!=1")
 	kmgTest.Equal(info, "")
+	kmgTest.Ok(err != nil, err)
+	kmgTest.Equal(err.Error(), "Score!=1")
+
+	info, err = client.DemoFunc8(DemoRequest{}, &DemoRequest{}, 1)
+	kmgTest.Equal(info, "info1")
+
+	info, err = client.DemoFunc8(DemoRequest{}, &DemoRequest{}, 2)
+	kmgTest.Equal(info, "info")
 }
 
 func BenchmarkGenerated(ot *testing.B) {

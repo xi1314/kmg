@@ -1,9 +1,11 @@
 package kmgNet
 
 import (
+	"github.com/bronze1man/kmg/kmgErr"
 	"io"
 	"net"
 	"strings"
+	"time"
 )
 
 type ConnHandler interface {
@@ -44,7 +46,9 @@ func (server *ConnServer) Start() (err error) {
 					strings.Contains(err.Error(), "accept on closed mux") {
 					break
 				}
-				panic(err)
+				kmgErr.LogErrorWithStack(err)
+				time.Sleep(time.Millisecond * 100)
+				continue
 			}
 			go server.Handler.ConnHandle(conn)
 		}
@@ -73,10 +77,13 @@ func RunTCPServerV2(Listener net.Listener, handle ConnHandlerFunc) (closer func(
 		for {
 			conn, err := Listener.Accept()
 			if err != nil {
-				if strings.Contains(err.Error(), "use of closed network connection") {
+				errS := err.Error()
+				if strings.Contains(errS, "use of closed network connection") {
 					break
 				}
-				panic(err)
+				kmgErr.LogErrorWithStack(err)
+				time.Sleep(time.Millisecond * 100)
+				continue
 			}
 			go handle(conn)
 		}

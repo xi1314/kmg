@@ -1,15 +1,14 @@
 package kmgGoTpl
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCache"
+	"github.com/bronze1man/kmg/kmgConfig"
+	"github.com/bronze1man/kmg/kmgErr"
+	"github.com/bronze1man/kmg/kmgFile"
 	"go/format"
 	"path/filepath"
 	"strings"
-
-	"github.com/bronze1man/kmg/kmgCache"
-	"github.com/bronze1man/kmg/kmgErr"
-	"github.com/bronze1man/kmg/kmgFile"
 )
 
 type scope int
@@ -54,7 +53,9 @@ func MustBuildTplInDir(path string) {
 	}
 }
 
+// 此处路径表示 项目里面的一个路径
 func MustBuildTplInDirWithCache(path string) {
+	path = kmgConfig.DefaultEnv().PathInProject(path)
 	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+path, []string{path}, func() {
 		MustBuildTplInDir(path)
 	})
@@ -243,12 +244,12 @@ func (t *transformer) mustTransform(in []byte) []byte {
 }
 
 func (t *transformer) endTplScope() {
-	if t.lastScopeBuf.Len() > 0 {
+	s := t.lastScopeBuf.String()
+	if t.isHtml {
+		s = strings.Trim(s, "\n")
+	}
+	if len(s) > 0 {
 		t.outBuf.WriteString("_buf.WriteString(")
-		s := t.lastScopeBuf.String()
-		if t.isHtml {
-			s = strings.Trim(s, "\n")
-		}
 		if !strings.Contains(s, "`") {
 			t.outBuf.WriteString("`")
 			t.outBuf.WriteString(s)

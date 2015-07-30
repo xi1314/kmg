@@ -34,7 +34,7 @@ func runFileHttpServer() {
 	fmt.Println("start server at", listenAddr)
 	err = http.ListenAndServe(listenAddr, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "os.Getwd() fail %s", err)
+		fmt.Fprintf(os.Stderr, "http.ListenAndServe() fail %s", err)
 		return
 	}
 	return

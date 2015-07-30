@@ -2,10 +2,8 @@ package kmgCrypto
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
-	"github.com/bronze1man/kmg/kmgRand"
 	"github.com/bronze1man/kmg/kmgTest"
 )
 
@@ -67,5 +65,4 @@ func TestCompressAndEncryptBytes(ot *testing.T) {
 		kmgTest.Ok(err != nil)
 	}
 
-	fmt.Printf("%#v", kmgRand.MustCryptoRandBytes(32))
 }

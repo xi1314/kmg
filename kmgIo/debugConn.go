@@ -2,11 +2,10 @@ package kmgIo
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgTime"
 	"io"
 	"sync/atomic"
 	"time"
-
-	"github.com/bronze1man/kmg/kmgTime"
 )
 
 //debug a io.ReadWriteCloser

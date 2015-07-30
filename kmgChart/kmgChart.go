@@ -20,8 +20,8 @@ type dataZoom struct {
 type axis struct {
 	Type string        `json:"type"` //category/value/time/log
 	Data []interface{} `json:"data"`
-	Min  interface{}   `json:"min"`
-	Max  interface{}   `json:"max"`
+	Min  interface{}   `json:"min,omitempty"`
+	Max  interface{}   `json:"max,omitempty"`
 }
 
 type markPointData struct {
@@ -44,7 +44,7 @@ type series struct {
 	MarkPoint     *markPoint    `json:"markPoint"`
 }
 
-type title struct {
+type Title struct {
 	Text    string `json:"text"`
 	Subtext string `json:"subtext"`
 }
@@ -63,7 +63,7 @@ type option struct {
 	XAxis     *axis     `json:"xAxis"`
 	YAxis     *axis     `json:"yAxis"`
 	Series    []series  `json:"series"`
-	Title     *title    `json:"title"`
+	Title     *Title    `json:"title"`
 	Animation bool      `json:"animation"`
 	Tooltip   *tooltip  `json:"tooltip"`
 	DataZoom  *dataZoom `json:"dataZoom"`
@@ -85,17 +85,13 @@ func newChartBaseConfig() *Chart {
 		Option: &option{
 			XAxis: &axis{},
 			YAxis: &axis{},
-			Title: &title{},
+			Title: &Title{},
 			Tooltip: &tooltip{
 				Trigger: "axis",
 				AxisPointer: &axisPointer{
 					Show: true,
 					Type: "none",
 				},
-			},
-			DataZoom: &dataZoom{
-				Show:     true,
-				RealTime: true,
 			},
 		},
 	}

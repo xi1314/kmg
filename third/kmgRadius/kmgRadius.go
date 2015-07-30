@@ -1,7 +1,6 @@
 package kmgRadius
 
 import (
-	"io"
 	"net"
 
 	"github.com/bronze1man/kmg/kmgLog"
@@ -34,7 +33,7 @@ type Handler struct {
 //异步运行服务器,
 // TODO 返回Closer以便可以关闭服务器,所有无法运行的错误panic出来,其他错误丢到kmgLog error里面.
 // 如果不需要Closer可以直接忽略
-func RunServer(address string, secret []byte, handler Handler) io.Closer {
+func RunServer(address string, secret []byte, handler Handler) func() error {
 	s := server{
 		mschapMap: map[string]mschapStatus{},
 		handler:   handler,
@@ -45,9 +44,10 @@ func RunServer(address string, secret []byte, handler Handler) io.Closer {
 type PacketHandler func(request *Packet) *Packet
 
 //异步运行服务器,返回Closer以便可以关闭服务器,所有无法运行的错误panic出来,其他错误丢到kmgLog error里面.
-func RunServerWithPacketHandler(address string, secret []byte, handler PacketHandler) io.Closer {
-	var conn *net.UDPConn
+func RunServerWithPacketHandler(address string, secret []byte, handler PacketHandler) func() error {
+	connChan := make(chan *net.UDPConn)
 	go func() {
+		var conn *net.UDPConn
 		addr, err := net.ResolveUDPAddr("udp", address)
 		if err != nil {
 			panic(err)
@@ -56,7 +56,7 @@ func RunServerWithPacketHandler(address string, secret []byte, handler PacketHan
 		if err != nil {
 			panic(err)
 		}
-
+		connChan <- conn
 		for {
 			b := make([]byte, 4096)
 			n, senderAddress, err := conn.ReadFrom(b)
@@ -84,5 +84,7 @@ func RunServerWithPacketHandler(address string, secret []byte, handler PacketHan
 		}
 		return
 	}()
-	return conn
+	conn := <-connChan
+	close(connChan)
+	return conn.Close
 }

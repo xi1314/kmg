@@ -21,3 +21,14 @@ func (c multiCloser) Close() (err error) {
 	}
 	return err
 }
+
+func MultiErrorHandle(fs ...func() error) error {
+	var err error
+	for _, f := range fs {
+		err1 := f()
+		if err1 != nil {
+			err = err1
+		}
+	}
+	return err
+}

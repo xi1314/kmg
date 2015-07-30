@@ -26,23 +26,23 @@ func CreateLineFromTimeFloatPair(inputList []TimeFloatPair) *Chart {
 			},
 		},
 	}
+	line.Option.YAxis.Min, line.Option.YAxis.Max = getYMinMax(inputList)
 	for _, v := range inputList {
 		line.Option.Series[0].Data = append(line.Option.Series[0].Data, []interface{}{v.X, v.Y})
 	}
 	line.JS = `
+		delete option.title
 		function formatDate(data) { //date JavaScript Date 对象
 			return moment(data).format("YYYY-MM-DD HH:mm:ss:SSS")
 		}
-		//坐标显示值域通过 DataZoom 自适应
-		delete option.xAxis.min
-		delete option.xAxis.max
-		delete option.yAxis.min;
-		delete option.yAxis.max;
         option.xAxis.axisLabel = {
-            formatter : function (value) {
-                return formatDate(value)
-            }
+            formatter : formatDate
         };
+        option.yAxis.axisLabel = {
+        	formatter : function(data){
+        		return data.toPrecision(3)
+        	}
+        }
         option.tooltip.formatter = function (params) {
             return "X: " + formatDate(params.value[0])
                     + "<br /> Y: " + params.value[1]
@@ -87,6 +87,9 @@ func TimeContainInRange(startTime time.Time, timeRange time.Duration, t time.Tim
 }
 
 func LODForTimeFloatLine(input []TimeFloatPair, levelList []LODLevel) []TimeFloatPair {
+	if len(input) <= 100 {
+		return input
+	}
 	sort.Sort(TimeFloatPairSortByDESC(input))
 	output := []TimeFloatPair{}
 	startTime := input[0].X
@@ -122,7 +125,8 @@ func LODForTimeFloatLine(input []TimeFloatPair, levelList []LODLevel) []TimeFloa
 	return output
 }
 
-// 平均时间分析
+//平均时间分析
+//在 density 内 y 之和除以 y 的数量
 func AvgTimeFloatPair(input []TimeFloatPair, Density time.Duration) []TimeFloatPair {
 	if len(input) == 0 {
 		return nil
@@ -149,7 +153,8 @@ func AvgTimeFloatPair(input []TimeFloatPair, Density time.Duration) []TimeFloatP
 	return output
 }
 
-// 累计时间分析
+//累计时间分析
+//在 density 内 y 之和除以 density
 func AccTimePerSecondFloatPair(input []TimeFloatPair, Density time.Duration) []TimeFloatPair {
 	if len(input) == 0 {
 		return nil
@@ -171,4 +176,27 @@ func AccTimePerSecondFloatPair(input []TimeFloatPair, Density time.Duration) []T
 	}
 	// 直接忽略掉最后几条数据
 	return output
+}
+
+func getYMinMax(inputList []TimeFloatPair) (min float64, max float64) {
+	if len(inputList) == 0 {
+		return 0, 1
+	}
+	min = inputList[0].Y
+	max = inputList[0].Y
+	for i := range inputList {
+		if min > inputList[i].Y {
+			min = inputList[i].Y
+		}
+		if max < inputList[i].Y {
+			max = inputList[i].Y
+		}
+	}
+	if min > 0 && max > 0 {
+		min = 0
+	}
+	if max == min {
+		max = min + 1 //如果只有一个Y值,就啥也看不到了.
+	}
+	return min, max
 }

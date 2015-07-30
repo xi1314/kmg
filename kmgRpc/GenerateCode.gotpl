@@ -11,7 +11,7 @@ import (
 )
 
 type Client_<?=config.ObjectName?> struct {
-	RemoteUrl string //只有主机和地址
+	RemoteUrl string // http://kmg.org:1234/
 }
 
 
@@ -23,8 +23,8 @@ const (
 )
 
 //server
-func ListenAndServe_Demo(addr string, obj *Demo) (closer func()error) {
-	s := &generateServer_Demo{
+func ListenAndServe_<?=config.ObjectName?>(addr string, obj *<?=config.ObjectName?>) (closer func()error) {
+	s := &generateServer_<?=config.ObjectName?>{
 		obj: obj,
 	}
 	return kmgHttp.MustGoHttpAsyncListenAndServeWithCloser(addr, s)
@@ -139,20 +139,20 @@ func (s *generateServer_<?=config.ObjectName?>) handleApiV1(inBuf []byte) (outBu
 	    <? for _,args:=range api.GetOutArgsListWithoutError() { ?>
 	       var <?=args.Name?> <?=args.ObjectTypeStr?>
 	    <? } ?>
-		var err error
+		var Err error
 		reqData := &struct {
             <? for _,args:=range api.InArgsList { ?>
                <?=args.Name?> <?=args.ObjectTypeStr?>
             <? } ?>
 		}{}
-		err = json.Unmarshal(b2, reqData)
-		if err != nil {
-			return nil, err
+		Err = json.Unmarshal(b2, reqData)
+		if Err != nil {
+			return nil, Err
 		}
 		<? if api.HasReturnArgument() { ?>
 		    <?=api.GetOutArgsNameListForAssign()?> = s.obj.<?=api.Name?>(<?for _,args:=range api.InArgsList {?> reqData.<?=args.Name?>,<? } ?> )
-            if err != nil {
-                return nil, err
+            if Err != nil {
+                return nil, Err
             }
 		<? }else{ ?>
 		    s.obj.<?=api.Name?>(<?for _,args:=range api.InArgsList {?> reqData.<?=args.Name?>,<? } ?> )
@@ -188,16 +188,16 @@ func (c *Client_<?=config.ObjectName?> ) <?=api.Name?>( <?for _,arg:=range api.I
 	}
 	<? if api.IsOutExpendToOneArgument() { ?>
 	    var respData <?=api.OutArgsList[0].ObjectTypeStr?>
-        err = c.sendRequest("<?=api.Name?>", reqData, &respData)
-        return respData,err
+        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
+        return respData,Err
 	<? } else { ?>
         respData := &struct {
             <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
                 <?=arg.Name?> <?=arg.ObjectTypeStr?>
             <? } ?>
         }{}
-        err = c.sendRequest("<?=api.Name?>", reqData, &respData)
-        return <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>respData.<?=arg.Name?>,<? } ?> err
+        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
+        return <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>respData.<?=arg.Name?>,<? } ?> Err
     <? } ?>
 }
 <? } ?>

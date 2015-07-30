@@ -37,3 +37,11 @@ func PortFromAddrString(addr string) (int, error) {
 func JoinHostPortInt(host string, port int) string {
 	return net.JoinHostPort(host, strconv.Itoa(port))
 }
+
+func MustGetHostFromAddr(addr string) string {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		panic(err)
+	}
+	return host
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
+	"gopkg.in/redis.v2"
 )
 
 // 清空当前db的所有数据,并且设置为传入的数据

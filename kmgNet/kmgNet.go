@@ -55,3 +55,29 @@ func SizeString(byteNum int64) string {
 	}
 	return fmt.Sprintf("%dB", byteNum)
 }
+
+func CloseRead(conn net.Conn) error {
+	tcpC := mustGetTcpConnFromConn(conn)
+	return tcpC.CloseRead()
+}
+
+func CloseWrite(conn net.Conn) error {
+	tcpC := mustGetTcpConnFromConn(conn)
+	return tcpC.CloseWrite()
+}
+
+func mustGetTcpConnFromConn(conn net.Conn) *net.TCPConn {
+	tcpC, ok := conn.(*net.TCPConn)
+	if ok {
+		return tcpC
+	}
+	conner, ok := conn.(GetUnderlyingConner)
+	if ok {
+		return mustGetTcpConnFromConn(conner.GetUnderlyingConn())
+	}
+	panic(fmt.Errorf("not support conn type %T", conn))
+}
+
+type GetUnderlyingConner interface {
+	GetUnderlyingConn() net.Conn
+}
