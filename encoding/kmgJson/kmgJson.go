@@ -1,13 +1,12 @@
 package kmgJson
 
 import (
+	"bytes"
 	"encoding/json"
+	"github.com/bronze1man/kmg/typeTransform"
 	"io/ioutil"
 	"os"
-
 	"strings"
-
-	"github.com/bronze1man/kmg/typeTransform"
 )
 
 func ReadFile(path string, obj interface{}) error {
@@ -108,6 +107,15 @@ func MustUnmarshalToMap(r []byte) (obj map[string]interface{}) {
 	return obj
 }
 
+func MustUnmarshalToMapDeleteBOM(r []byte) (obj map[string]interface{}) {
+	r = DeleteBOM(r)
+	err := json.Unmarshal(r, &obj)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
 // for debug to inspect content in obj
 func MustMarshalIndentToString(obj interface{}) string {
 	output, err := json.MarshalIndent(obj, "", "  ")
@@ -141,4 +149,9 @@ func MustMarshalToString(obj interface{}) string {
 		panic(err)
 	}
 	return string(output)
+}
+
+func DeleteBOM(fileBytes []byte) []byte {
+	trimmedBytes := bytes.Trim(fileBytes, "\xef\xbb\xbf")
+	return trimmedBytes
 }

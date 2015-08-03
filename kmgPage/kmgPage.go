@@ -31,6 +31,16 @@ func CreateFromSelectCommandAndHttpContext(Select *MysqlAst.SelectCommand, Ctx *
 	return page.runSelectCommand(Select)
 }
 
+func CreateFromSelectCommandAndHttpContextByItemPerPage(Select *MysqlAst.SelectCommand, Ctx *kmgHttp.Context, num int) *KmgPage {
+	page := &KmgPage{}
+	page.BaseUrl = Ctx.GetRequestUrl()
+	page.CurrentPage = Ctx.InNum("Page")
+	page.PageKeyName = "Page"
+	page.ItemPerPage = num
+	page.init()
+	return page.runSelectCommand(Select)
+}
+
 type CreateFromDataRequest struct {
 	Data        []map[string]string
 	BaseUrl     string
@@ -82,7 +92,7 @@ func (page *KmgPage) runSelectCommand(selectCommand *MysqlAst.SelectCommand) *Km
 
 func (page *KmgPage) init() {
 	if page.ItemPerPage == 0 {
-		page.ItemPerPage = 10
+		page.ItemPerPage = 30
 	}
 	if page.ShowPageNum == 0 {
 		page.ShowPageNum = 10
@@ -139,8 +149,6 @@ func (page *KmgPage) GetBeforePageUrl() string {
 	pageNumber := page.CurrentPage - 1
 	if pageNumber < 1 {
 		pageNumber = 1
-	}
-	if pageNumber == 1 {
 		return "javascript:"
 	}
 	return page.GetUrlWithPage(pageNumber)
@@ -150,9 +158,6 @@ func (page *KmgPage) GetBeforePageUrl() string {
 func (page *KmgPage) GetAfterPageUrl() string {
 	pageNumber := page.CurrentPage + 1
 	if pageNumber > page.GetTotalPage() {
-		pageNumber = page.GetTotalPage()
-	}
-	if pageNumber == page.GetTotalPage() {
 		return "javascript:"
 	}
 	return page.GetUrlWithPage(pageNumber)
