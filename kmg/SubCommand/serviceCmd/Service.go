@@ -91,10 +91,7 @@ func Uninstall(name string) (err error) {
 		pathList = append(pathList, "/etc/rc"+i+".d/K02"+name)
 	}
 	for _, path := range pathList {
-		err = os.Remove(path)
-		if err != nil {
-			return
-		}
+		kmgFile.MustDelete(path)
 	}
 	return nil
 }
