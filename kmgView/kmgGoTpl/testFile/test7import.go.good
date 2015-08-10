@@ -1,0 +1,21 @@
+package example
+
+import (
+	"bytes"
+	"github.com/bronze1man/kmg/kmgXss"
+)
+
+func tplTest6() string {
+	a := 1
+	/*
+	   package abc
+	   import (
+	       "strconv"
+	   )
+	*/
+	var _buf bytes.Buffer
+	_buf.WriteString(`<p>`)
+	_buf.WriteString(kmgXss.H(a))
+	_buf.WriteString(`</p>`)
+	return _buf.String()
+}

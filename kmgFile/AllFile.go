@@ -58,6 +58,7 @@ func GetAllFiles(root string) (out []string, err error) {
 	return
 }
 
+// 获得所有文件,不包括目录
 func MustGetAllFiles(root string) (out []string) {
 	out, err := GetAllFiles(root)
 	if err != nil {
@@ -65,3 +66,29 @@ func MustGetAllFiles(root string) (out []string) {
 	}
 	return out
 }
+
+/*
+// 回调只会给文件名,回调返回true表示需要这个文件,返回false表示不需要这个文件
+func MustGetAllFilesWithCallback(root string,cb func(absPath string)bool) (out []string) {
+	root, err := Realpath(root)
+	if err != nil {
+		panic(err)
+	}
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir(){
+			return nil
+		}
+		if cb(path) {
+			out = append(out,path)
+		}
+		return nil
+	})
+	if err!=nil{
+		panic(err)
+	}
+	return
+}
+*/

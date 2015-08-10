@@ -263,12 +263,12 @@ func (q DbQueryer) MustRunSelectCommand(selectCommand *MysqlAst.SelectCommand) (
 	return list
 }
 
-//事务不可以ping
+//事务不可以ping,ping需要数据库存在
 func Ping() (err error) {
 	return GetDb().Ping()
 }
 
-//事务不可以ping
+//事务不可以ping,ping需要数据库存在
 func MustPing() {
 	err := Ping()
 	if err != nil {

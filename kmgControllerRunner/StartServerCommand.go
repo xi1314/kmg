@@ -42,6 +42,13 @@ const (
 	ServerTypeBoth ServerType = "Both" //http跳转到https
 )
 
+func StartHttpServer(addr string) {
+	StartServer(ServerRequest{
+		HttpAddr: addr,
+		Type:     ServerTypeHttp,
+	})
+}
+
 func StartServer(sReq ServerRequest) {
 	var targetScheme string
 	switch sReq.Type {

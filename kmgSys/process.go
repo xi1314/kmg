@@ -1,35 +1,56 @@
 package kmgSys
 
 import (
+	"fmt"
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgPlatform"
 	"github.com/bronze1man/kmg/kmgStrconv"
 	"os"
 	"strings"
 )
 
-func KillProcessByBinName(binName string) {
-	pidList := GetAllProcessIdByBinName(binName)
-	for _, pid := range pidList {
-		KillProcessByPid(pid)
-	}
+type Process struct {
+	Id      int
+	Command string
 }
 
-//只支持 Linux
-func GetAllProcessIdByBinName(binName string) []int {
-	b := kmgCmd.CmdSlice([]string{"ps", "-C", binName, "-o", "pid="}).MustRunAndReturnOutput()
-	s := strings.Split(string(b), "\n")
-	out := []int{}
-	for _, l := range s {
-		out = append(out, kmgStrconv.AtoIDefault0(strings.TrimSpace(l)))
+func (p *Process) Kill() {
+	sp, err := os.FindProcess(p.Id)
+	handleErr(err)
+	err = sp.Kill()
+	handleErr(err)
+}
+
+func GetAllProcessByBinName(binName string) []*Process {
+	if !kmgPlatform.LinuxAmd64.Compatible(kmgPlatform.GetCompiledPlatform()) {
+		panic(ErrPlatformNotSupport)
+	}
+	b := kmgCmd.CmdBash(CmdProcessListByBinName(binName)).MustRunAndReturnOutputAndNotExitStatusCheck()
+	return ExtractProcessListFromString(string(b))
+}
+
+func CmdKillProcessByPid(pid int) string {
+	return fmt.Sprintf("kill %v", pid)
+}
+
+func CmdProcessListByBinName(binName string) string {
+	return fmt.Sprintf("ps -C %s -o pid=,cmd=", binName)
+}
+
+func ExtractProcessListFromString(output string) []*Process {
+	lines := strings.Split(output, "\n")
+	out := []*Process{}
+	for _, l := range lines {
+		ls := strings.Fields(l)
+		if len(ls) == 0 {
+			continue
+		}
+		out = append(out, &Process{
+			Id:      kmgStrconv.AtoIDefault0(ls[0]),
+			Command: strings.Join(ls[1:], " "),
+		})
 	}
 	return out
-}
-
-func KillProcessByPid(pid int) {
-	p, err := os.FindProcess(pid)
-	handleErr(err)
-	err = p.Kill()
-	handleErr(err)
 }
 
 func handleErr(err error) {

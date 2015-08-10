@@ -55,10 +55,10 @@ func MustBuildTplInDir(path string) {
 }
 
 // 此处路径表示 项目里面的一个路径
-func MustBuildTplInDirWithCache(path string) {
-	path = kmgConfig.DefaultEnv().PathInProject(path)
-	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+path, []string{path}, func() {
-		MustBuildTplInDir(path)
+func MustBuildTplInDirWithCache(root string) {
+	root = kmgConfig.DefaultEnv().PathInProject(root)
+	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+root, []string{root}, func() {
+		MustBuildTplInDir(root)
 	})
 }
 
@@ -181,13 +181,13 @@ func (t *transformer) mustTransform(in []byte) []byte {
 					// 忽略开头的状态错误
 					t.urlvStatus = urlvStatusQuestion
 				} else if t.urlvStatus == urlvStatusQuestion { //此处恰好是对的,后面不会匹配到?
-					if isAlphanum(in[t.pos]) {
+					if isUrlvChar(in[t.pos]) {
 						t.urlvStatus = urlvStatusKey
 					} else {
 						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
 					}
 				} else if t.urlvStatus == urlvStatusKey {
-					if isAlphanum(in[t.pos]) {
+					if isUrlvChar(in[t.pos]) {
 						t.urlvStatus = urlvStatusKey
 					} else if in[t.pos] == '=' {
 						t.urlvStatus = urlvStatusEqual
@@ -195,13 +195,13 @@ func (t *transformer) mustTransform(in []byte) []byte {
 						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
 					}
 				} else if t.urlvStatus == urlvStatusEqual {
-					if isAlphanum(in[t.pos]) {
+					if isUrlvChar(in[t.pos]) {
 						t.urlvStatus = urlvStatusValue
 					} else {
 						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
 					}
 				} else if t.urlvStatus == urlvStatusValue {
-					if isAlphanum(in[t.pos]) {
+					if isUrlvChar(in[t.pos]) {
 						t.urlvStatus = urlvStatusValue
 					} else if in[t.pos] == '&' {
 						t.urlvStatus = urlvStatusAndSign
@@ -209,7 +209,7 @@ func (t *transformer) mustTransform(in []byte) []byte {
 						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
 					}
 				} else if t.urlvStatus == urlvStatusAndSign {
-					if isAlphanum(in[t.pos]) {
+					if isUrlvChar(in[t.pos]) {
 						t.urlvStatus = urlvStatusKey
 					} else {
 						t.urlvStatus = urlvStatusNot //状态计算错误,忽略本次匹配
@@ -309,4 +309,9 @@ func (t *transformer) isMatchString(token string) bool {
 
 func isAlphanum(b byte) bool {
 	return (b >= '0' && b <= '9') || (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z')
+}
+
+func isUrlvChar(b byte) bool {
+	return (b >= '0' && b <= '9') || (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z') ||
+		b == '.' || b == '-' || b == '_' || b == '%'
 }

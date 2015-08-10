@@ -1,0 +1,4 @@
+<? package kmgBootstrap
+func tplIcon (icon Icon) string { ?>
+ <i data-toggle="tooltip" data-original-title="<?= icon.Title ?>" class="<?= string(icon.IconColor) ?> fa fa-<?= icon.IconName ?>"></i>
+<? } ?>

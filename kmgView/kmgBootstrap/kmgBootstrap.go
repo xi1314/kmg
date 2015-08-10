@@ -137,3 +137,34 @@ type NavBar struct {
 func (navBar NavBar) HtmlRender() string {
 	return tplNavBar(navBar)
 }
+
+type TextColor string
+
+const (
+	TextMuted   TextColor = "text-muted"
+	TextPrimary TextColor = "text-primary"
+	TextSuccess TextColor = "text-success"
+	TextInfo    TextColor = "text-info"
+	TextWarning TextColor = "text-warning"
+	TextDanger  TextColor = "text-danger"
+)
+
+type BgColor string
+
+const (
+	BgPrimary TextColor = "bg-primary"
+	BgSuccess TextColor = "bg-success"
+	BgInfo    TextColor = "bg-info"
+	BgWarning TextColor = "bg-warning"
+	BgDanger  TextColor = "bg-danger"
+)
+
+type Icon struct {
+	IconName  string
+	Title     string
+	IconColor TextColor
+}
+
+func (icon Icon) HtmlRender() string {
+	return tplIcon(icon)
+}

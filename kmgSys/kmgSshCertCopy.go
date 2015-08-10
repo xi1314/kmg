@@ -32,8 +32,18 @@ func (r *RemoteServer) String() string {
 	return strings.Join(cmd, " ")
 }
 
+func SshCertCopyLocalToRemoteRoot(remoteAddress string) {
+	SshCertCopyLocalToRemote(&RemoteServer{
+		Address: remoteAddress,
+	})
+}
+
 func SshCertCopyLocalToRemote(remote *RemoteServer) {
 	if IsLocalSshCertCopyToRemote(remote) {
+		return
+	}
+	if remote.Password == "" {
+		kmgCmd.MustRunInBash("ssh-copy-id " + remote.String())
 		return
 	}
 	runCmdWithPassword(
@@ -59,16 +69,6 @@ func IsLocalSshCertCopyToRemote(remote *RemoteServer) bool {
 		return true
 	}
 	return false
-}
-
-func SshCertCopyCertToOneRemoteRoot(cert string, address string) {
-	SshCertCopyCertToRemote(cert, []RemoteServer{
-		{
-			Address:  address,
-			UserName: "root",
-			SshPort:  22,
-		},
-	})
 }
 
 func SshCertCopyCertToRemote(cert string, remoteList []RemoteServer) {

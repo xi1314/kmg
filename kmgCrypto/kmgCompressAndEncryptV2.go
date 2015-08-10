@@ -12,6 +12,7 @@ import (
 
 /*
 先压缩,后加密,
+TODO 还不稳定,请先不要使用.
 对称加密,正确包含psk的所有功能,
 特别优化体积
 实际iv长度只有4字节,实际hash长度只有4字节
@@ -20,7 +21,7 @@ import (
 */
 func CompressAndEncryptBytesEncodeV2(key *[32]byte, data []byte) (output []byte) {
 	//先压缩
-	data = compressV2(data)
+	data = compressV4(data)
 	//后加密
 	Iv := kmgRand.MustCryptoRandBytes(4) //此处只会报操作系统不支持的错误.
 	block, err := aes.NewCipher((*key)[:])
@@ -40,12 +41,13 @@ func CompressAndEncryptBytesEncodeV2(key *[32]byte, data []byte) (output []byte)
 }
 
 /*
+TODO 还不稳定,请先不要使用.
 对称解密,
 	不会修改输入的数据
 */
 func CompressAndEncryptBytesDecodeV2(key *[32]byte, data []byte) (output []byte, err error) {
 	//先解密
-	if len(data) < 4+4+1 {
+	if len(data) < 4+4 {
 		return nil, errors.New("[kmgCipher.CompressAndEncryptBytesDecode] input data too small")
 	}
 	aseKey := key[:]
@@ -65,7 +67,7 @@ func CompressAndEncryptBytesDecodeV2(key *[32]byte, data []byte) (output []byte,
 	}
 	output = output[:beforeCbcSize]
 	//后解压缩
-	output, err = uncompressV2(output)
+	output, err = uncompressV4(output)
 	return output, err
 }
 
@@ -106,11 +108,11 @@ func uncompressV3(inData []byte) (outData []byte, err error) {
 	}
 	return zappy.Decode(nil,inData[1:])
 }
+*/
 
 func compressV4(inData []byte) (outData []byte) {
 	return inData
 }
 func uncompressV4(inData []byte) (outData []byte, err error) {
-	return outData,nil
+	return inData, nil
 }
-*/

@@ -37,6 +37,12 @@ func Md5HexFromString(data string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+func Md5Byte(data []byte) []byte {
+	hash := md5.New()
+	hash.Write(data)
+	return hash.Sum(nil)
+}
+
 //获得文件的MD5值
 func MustMd5File(path string) string {
 	content := kmgFile.MustReadFile(path)

@@ -9,10 +9,10 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"strings"
 	"time"
 
+	"crypto/tls"
 	"github.com/bronze1man/kmg/kmgNet"
 )
 
@@ -164,23 +164,6 @@ func ClearHttpDefaultServer() {
 	http.DefaultServeMux = http.NewServeMux()
 }
 
-func AddUriProxyToDefaultServer(uri, targetUrl string) {
-	http.DefaultServeMux.HandleFunc(uri, func(w http.ResponseWriter, req *http.Request) {
-		proxyReq := MustHttpRequestClone(req)
-		target, err := url.Parse(targetUrl)
-		if err != nil {
-			panic(err)
-		}
-		proxyReq.Host = target.Host
-		proxyReq.URL.Host = target.Host
-		proxyReq.URL.Scheme = target.Scheme
-		err = HttpProxyToWriter(w, proxyReq)
-		if err != nil {
-			panic(err)
-		}
-	})
-}
-
 func Redirect301ToNewHost(w http.ResponseWriter, req *http.Request, scheme string, host string) {
 	u := req.URL
 	u.Host = host
@@ -273,4 +256,24 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 	tc.SetKeepAlive(true)
 	tc.SetKeepAlivePeriod(3 * time.Minute)
 	return tc, nil
+}
+
+func GoListenAndServeTLSWithCertContent(addr string, certS string, keyS string, handler http.Handler) error {
+	srv := &http.Server{Addr: addr, Handler: handler}
+	cert, err := tls.X509KeyPair([]byte(certS), []byte(keyS))
+	if err != nil {
+		return err
+	}
+	srv.TLSConfig = &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"http/1.1"},
+	}
+
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, srv.TLSConfig)
+	return srv.Serve(tlsListener)
 }

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -24,11 +25,12 @@ type Context struct {
 }
 
 type Bucket struct {
-	Name      string
-	Domain    string
-	IsPrivate bool
-	Ak        string
-	Sk        string
+	Ak string
+	Sk string
+
+	Name      string //空间名
+	Domain    string //下载使用的域名
+	IsPrivate bool   // 是否是私有Api
 }
 
 var currentContext *Context
@@ -142,6 +144,17 @@ func (ctx *Context) UploadFromBytes(remotePath string, b []byte) (err error) {
 	return
 }
 
+//上传字节 remotePath 开头带 / 或不带 / 效果完全不一样. 正常情况应该是不带 /的
+// 此处没有实现流式接口,这个接口的效果和 UploadFromBytes 没有什么差别,(依然会爆内存)
+// 分片上传 功能似乎可以解决此类问题,可惜太过复杂了.
+func (ctx *Context) UploadFromReader(remotePath string, reader io.Reader) (err error) {
+	buf, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	return ctx.UploadFromBytes(remotePath, buf)
+}
+
 func (ctx *Context) MustUploadFromBytes(remotePath string, context []byte) {
 	ctx.singleContextCheck()
 	err := ctx.UploadFromBytes(remotePath, context)
@@ -185,11 +198,16 @@ func (ctx *Context) MustRemoveBatch(PathList []string) {
 			panic(err)
 		}
 	}
+}
 
+// 返回 scheme和domain ,结尾没有 /
+// 例如: http://xxx.com
+func (ctx *Context) GetSchemeAndDomain() string {
+	return "http://" + ctx.domain
 }
 
 type FileInfo struct {
-	Path    string
+	Path    string //
 	Hash    string
 	Size    int64
 	ModTime time.Time

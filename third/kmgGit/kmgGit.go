@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgStrings"
@@ -14,6 +15,9 @@ import (
 func GetRepositoryFromPath(path string) (repo *Repository, err error) {
 	p, err := kmgFile.SearchFileInParentDir(path, ".git")
 	if err != nil {
+		if err == kmgFile.NotFoundError {
+			return nil, errors.New("can not found .git folder,do you in a git repository?")
+		}
 		return
 	}
 	return &Repository{

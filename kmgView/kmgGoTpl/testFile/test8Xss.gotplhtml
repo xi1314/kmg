@@ -1,0 +1,7 @@
+<?
+package example
+
+func tplTest8()string{
+?>
+    <a href="/a/?n=a.b.c&Id=<?="1"?>">
+<? } ?>

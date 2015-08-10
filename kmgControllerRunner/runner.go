@@ -24,7 +24,7 @@ func clearController() {
 }
 
 //注册controller,请先注册后使用,该函数不能并发调用,不能在http开始处理之后再注册(data race问题)
-// 不允许重复注册.
+// 允许重复注册.
 func RegisterController(obj interface{}) {
 	v := reflect.ValueOf(obj)
 	t := v.Type()
@@ -47,6 +47,12 @@ func RegisterController(obj interface{}) {
 			controllerObjMap[name] = mv.Interface().(func(ctx *kmgHttp.Context))
 		}
 	}
+}
+
+// 此处可以随意定义Api的名称,用来解决调用者的名称向前兼容问题.
+// 普通情况下可以使用 RegisterController,减少信息重复.
+func RegisterControllerFunc(name string, f func(ctx *kmgHttp.Context)) {
+	controllerObjMap[name] = f
 }
 
 func GetControllerNameList() []string {

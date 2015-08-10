@@ -9,6 +9,7 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 )
 
+// 向http默认服务器加入一个本地文件或目录
 func MustAddFileToHttpPathToDefaultServer(httpPath string, localFilePath string) {
 	MustAddFileToHttpPathToServeMux(http.DefaultServeMux, httpPath, localFilePath)
 }

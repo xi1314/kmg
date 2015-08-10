@@ -1,0 +1,14 @@
+package example
+
+import (
+	"bytes"
+	"github.com/bronze1man/kmg/kmgXss"
+)
+
+func tplTest8() string {
+	var _buf bytes.Buffer
+	_buf.WriteString(`    <a href="/a/?n=a.b.c&Id=`)
+	_buf.WriteString(kmgXss.Urlv("1"))
+	_buf.WriteString(`">`)
+	return _buf.String()
+}

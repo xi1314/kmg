@@ -70,6 +70,15 @@ func MustLoadProdConfig() {
 	mustLoadConfigByFilename("Prod.yml")
 }
 
+func LoadConfigWithDbName(dbname string) {
+	SetDefaultDbConfig(&DbConfig{
+		Username: "root",
+		Password: "",
+		Host:     "127.0.0.1",
+		DbName:   dbname,
+	})
+}
+
 func mustLoadConfigByFilename(filename string) {
 	conf := TestDbConf{}
 	err := kmgYaml.ReadFile(kmgConfig.DefaultEnv().PathInConfig(filename), &conf)

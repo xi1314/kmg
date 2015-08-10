@@ -84,7 +84,7 @@ func (c *Client) PushToAll(content string) (err error) {
 
 	op := jpush.NewOptions()
 	op.SetApns_production(c.IsIosProduct)
-	op.SetBigPushDuration(60) //过快的进行全局推送,会导致系统其他地方压力太大而挂掉.先设置成60分钟.
+	//	op.SetBigPushDuration(60) //过快的进行全局推送,会导致系统其他地方压力太大而挂掉.先设置成60分钟.
 	nb.SetOptions(op)
 	ret, err := c.c.Send(nb)
 	if err != nil {

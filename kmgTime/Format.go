@@ -37,3 +37,10 @@ func DefaultFormat(t time.Time) string {
 	}
 	return t.In(DefaultTimeZone).Format(FormatMysql)
 }
+
+func MonthAndDayFormat(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.In(DefaultTimeZone).Format(FormatMysqlMouthAndDay)
+}
