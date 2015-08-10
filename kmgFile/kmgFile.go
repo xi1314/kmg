@@ -127,6 +127,17 @@ func ReadDir(dirname string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(dirname)
 }
 
+func Delete(path string) (err error) {
+	err = os.RemoveAll(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //delete file or directory,ignore file not exist err
 func MustDelete(path string) {
 	err := os.RemoveAll(path)
@@ -217,4 +228,29 @@ func MustRename(oldpath string, newpath string) {
 
 func MustSymlink(fromPath string, toPath string) {
 	kmgCmd.CmdSlice([]string{"ln", "-sf", fromPath, toPath}).MustStdioRun()
+}
+
+func MustGetWd() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return wd
+}
+
+// 返回一个目录下面的所有文件的名字
+// 文件名是相对于这个目录的
+// 只返回第一层,没有更多层
+// 只返回文件,不返回目录
+func ReadDirFileOneLevel(path string) (fileList []string, err error) {
+	fiList, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, fi := range fiList {
+		if !fi.IsDir() {
+			fileList = append(fileList, fi.Name())
+		}
+	}
+	return fileList, nil
 }

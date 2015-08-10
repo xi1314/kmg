@@ -5,10 +5,16 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/bronze1man/kmg/encoding/kmgGob"
+	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
+	"github.com/bronze1man/kmg/kmgCrypto"
+	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgGoSource"
+	"github.com/bronze1man/kmg/kmgPlatform"
+	//"github.com/bronze1man/kmg/kmgDebug"
 )
 
 // go install bug
@@ -69,14 +75,151 @@ func runCmdSliceWithGoPath(gopath string, cmdSlice []string) {
 }
 
 func goRunPackageName(goPath string, pathOrPkg string) {
-	//这个方案的实现缓存是正常的,但是也只能更新本GOPATH里面的pkg,不能更多多个GOPATH里面其他GOPATH的pkg缓存.
-	//是package
-	//build
-	// TODO 已知bug1 删除某个package里面的部分文件,然后由于引用到了旧的实现的代码,不会报错.删除pkg解决问题.
-	// TODO 已知bug2 如果一个package先是main,然后build了一个东西,然后又改成了非main,再gorun会使用旧的缓存/bin/里面的缓存.
-	runCmdSliceWithGoPath(goPath, []string{"go", "install", pathOrPkg})
-
+	goRunInstall(goPath, pathOrPkg)
 	//run
 	outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
 	runCmdSliceWithGoPath(goPath, append([]string{outPath}, os.Args[2:]...))
+}
+
+type gorunCacheInfo struct {
+	PkgMap map[string]*gorunCachePkgInfo // key pkgname
+}
+
+type gorunCachePkgInfo struct {
+	GoFileMap map[string]string
+	PkgMd5    string
+	IsMain    bool
+	Name      string
+}
+
+func (info *gorunCachePkgInfo) getPkgBinPath(gopath string, platform string) string {
+	if info.IsMain {
+		return filepath.Join("bin", filepath.Base(info.Name))
+	} else {
+		return filepath.Join("pkg", platform, info.Name+".a")
+	}
+}
+
+func goRunInstall(goPath string, pathOrPkg string) {
+	//只能更新本GOPATH里面的pkg,不能更多多个GOPATH里面其他GOPATH的pkg缓存.
+	// TODO 已知bug1 删除某个package里面的部分文件,然后由于引用到了旧的实现的代码,不会报错.删除pkg解决问题.
+	// TODO 已知bug2 如果一个package先是main,然后build了一个东西,然后又改成了非main,再gorun会使用旧的缓存/bin/里面的缓存.
+	ok := goRunInstallIsValidAndInvalidCache(goPath, pathOrPkg)
+	if ok {
+		//fmt.Println("use cache")
+		return
+	}
+	//fmt.Println("not use cache")
+	runCmdSliceWithGoPath(goPath, []string{"go", "install", pathOrPkg})
+	// 填充缓存
+	platform := kmgPlatform.GetCompiledPlatform().String()
+	info := &gorunCacheInfo{
+		PkgMap: map[string]*gorunCachePkgInfo{},
+	}
+	outputJson := kmgCmd.CmdSlice([]string{"go", "list", "-json", pathOrPkg}).
+		MustSetEnv("GOPATH", goPath).MustCombinedOutput()
+	listObj := &struct {
+		Deps []string
+		Name string
+	}{}
+	kmgJson.MustUnmarshal(outputJson, &listObj)
+	if listObj.Name != "main" {
+		fmt.Printf("run non main package %s\n", pathOrPkg)
+		return
+	}
+	listObj.Deps = append(listObj.Deps, pathOrPkg)
+	for _, pkgName := range listObj.Deps {
+		srcpkgPath := filepath.Join(goPath, "src", pkgName)
+		fileList, err := kmgFile.ReadDirFileOneLevel(srcpkgPath)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				panic(err)
+			}
+			// 没有找到pkg,可能是这个pkg在GOROOT出现过,此处暂时不管.
+			continue
+		}
+		pkgInfo := &gorunCachePkgInfo{
+			GoFileMap: map[string]string{},
+		}
+		for _, file := range fileList {
+			ext := filepath.Ext(file)
+			if ext == ".go" {
+				pkgInfo.GoFileMap[file] = kmgCrypto.MustMd5File(filepath.Join(srcpkgPath, file))
+			}
+		}
+		pkgInfo.IsMain = pkgName == pathOrPkg
+		pkgInfo.Name = pkgName
+		pkgBinPath := pkgInfo.getPkgBinPath(goPath, platform)
+		pkgInfo.PkgMd5 = kmgCrypto.MustMd5File(pkgBinPath)
+		info.PkgMap[pkgName] = pkgInfo
+	}
+	tmpPath := filepath.Join(goPath, "tmp", "gorun", kmgCrypto.Md5HexFromString(pathOrPkg+"_"+platform))
+	kmgGob.MustWriteFile(tmpPath, info)
+}
+
+func goRunInstallIsValidAndInvalidCache(goPath string, pathOrPkg string) bool {
+	info := &gorunCacheInfo{}
+	// TODO 获取本次install的 平台名称
+	platform := kmgPlatform.GetCompiledPlatform().String()
+	tmpPath := filepath.Join(goPath, "tmp", "gorun", kmgCrypto.Md5HexFromString(pathOrPkg+"_"+platform))
+	err := kmgGob.ReadFile(tmpPath, &info)
+	if err != nil { //此处故意忽略错误 没有缓存文件 TODO 此处需要折腾其他东西吗?
+		return false
+	}
+	//kmgDebug.Println(info)
+	isValid := true
+	for pkgName, pkgInfo := range info.PkgMap {
+		pkgPath := pkgInfo.getPkgBinPath(goPath, platform)
+		if !checkFileWithMd5(pkgPath, pkgInfo.PkgMd5) {
+			kmgFile.MustDelete(pkgPath)
+			isValid = false
+			continue
+		}
+		srcpkgPath := filepath.Join(goPath, "src", pkgName)
+		fileList, err := kmgFile.ReadDirFileOneLevel(srcpkgPath)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				panic(err)
+			}
+			kmgFile.MustDelete(pkgPath)
+			isValid = false
+			continue
+		}
+		isThisPkgValid := true
+		for _, file := range fileList {
+			ext := filepath.Ext(file)
+			if ext == ".go" {
+				// 多了一个文件
+				if pkgInfo.GoFileMap[file] == "" {
+					kmgFile.MustDelete(pkgPath)
+					isValid = false
+					isThisPkgValid = false
+					break
+				}
+			}
+		}
+		if !isThisPkgValid {
+			continue
+		}
+		for name, md5 := range pkgInfo.GoFileMap {
+			goFilePath := filepath.Join(srcpkgPath, name)
+			if !checkFileWithMd5(goFilePath, md5) {
+				kmgFile.MustDelete(pkgPath)
+				isValid = false
+				break
+			}
+		}
+	}
+	return isValid
+}
+
+func checkFileWithMd5(path string, shouldMd5 string) (ok bool) {
+	content, err := kmgFile.ReadFile(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			panic(err)
+		}
+		return false
+	}
+	return kmgCrypto.Md5Hex(content) == shouldMd5
 }
