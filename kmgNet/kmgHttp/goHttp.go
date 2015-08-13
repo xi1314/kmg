@@ -190,7 +190,7 @@ func MustUrlGetContentProcess(url string) (b []byte) {
 		if n > 0 {
 			buf.Write(bufBytes[:n])
 			now := time.Now()
-			if now.After(lastTime.Add(100 * time.Millisecond)) {
+			if now.After(lastTime.Add(1 * time.Second)) {
 				thisBytes := buf.Len()
 				printProgress(int64(thisBytes), resp.ContentLength, now.Sub(lastTime), thisBytes-lastBytes)
 				lastTime = now
@@ -198,6 +198,7 @@ func MustUrlGetContentProcess(url string) (b []byte) {
 			}
 		}
 		if err == io.EOF {
+			fmt.Println()
 			return buf.Bytes()
 		}
 		if err != nil {
