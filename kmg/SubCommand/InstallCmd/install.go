@@ -11,6 +11,7 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
+	"path"
 )
 
 func AddCommandList() {
@@ -25,6 +26,7 @@ func AddCommandList() {
 func installCmd() {
 	cg := kmgConsole.NewCommandGroup()
 	cg.AddCommandWithName("golang", installGolang)
+	cg.AddCommandWithName("golang1.5", installGolang15)
 	cg.Main()
 }
 
@@ -39,9 +41,25 @@ func installCmd() {
 	* TODO 国外服务器因为网络太卡而不能安装
 */
 func installGolang() {
+	installGolangWithUrlMap(map[string]string{
+		"windows_amd64": "http://kmgtools.qiniudn.com/v1/go1.4.2.windows-amd64.zip",
+		"linux_amd64":   "http://kmgtools.qiniudn.com/v1/go1.4.2.linux-amd64.tar.gz",
+		"darwin_amd64":  "http://kmgtools.qiniudn.com/v1/go1.4.2.darwin-amd64-osx10.8.tar.gz",
+	})
+}
+
+func installGolang15() {
+	installGolangWithUrlMap(map[string]string{
+		"windows_amd64": "https://storage.googleapis.com/golang/go1.5rc1.windows-amd64.zip",
+		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5rc1.linux-amd64.tar.gz",
+		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5rc1.darwin-amd64.tar.gz",
+	})
+}
+
+func installGolangWithUrlMap(urlMap map[string]string) {
 	p := kmgPlatform.GetCompiledPlatform()
 	if p.Compatible(kmgPlatform.WindowsAmd64) {
-		contentB, err := kmgHttp.UrlGetContent("http://kmgtools.qiniudn.com/v1/go1.4.2.windows-amd64.zip")
+		contentB, err := kmgHttp.UrlGetContent(urlMap["windows_amd64"])
 		kmgConsole.ExitOnErr(err)
 		err = kmgCompress.ZipUncompressFromBytesToDir(contentB, `c:\go`, "go")
 		kmgConsole.ExitOnErr(err)
@@ -59,18 +77,12 @@ func installGolang() {
 		return
 	}
 
-	packageName := ""
-
-	switch {
-	case p.Compatible(kmgPlatform.LinuxAmd64):
-		packageName = "go1.4.2.linux-amd64.tar.gz"
-		kmgCmd.ProxyRun("apt-get install -y gcc")
-	case p.Compatible(kmgPlatform.DarwinAmd64):
-		packageName = "go1.4.2.darwin-amd64-osx10.8.tar.gz"
-	default:
+	url, ok := urlMap[p.String()]
+	if !ok {
 		kmgConsole.ExitOnErr(fmt.Errorf("not support platform [%s]", p))
 	}
-	contentB := kmgHttp.MustUrlGetContentProcess("http://kmgtools.qiniudn.com/v1/" + packageName)
+	packageName := path.Base(url)
+	contentB := kmgHttp.MustUrlGetContentProcess(url)
 
 	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)
@@ -84,5 +96,4 @@ func installGolang() {
 	kmgFile.MustEnsureBinPath("/bin/go")
 	kmgFile.MustEnsureBinPath("/bin/godoc")
 	kmgFile.MustEnsureBinPath("/bin/gofmt")
-
 }
