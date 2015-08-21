@@ -68,6 +68,18 @@ func MustGetAllFiles(root string) (out []string) {
 	return out
 }
 
+// 获得所有文件,不包括目录
+func MustGetAllFileFromPathList(pathlist []string) (outList []string) {
+	for _, root := range pathlist {
+		out, err := GetAllFiles(root)
+		if err != nil {
+			panic(err)
+		}
+		outList = append(outList, out...)
+	}
+	return outList
+}
+
 // 获得所有目录,不包括文件
 func MustGetAllDir(root string) (out []string) {
 	root, err := Realpath(root)

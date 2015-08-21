@@ -17,3 +17,8 @@ func PathTrimExt(path string) string {
 	ext := filepath.Ext(path)
 	return strings.TrimSuffix(path, ext)
 }
+
+type PathAndContentPair struct {
+	Path    string
+	Content []byte
+}

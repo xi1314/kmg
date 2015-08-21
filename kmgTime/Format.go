@@ -25,6 +25,8 @@ var ParseFormatGuessList = []string{
 	Iso3339Hour,
 	Iso3339Minute,
 	Iso3339Second,
+	time.RFC3339,
+	time.RFC3339Nano,
 }
 
 var MysqlStart = "0000-01-01 00:00:00"

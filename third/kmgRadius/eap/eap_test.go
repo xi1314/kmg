@@ -4,8 +4,8 @@ import (
 	//"fmt"
 	"testing"
 
+	. "github.com/bronze1man/kmg/kmgTest"
 	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
-	. "github.com/bronze1man/kmgTest"
 )
 
 func TestEapMsChapV2ChallengeDecode(ot *testing.T) {

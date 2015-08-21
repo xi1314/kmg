@@ -17,6 +17,12 @@ func getFileChangeCachePath(key string) string {
 }
 
 func MustMd5FileChangeCache(key string, pathList []string, f func()) {
+	// 此处需要考虑,
+	//   用户新添加了一个文件
+	//   用户删除了一个文件
+	//   用户编辑了一个文件
+	//   用户在目录里面添加了一个文件
+	//   用在在目录里面删除了一个文件
 	//读取文件修改时间缓存信息
 	toChange := false
 	cacheInfo := map[string]string{}

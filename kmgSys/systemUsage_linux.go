@@ -11,13 +11,13 @@ func UsagePreInstall() {
 	if kmgCmd.Exist("mpstat") && kmgCmd.Exist("netstat") {
 		return
 	}
-	kmgCmd.MustRun("sudo apt-get update")
-	kmgCmd.MustRun("sudo apt-get install -y sysstat")
+	kmgCmd.MustCombinedOutput("sudo apt-get update")
+	kmgCmd.MustCombinedOutput("sudo apt-get install -y sysstat")
 }
 
 //byte
 func Memory() (used float64, total int) {
-	return memory(string(kmgCmd.MustRunAndReturnOutput("free -b")))
+	return memory(string(kmgCmd.MustCombinedOutput("free -b")))
 }
 
 func memory(output string) (used float64, total int) {
@@ -44,7 +44,7 @@ func memory(output string) (used float64, total int) {
 }
 
 func Cpu() (used float64, numOfCore int) {
-	return cpu(string(kmgCmd.MustRunAndReturnOutput("mpstat")))
+	return cpu(string(kmgCmd.MustCombinedOutput("mpstat")))
 }
 
 func cpu(output string) (used float64, numOfCore int) {
@@ -62,7 +62,7 @@ func cpu(output string) (used float64, numOfCore int) {
 //只返回 / 挂载的磁盘空间
 //total 1024byte 的默认单位，没有选项改成byte
 func Disk() (used float64, total int) {
-	return disk(string(kmgCmd.MustRunAndReturnOutput("df")))
+	return disk(string(kmgCmd.MustCombinedOutput("df")))
 }
 
 func disk(output string) (used float64, total int) {
@@ -92,7 +92,7 @@ func disk(output string) (used float64, total int) {
 
 //获取外网网卡
 func FindDeviceNameByIp(ip string) string {
-	o := string(kmgCmd.MustRunAndReturnOutput("ifconfig -s"))
+	o := string(kmgCmd.MustCombinedOutput("ifconfig -s"))
 	lines := strings.Split(o, "\n")
 	for i, l := range lines {
 		if i == 0 {
@@ -100,7 +100,7 @@ func FindDeviceNameByIp(ip string) string {
 		}
 		dn := strings.Split(l, " ")
 		deviceName := dn[0]
-		s := string(kmgCmd.MustRunAndReturnOutput("ifconfig " + deviceName))
+		s := string(kmgCmd.MustCombinedOutput("ifconfig " + deviceName))
 		if strings.Contains(s, ip) {
 			return deviceName
 		}
@@ -110,7 +110,7 @@ func FindDeviceNameByIp(ip string) string {
 
 //byte
 func NetworkRXTX(deviceName string) (rx int, tx int) {
-	return networkRXTX(string(kmgCmd.MustRunAndReturnOutput("ifconfig " + deviceName)))
+	return networkRXTX(string(kmgCmd.MustCombinedOutput("ifconfig " + deviceName)))
 }
 
 func networkRXTX(output string) (rx int, tx int) {
@@ -138,7 +138,7 @@ func networkRXTX(output string) (rx int, tx int) {
 }
 
 func NetworkConnection() (connectionCount int) {
-	return networkConnection(string(kmgCmd.CmdSlice([]string{"bash", "-c", "netstat -na | grep ESTABLISHED | wc -l"}).MustRunAndReturnOutput()))
+	return networkConnection(string(kmgCmd.CmdSlice([]string{"bash", "-c", "netstat -na | grep ESTABLISHED | wc -l"}).MustCombinedOutput()))
 }
 
 func networkConnection(output string) (connectionCount int) {
@@ -150,12 +150,15 @@ func IKEUserCount() int {
 	if !kmgCmd.Exist("swanctl") {
 		return 0
 	}
-	return ikeUserCount(string(kmgCmd.MustRunAndReturnOutput("swanctl -S")))
+	return ikeUserCount(string(kmgCmd.MustCombinedOutputAndNotExitStatusCheck("swanctl -S")))
 }
 
 func ikeUserCount(output string) int {
 	lines := strings.Split(output, "\n")
 	c := ""
+	if !strings.Contains(output, "IKE_SAs") {
+		return 0
+	}
 	for _, line := range lines {
 		if strings.HasPrefix(line, "IKE_SAs") {
 			_line := strings.Split(line, "total")

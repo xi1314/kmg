@@ -230,7 +230,7 @@ func GetExecCmdExitStatus(cmd *exec.Cmd) int {
 }
 
 func Exist(cmd string) bool {
-	err := Run("which " + cmd)
+	_, err := CmdBash("which " + cmd).cmd.CombinedOutput()
 	if err == nil {
 		return true
 	} else {

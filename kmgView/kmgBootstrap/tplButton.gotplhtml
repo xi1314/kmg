@@ -1,0 +1,22 @@
+<? package kmgBootstrap
+func tplButton (button Button) string { ?>
+<<?= string(button.Type) ?>
+<? if button.Type == ButtonTypeA { ?>
+    <? if button.Url == "" { ?>
+    href="javascript:void(0);"
+    <? } else { ?>
+    href="<?= kmgXss.Urlv(button.Url) ?>"
+    <? } ?>
+<? } ?>
+<? if button.Type == ButtonTypeButton { ?>
+    type="submit"
+<? } ?>
+<? if button.AttributeNode != nil { ?>
+    <?= raw(button.AttributeNode.HtmlRender())?>
+<? } ?>
+class="btn <?= string(button.Color) ?> <?= string(button.Size) ?> <?= button.ClassName ?>"
+id="<?= button.Id ?>"
+>
+    <?= raw(button.Content.HtmlRender()) ?>
+</<?= string(button.Type) ?>>
+<? } ?>

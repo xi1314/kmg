@@ -2,6 +2,8 @@ package testPackage
 
 import (
 	"errors"
+	"github.com/bronze1man/kmg/kmgTime"
+	"time"
 )
 
 type Demo struct {
@@ -53,4 +55,12 @@ func (s *Demo) DemoFunc8(req1 DemoRequest, req2 *DemoRequest, req3 int) (info st
 		return "info1", nil
 	}
 	return "info", nil
+}
+
+func (s *Demo) DemoTime(t time.Time) (out time.Time) {
+	return t.In(kmgTime.DefaultTimeZone).Add(time.Hour + time.Millisecond + time.Nanosecond)
+}
+
+func (s *Demo) DemoTime2(t time.Time) (out time.Time) {
+	return t.In(kmgTime.DefaultTimeZone).Add(time.Hour + time.Millisecond)
 }

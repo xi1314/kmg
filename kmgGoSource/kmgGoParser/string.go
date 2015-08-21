@@ -3,11 +3,12 @@ package kmgGoParser
 import (
 	"bytes"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
 	"strconv"
 )
 
 // 可以读这两种 "abc" `abc`
-func mustReadGoString(r *reader) (output []byte) {
+func mustReadGoString(r *kmgGoReader.Reader) (output []byte) {
 	b := r.ReadByte()
 	if b == '"' {
 		buf := &bytes.Buffer{}
@@ -33,7 +34,7 @@ func mustReadGoString(r *reader) (output []byte) {
 }
 
 // 可以读 '"' 这种,返回这个东西实际占的字节数据
-func mustReadGoChar(r *reader) []byte {
+func mustReadGoChar(r *kmgGoReader.Reader) []byte {
 	b := r.ReadByte()
 	if b != '\'' {
 		panic(r.GetFileLineInfo() + " unexcept byte " + strconv.Itoa(int(b)))
@@ -53,7 +54,7 @@ func mustReadGoChar(r *reader) []byte {
 }
 
 // 此处已经读过了 /
-func handleSlashInGoChar(r *reader, buf *bytes.Buffer) {
+func handleSlashInGoChar(r *kmgGoReader.Reader, buf *bytes.Buffer) {
 	if r.IsEof() {
 		panic(r.GetFileLineInfo() + " unexcept EOF")
 	}

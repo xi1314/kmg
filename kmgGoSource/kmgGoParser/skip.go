@@ -1,7 +1,9 @@
 package kmgGoParser
 
+import "github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
+
 // 此处暂时仅跳过该部分
-func (gofile *File) readGoType(r *reader) {
+func (gofile *File) readGoType(r *kmgGoReader.Reader) {
 	r.MustReadMatch([]byte("type"))
 	r.ReadAllSpace()
 	b := r.ReadByte()
@@ -19,7 +21,7 @@ func (gofile *File) readGoType(r *reader) {
 			gofile.NamedTypeList = append(gofile.NamedTypeList, &NamedType{
 				PackagePath: gofile.PackagePath,
 				Name:        string(name),
-				UnderType:   typ,
+				underType:   typ,
 			})
 		}
 		return
@@ -31,14 +33,14 @@ func (gofile *File) readGoType(r *reader) {
 		gofile.NamedTypeList = append(gofile.NamedTypeList, &NamedType{
 			PackagePath: gofile.PackagePath,
 			Name:        string(name),
-			UnderType:   typ,
+			underType:   typ,
 		})
 		return
 	}
 }
 
 // 正确跳过该部分.
-func (gofile *File) readGoVar(r *reader) {
+func (gofile *File) readGoVar(r *kmgGoReader.Reader) {
 	r.MustReadMatch([]byte("var"))
 	r.ReadAllSpace()
 	b := r.ReadByte()
@@ -62,17 +64,17 @@ func (gofile *File) readGoVar(r *reader) {
 			readMatchBigParantheses(r)
 			//TODO 正确跳过该部分
 			/*
-						简单解决下列情况
-						var UnreadRuneErrorTests = []struct {
-				name string
-				f    func(*Reader)
-			}{
-				{"Read", func(r *Reader) { r.Read([]byte{0}) }},
-				{"ReadByte", func(r *Reader) { r.ReadByte() }},
-				{"UnreadRune", func(r *Reader) { r.UnreadRune() }},
-				{"Seek", func(r *Reader) { r.Seek(0, 1) }},
-				{"WriteTo", func(r *Reader) { r.WriteTo(&Buffer{}) }},
-			}
+							简单解决下列情况
+							var UnreadRuneErrorTests = []struct {
+					name string
+					f    func(*Reader)
+				}{
+					{"Read", func(r *Reader) { r.Read([]byte{0}) }},
+					{"ReadByte", func(r *Reader) { r.ReadByte() }},
+					{"UnreadRune", func(r *Reader) { r.UnreadRune() }},
+					{"Seek", func(r *Reader) { r.Seek(0, 1) }},
+					{"WriteTo", func(r *Reader) { r.WriteTo(&Buffer{}) }},
+				}
 
 			*/
 		}
@@ -87,7 +89,7 @@ func (gofile *File) readGoVar(r *reader) {
 }
 
 // 正确跳过该部分.
-func (gofile *File) readGoConst(r *reader) {
+func (gofile *File) readGoConst(r *kmgGoReader.Reader) {
 	r.MustReadMatch([]byte("const"))
 	r.ReadAllSpace()
 	b := r.ReadByte()

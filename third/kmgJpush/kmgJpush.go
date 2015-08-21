@@ -56,7 +56,7 @@ func (c *Client) PushToOne(alias string, content string) (err error) {
 		return err
 	}
 	if ret.Error.Code == 0 {
-		kmgLog.Log("jpush", "PushToOne success", c.name, alias, content)
+		kmgLog.Log("jpush", "PushToOne success", c.name, alias, content, c.IsIosProduct)
 		return nil
 	}
 	if ret.Error.Code == 1011 {

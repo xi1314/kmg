@@ -1,4 +1,4 @@
-package kmgGoParser
+package kmgGoReader
 
 import (
 	"sort"
@@ -10,9 +10,9 @@ type FilePos struct {
 	lines    []int
 }
 
-func newPosFile(filepath string, content []byte) *FilePos {
+func NewPosFile(filepath string, content []byte) *FilePos {
 	lines := make([]int, 0)
-	r := newReader(content, nil)
+	r := NewReader(content, nil)
 	lines = append(lines, 0)
 	for {
 		r.ReadUntilByte('\n')

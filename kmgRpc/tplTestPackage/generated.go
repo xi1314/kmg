@@ -1,6 +1,10 @@
 package tplTestPackage
 
 import (
+	"fmt"
+
+	"github.com/bronze1man/kmg/kmgCrypto"
+
 	"github.com/bronze1man/kmg/kmgLog"
 
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
@@ -12,10 +16,6 @@ import (
 	"encoding/json"
 
 	"errors"
-
-	"fmt"
-
-	"github.com/bronze1man/kmg/kmgCrypto"
 )
 
 type Client_Demo struct {

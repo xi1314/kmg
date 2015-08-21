@@ -1,0 +1,20 @@
+<?
+package kmgRpcJava
+func (config Api)tplApiClient() string {
+?>
+        public <?=config.OutTypeString?> <?=config.Name?>(<?=config.getClientFuncInParameter()?>) throws Exception{
+            <?=config.Name?>RpcRequest reqData = new <?=config.Name?>RpcRequest();
+            <?for _,arg:=range config.InArgsList { ?>
+                reqData.<?=arg.Name?> = <?=arg.Name?>;
+            <? } ?>
+            <? if config.OutTypeFieldName!="" { ?>
+                return this.sendRequest("<?=config.Name?>", reqData, <?=config.Name?>RpcResponse.class).<?=config.OutTypeFieldName?>;
+            <? }else if config.OutTypeString=="void" { ?>
+                this.sendRequest("<?=config.Name?>", reqData, <?=config.OutTypeString?>.class);
+            <? }else{ ?>
+                return this.sendRequest("<?=config.Name?>", reqData, <?=config.OutTypeString?>.class);
+            <? } ?>
+        }
+<?
+}
+?>

@@ -8,6 +8,7 @@ import (
 	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgFile"
 	"go/format"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -34,6 +35,10 @@ func BuildTplOneFile(in []byte, isHtml bool) (out []byte, err error) {
 
 func MustBuildTplInDir(path string) {
 	pathList := kmgFile.MustGetAllFiles(path)
+	MustBuildTplInPathList(pathList)
+}
+
+func MustBuildTplInPathList(pathList []string) {
 	for _, val := range pathList {
 		ext := filepath.Ext(val)
 		if ext == ".gotpl" {
@@ -57,9 +62,33 @@ func MustBuildTplInDir(path string) {
 // 此处路径表示 项目里面的一个路径
 func MustBuildTplInDirWithCache(root string) {
 	root = kmgConfig.DefaultEnv().PathInProject(root)
-	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+root, []string{root}, func() {
-		MustBuildTplInDir(root)
+	cachedFileList := cacheFileFilter(root)
+	kmgCache.MustMd5FileChangeCache("kmgGoTpl_"+root, cachedFileList, func() {
+		MustBuildTplInPathList(cachedFileList)
 	})
+}
+
+// 此处返回所有需要进行缓存的文件
+func cacheFileFilter(root string) []string {
+	output := make([]string, 0, 2048)
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if ext == ".gotpl" || ext == ".gotplhtml" {
+			output = append(output, path)
+			output = append(output, kmgFile.PathTrimExt(path)+".go")
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	return output
 }
 
 type transformer struct {
