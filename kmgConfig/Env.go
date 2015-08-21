@@ -99,6 +99,19 @@ func (context *Env) MustGetPathFromImportPath(importPath string) string {
 	panic(fmt.Errorf("can not found import path [%s] GOPATH:[%s] GOROOT:[%s]",
 		importPath, context.GOPATHToString(), context.GOROOT))
 }
+func (context *Env) GetGOROOT() string {
+	if context.GOROOT != "" {
+		return context.GOROOT
+	}
+	context.GOROOT = os.Getenv("GOROOT")
+	if context.GOROOT != "" {
+		return context.GOROOT
+	}
+	if kmgFile.MustFileExist("/usr/local/go") {
+		context.GOROOT = "/usr/local/go"
+	}
+	return context.GOROOT
+}
 
 func FindFromPath(p string) (context *Env, err error) {
 	p, err = kmgFile.SearchFileInParentDir(p, ".kmg.yml")

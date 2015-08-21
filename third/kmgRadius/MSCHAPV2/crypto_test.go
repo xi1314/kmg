@@ -3,7 +3,7 @@ package MSCHAPV2
 import (
 	"testing"
 
-	. "github.com/bronze1man/kmgTest"
+	. "github.com/bronze1man/kmg/kmgTest"
 )
 
 // rfc2759 Page 15 section 9.2 "9.2.  Hash Example"

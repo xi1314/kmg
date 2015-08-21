@@ -3,30 +3,19 @@ package kmgGoParser
 import (
 	"bytes"
 	"github.com/bronze1man/kmg/kmgFile"
-	"path/filepath"
-	"strings"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
 	"unicode"
 )
 
 // 暂时忽略任何测试包. 此处不做编译检查,认为所有输入的go文件都是正常的.
 func MustParsePackage(gopath string, pkgPath string) *Package {
-	dirPath := filepath.Join(gopath, "src", pkgPath)
-	pkg := &Package{
-		ImportMap: map[string]bool{},
-		PkgPath:   pkgPath,
-	}
-	for _, path := range kmgFile.MustReadDirFileOneLevel(dirPath) {
-		if strings.HasSuffix(path, ".go") {
-			pkg.mustAddFile(filepath.Join(dirPath, path))
-		}
-	}
-	return pkg
+	return NewProgram([]string{gopath}).GetPackage(pkgPath)
 }
 
 //再多解析一个文件,path 是绝对路径
 func (pkg *Package) mustAddFile(path string) {
 	//fmt.Println(path)
-	file := parseFile(pkg.PkgPath, path)
+	file := parseFile(pkg.PkgPath, path, pkg)
 	for imp := range file.ImportMap {
 		pkg.AddImport(imp)
 	}
@@ -50,16 +39,17 @@ func (pkg *Package) LookupNamedType(name string) *NamedType {
 	return nil
 }
 
-func parseFile(pkgPath string, path string) *File {
+func parseFile(pkgPath string, path string, pkg *Package) *File {
 	gofile := &File{
 		PackagePath:    pkgPath,
 		ImportMap:      map[string]bool{},
 		AliasImportMap: map[string]string{},
+		Pkg:            pkg,
 	}
 	content := kmgFile.MustReadFile(path)
-	posFile := newPosFile(path, content)
+	posFile := kmgGoReader.NewPosFile(path, content)
 	content = goSourceRemoveComment(content, posFile)
-	r := newReader(content, posFile)
+	r := kmgGoReader.NewReader(content, posFile)
 
 	r.ReadAllSpace()
 	r.MustReadMatch([]byte("package"))
@@ -105,7 +95,7 @@ func parseFile(pkgPath string, path string) *File {
 	}
 }
 
-func readIdentifier(r *reader) []byte {
+func readIdentifier(r *kmgGoReader.Reader) []byte {
 	buf := &bytes.Buffer{}
 	if r.IsEof() {
 		panic(r.GetFileLineInfo() + " unexcept EOF")
@@ -132,22 +122,22 @@ func readIdentifier(r *reader) []byte {
 }
 
 // 跳过 "{" "}",默认当前已经有第一层了(已经读入一个"{"了)
-func readMatchBigParantheses(r *reader) []byte {
+func readMatchBigParantheses(r *kmgGoReader.Reader) []byte {
 	return readMatchChar(r, '{', '}')
 }
 
 // 跳过 "[" "]",默认当前已经有第一层了(已经读入一个"["了)
-func readMatchMiddleParantheses(r *reader) []byte {
+func readMatchMiddleParantheses(r *kmgGoReader.Reader) []byte {
 	return readMatchChar(r, '[', ']')
 }
 
 // 跳过 "(" ")",默认当前已经有第一层了(已经读入一个"("了)
-func readMatchSmallParantheses(r *reader) []byte {
+func readMatchSmallParantheses(r *kmgGoReader.Reader) []byte {
 	return readMatchChar(r, '(', ')')
 }
 
-func readMatchChar(r *reader, starter byte, ender byte) []byte {
-	startPos := r.pos
+func readMatchChar(r *kmgGoReader.Reader, starter byte, ender byte) []byte {
+	startPos := r.Pos()
 	level := 1
 	for {
 		if r.IsEof() {
@@ -165,7 +155,7 @@ func readMatchChar(r *reader, starter byte, ender byte) []byte {
 		} else if b == ender {
 			level--
 			if level == 0 {
-				return r.buf[startPos:r.pos]
+				return r.BufToCurrent(startPos)
 			}
 		}
 	}

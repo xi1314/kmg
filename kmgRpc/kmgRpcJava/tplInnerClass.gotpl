@@ -1,0 +1,12 @@
+<?
+package kmgRpcJava
+func (config InnerClass)tplInnerClass() string {
+?>
+    <?if config.IsPublic {?>public<?}else{?>private<?}?> static class <?=config.Name?>{
+        <?for _,field:=range config.FieldList{?>
+            public <?=field.TypeStr?> <?=field.Name?>;
+        <? } ?>
+    }
+<?
+}
+?>

@@ -39,6 +39,9 @@ func SshCertCopyLocalToRemoteRoot(remoteAddress string) {
 }
 
 func SshCertCopyLocalToRemote(remote *RemoteServer) {
+	if remote.Address == "" {
+		return
+	}
 	if IsLocalSshCertCopyToRemote(remote) {
 		return
 	}

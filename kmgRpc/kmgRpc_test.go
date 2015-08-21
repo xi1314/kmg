@@ -13,7 +13,7 @@ import (
 func TestMustGenerateCode(t *testing.T) {
 	kmgGoTpl.MustBuildTplInDirWithCache("src/github.com/bronze1man/kmg/kmgRpc") // 模板变化需要运行两次,才能看到结果.
 	kmgFile.MustDelete("testPackage/generated.go")
-	MustGenerateCode(GenerateRequest{
+	MustGenerateCode(&GenerateRequest{
 		ObjectPkgPath:        "github.com/bronze1man/kmg/kmgRpc/testPackage",
 		ObjectName:           "Demo",
 		ObjectIsPointer:      true,
@@ -25,7 +25,7 @@ func TestMustGenerateCode(t *testing.T) {
 
 func TestReflectToTplConfig(t *testing.T) {
 	conf := reflectToTplConfig(
-		GenerateRequest{
+		&GenerateRequest{
 			ObjectPkgPath:        "github.com/bronze1man/kmg/kmgRpc/testPackage",
 			ObjectName:           "Demo",
 			ObjectIsPointer:      true,
@@ -42,9 +42,8 @@ func TestReflectToTplConfig(t *testing.T) {
 }
 
 func TestTplGenerateCode(t *testing.T) {
-	out := tplGenerateCode(tplConfig{
+	out := tplGenerateCode(&tplConfig{
 		OutPackageName: "tplTestPackage",
-		OutKeyByteList: "1,2",
 		ObjectName:     "Demo",
 		ObjectTypeStr:  "*Demo",
 		ApiList: []Api{

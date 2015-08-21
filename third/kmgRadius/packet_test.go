@@ -6,9 +6,9 @@ import (
 	"net"
 	"testing"
 
+	. "github.com/bronze1man/kmg/kmgTest"
 	"github.com/bronze1man/kmg/third/kmgRadius/MSCHAPV2"
 	"github.com/bronze1man/kmg/third/kmgRadius/eap"
-	. "github.com/bronze1man/kmgTest"
 )
 
 func TestAccessRequestPacket(ot *testing.T) {

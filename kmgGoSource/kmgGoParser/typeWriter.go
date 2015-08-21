@@ -13,7 +13,6 @@ func MustWriteGoTypes(thisPackagePath string, typi Type) (s string, addPkgPathLi
 		if thisPackagePath == typ.PackagePath {
 			return typ.Name, nil
 		}
-		fmt.Println("[" + typ.Name + "][" + typ.PackagePath + "]")
 		return path.Base(typ.PackagePath) + "." + typ.Name, []string{typ.PackagePath}
 	case PointerType:
 		s, addPkgPathList = MustWriteGoTypes(thisPackagePath, typ.Elem)

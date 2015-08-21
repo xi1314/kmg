@@ -10,7 +10,6 @@ import (
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net"
 	"net/http"
-	"net/http/httputil"
 )
 
 func AddCommandList() {
@@ -55,22 +54,7 @@ func RunServer(sReq ServerRequest) (closer func() error, err error) {
 	if sReq.AesKey != "" {
 		dialer = AesTunnel.NewAesStartDialer(AesCtrConnWrapper.NewKey([]byte(sReq.AesKey)), dialer)
 	}
-	proxyer := &httputil.ReverseProxy{
-		Director: func(req *http.Request) {
-			req.RequestURI = ""
-			if req.Proto == "" {
-				req.Proto = "HTTP/1.1"
-			}
-			if req.URL.Scheme == "" {
-				req.URL.Scheme = "http"
-			}
-			req.URL.Host = req.Host
-		},
-		Transport: &http.Transport{
-			Dial: dialer,
-		},
-	}
-	handler := proxyer.ServeHTTP
+	handler := NewProxyHttpHandlerFromDialer(dialer)
 	var targetScheme string
 	switch sReq.Type {
 	case ServerTypeHttp:

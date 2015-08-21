@@ -1,6 +1,6 @@
 <?
 package kmgRpc
-func tplGenerateCode(config tplConfig) string {
+func tplGenerateCode(config *tplConfig) string {
 ?>
 package <?=config.OutPackageName?>
 
@@ -12,37 +12,30 @@ import (
 
 type Client_<?=config.ObjectName?> struct {
 	RemoteUrl string // http://kmg.org:1234/
+	Psk *[32]byte
 }
 
-
-var kmgRpc_<?=config.ObjectName?>_encryptKey = &[32]byte{<?=config.OutKeyByteList?>}
-
-const (
-	kmgRpc_<?=config.ObjectName?>_ResponseCodeSuccess byte = 1
-	kmgRpc_<?=config.ObjectName?>_ResponseCodeError   byte = 2
-)
-
 //server
-func ListenAndServe_<?=config.ObjectName?>(addr string, obj *<?=config.ObjectName?>) (closer func()error) {
-	s := &generateServer_<?=config.ObjectName?>{
-		obj: obj,
-	}
+func ListenAndServe_<?=config.ObjectName?>(addr string, obj *<?=config.ObjectName?>,psk *[32]byte) (closer func()error) {
+	s := NewServer_<?=config.ObjectName?>(obj,psk)
 	return kmgHttp.MustGoHttpAsyncListenAndServeWithCloser(addr, s)
 }
 
-func NewServer_<?=config.ObjectName?>(obj <?=config.ObjectTypeStr?>) http.Handler {
+func NewServer_<?=config.ObjectName?>(obj <?=config.ObjectTypeStr?>,psk *[32]byte) http.Handler {
 	return &generateServer_<?=config.ObjectName?>{
 		obj: obj,
+		psk: psk,
 	}
 }
 
-func NewClient_<?=config.ObjectName?>(RemoteUrl string) *Client_<?=config.ObjectName?> {
-	return &Client_<?=config.ObjectName?>{RemoteUrl: RemoteUrl}
+func NewClient_<?=config.ObjectName?>(RemoteUrl string,Psk *[32]byte) *Client_<?=config.ObjectName?> {
+	return &Client_<?=config.ObjectName?>{RemoteUrl: RemoteUrl,Psk: Psk}
 }
 
 
 type generateServer_<?=config.ObjectName?> struct {
 	obj <?=config.ObjectTypeStr?>
+	psk *[32]byte
 }
 
 // http-json-api v1
@@ -57,22 +50,26 @@ func (s *generateServer_<?=config.ObjectName?>) ServeHTTP(w http.ResponseWriter,
 		return
 	}
 
-	//解密
-	b1, err = kmgCrypto.CompressAndEncryptBytesDecode(kmgRpc_<?=config.ObjectName?>_encryptKey, b1)
-	if err != nil {
-		http.Error(w, "error 2", 400)
-		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
-		return
+	if s.psk!=nil{
+		//解密
+		b1, err = kmgCrypto.CompressAndEncryptBytesDecodeV2(s.psk, b1)
+		if err != nil {
+			http.Error(w, "error 2", 400)
+			kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
+			return
+		}
 	}
 	outBuf, err := s.handleApiV1(b1)
 	if err != nil {
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
-		outBuf = append([]byte{kmgRpc_<?=config.ObjectName?>_ResponseCodeError}, err.Error()...)
+		outBuf = append([]byte{1}, err.Error()...) // error
 	} else {
-		outBuf = append([]byte{kmgRpc_<?=config.ObjectName?>_ResponseCodeSuccess}, outBuf...)
+		outBuf = append([]byte{2}, outBuf...) // success
 	}
-	//加密
-	outBuf = kmgCrypto.CompressAndEncryptBytesEncode(kmgRpc_<?=config.ObjectName?>_encryptKey, outBuf)
+	if s.psk!=nil{
+		//加密
+		outBuf = kmgCrypto.CompressAndEncryptBytesEncodeV2(s.psk, outBuf)
+	}
 	w.WriteHeader(200)
 	w.Header().Set("Content-type", "image/jpeg")
 	w.Write(outBuf)
@@ -89,8 +86,9 @@ func (c *Client_<?=config.ObjectName?>) sendRequest(apiName string, inData inter
 	inByte := []byte{byte(len(apiName))}
 	inByte = append(inByte, []byte(apiName)...)
 	inByte = append(inByte, inDataByte...)
-	inByte = kmgCrypto.CompressAndEncryptBytesEncode(kmgRpc_<?=config.ObjectName?>_encryptKey, inByte)
-
+	if c.Psk!=nil{
+		inByte = kmgCrypto.CompressAndEncryptBytesEncodeV2(c.Psk, inByte)
+	}
 	resp, err := http.Post(c.RemoteUrl, "image/jpeg", bytes.NewBuffer(inByte))
 	if err != nil {
 		return
@@ -99,17 +97,19 @@ func (c *Client_<?=config.ObjectName?>) sendRequest(apiName string, inData inter
 	if err != nil {
 		return
 	}
-	outByte, err = kmgCrypto.CompressAndEncryptBytesDecode(kmgRpc_<?=config.ObjectName?>_encryptKey, outByte)
-	if err != nil {
-		return
+	if c.Psk!=nil{
+		outByte, err = kmgCrypto.CompressAndEncryptBytesDecodeV2(c.Psk, outByte)
+		if err != nil {
+			return
+		}
 	}
 	if len(outByte) == 0 {
 		return errors.New("len(outByte)==0")
 	}
 	switch outByte[0] {
-	case kmgRpc_<?=config.ObjectName?>_ResponseCodeError:
+	case 1: //error
 		return errors.New(string(outByte[1:]))
-	case kmgRpc_<?=config.ObjectName?>_ResponseCodeSuccess:
+	case 2: //success
 		return json.Unmarshal(outByte[1:], outData)
 	default:
 		return fmt.Errorf("httpjsonApi protocol error 1 %d", outByte[0])
@@ -201,5 +201,17 @@ func (c *Client_<?=config.ObjectName?> ) <?=api.Name?>( <?for _,arg:=range api.I
     <? } ?>
 }
 <? } ?>
+
+var gClient_<?=config.ObjectName?> *Client_<?=config.ObjectName?>
+
+// 全局函数,请先设置客户端的地址,再获取全局客户端,此处不能并发调用
+func SetClient_<?=config.ObjectName?>Config(RemoteAddr string,Psk *[32]byte) {
+	gClient_<?=config.ObjectName?> = NewClient_<?=config.ObjectName?>(RemoteAddr,Psk)
+}
+
+func GetClient_<?=config.ObjectName?>() *Client_<?=config.ObjectName?> {
+	return gClient_<?=config.ObjectName?>
+}
+
 <? } ?>
 

@@ -9,8 +9,8 @@ import (
 	"github.com/bronze1man/kmg/kmgStrings"
 )
 
-func reflectToTplConfig(req GenerateRequest) tplConfig {
-	config := tplConfig{
+func reflectToTplConfig(req *GenerateRequest) *tplConfig {
+	config := &tplConfig{
 		ObjectName:     req.ObjectName,
 		OutPackageName: path.Base(req.OutPackageImportPath),
 		ImportPathMap: map[string]bool{
@@ -24,8 +24,11 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 			"bytes":    true,
 		},
 	}
-	OutKeyByteList := fmt.Sprintf("%#v", req.Key[:])
-	config.OutKeyByteList = OutKeyByteList[7 : len(OutKeyByteList)-1] //去掉 "[]byte{" 和 "}"
+	if req.ApiNameFilterCb == nil {
+		req.ApiNameFilterCb = func(name string) bool {
+			return true
+		}
+	}
 
 	pkg := kmgGoParser.MustParsePackage(kmgConfig.DefaultEnv().GOPATHToString(), req.ObjectPkgPath)
 	namedTyp := pkg.LookupNamedType(req.ObjectName)
@@ -46,6 +49,9 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 		if !methodObj.IsExport() {
 			continue
 		}
+		if !req.ApiNameFilterCb(methodObj.Name) {
+			continue
+		}
 		api := Api{
 			Name: methodObj.Name,
 		}
@@ -64,7 +70,7 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 				if ok && string(builtintyp) == "error" { //TODO 不要特例
 					name = "Err"
 				} else {
-					name = fmt.Sprintf("out_%d", i)
+					name = fmt.Sprintf("Out_%d", i)
 				}
 			}
 			pair := ArgumentNameTypePair{
@@ -77,53 +83,4 @@ func reflectToTplConfig(req GenerateRequest) tplConfig {
 		config.ApiList = append(config.ApiList, api)
 	}
 	return config
-	/*
-		ObjTyp := kmgGoSource.MustGetGoTypeFromPkgPathAndTypeName(req.ObjectPkgPath, req.ObjectName)
-		if req.ObjectIsPointer {
-			ObjTyp = types.NewPointer(ObjTyp)
-		}
-		var importPathList []string
-		config.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, ObjTyp)
-		config.mergeImportPath(importPathList)
-
-		//获取 object的 上面所有的方法
-		methodList := kmgGoSource.MustGetMethodListFromGoTypes(ObjTyp)
-		for _, methodObj := range methodList {
-			if !methodObj.Obj().Exported() {
-				continue
-			}
-			api := Api{
-				Name: methodObj.Obj().Name(),
-			}
-			methodTyp := methodObj.Type().(*types.Signature)
-			for i := 0; i < methodTyp.Params().Len(); i++ {
-				pairObj := methodTyp.Params().At(i)
-				pair := ArgumentNameTypePair{
-					Name: kmgStrings.FirstLetterToUpper(pairObj.Name()),
-				}
-				pair.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, pairObj.Type())
-				config.mergeImportPath(importPathList)
-				api.InArgsList = append(api.InArgsList, pair)
-			}
-			for i := 0; i < methodTyp.Results().Len(); i++ {
-				pairObj := methodTyp.Results().At(i)
-				name := kmgStrings.FirstLetterToUpper(pairObj.Name())
-				if name == "" {
-					if pairObj.Type().String() == "error" { //TODO 不要特例
-						name = "Err"
-					} else {
-						name = fmt.Sprintf("out_%d", i)
-					}
-				}
-				pair := ArgumentNameTypePair{
-					Name: name,
-				}
-				pair.ObjectTypeStr, importPathList = kmgGoSource.MustWriteGoTypes(req.OutPackageImportPath, pairObj.Type())
-				config.mergeImportPath(importPathList)
-				api.OutArgsList = append(api.OutArgsList, pair)
-			}
-			config.ApiList = append(config.ApiList, api)
-		}
-		return config
-	*/
 }

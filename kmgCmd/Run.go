@@ -43,6 +43,15 @@ func MustRunAndReturnOutput(cmd string) []byte {
 	return CmdString(cmd).MustRunAndReturnOutput()
 }
 
+//相比MustRun 返回输出结果，但是不会输出到 stdout
+func MustCombinedOutput(cmd string) []byte {
+	return CmdString(cmd).MustCombinedOutput()
+}
+
+func MustCombinedOutputAndNotExitStatusCheck(cmd string) []byte {
+	return CmdString(cmd).MustCombinedOutputAndNotExitStatusCheck()
+}
+
 //相比MustRun 输入的命令会被放到bash中执行,cmd的语法和bash一致.
 func MustRunInBash(cmd string) {
 	CmdBash(cmd).MustRun()

@@ -23,6 +23,10 @@ func IsDotFile(path string) bool {
 	return false
 }
 
+func HasExt(path string, ext string) bool {
+	return strings.HasSuffix(path, ext)
+}
+
 func GetFileBaseWithoutExt(p string) string {
 	return filepath.Base(p[:len(p)-len(filepath.Ext(p))])
 }

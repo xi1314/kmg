@@ -34,7 +34,6 @@ func Equal(get interface{}, expect interface{}, objList ...interface{}) {
 type assertPanicType struct{}
 
 //测试此处代码已经panic过了,并且返回panic出来的对象,如果没有panic,此处会panic
-//please use github.com/bronze1man/kmgTest
 func AssertPanic(f func()) (out interface{}) {
 	defer func() {
 		out = recover()

@@ -3,8 +3,11 @@ package kmgRpc
 import (
 	"strings"
 
+	"github.com/bronze1man/kmg/kmgCache"
+	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
+	"path/filepath"
 )
 
 type GenerateRequest struct {
@@ -12,17 +15,16 @@ type GenerateRequest struct {
 	ObjectPkgPath        string //TODO 对此处进行封装,解决描述对象问题.
 	ObjectName           string
 	ObjectIsPointer      bool
-	OutFilePath          string   //生成的文件路径
-	OutPackageImportPath string   //生成的package的importPath
-	Key                  [32]byte //密钥
+	OutFilePath          string //生成的文件路径
+	OutPackageImportPath string //生成的package的importPath
+	ApiNameFilterCb      func(name string) bool
 }
 
 //生成代码
 // 会把Object上面所有的公开函数都拿去生成一遍
-func MustGenerateCode(req GenerateRequest) {
+func MustGenerateCode(req *GenerateRequest) {
 	config := reflectToTplConfig(req)
 	outBs := tplGenerateCode(config)
-	//outBs=strings.Replace(outBs,"\n    \n","\n",-1)
 	outB := []byte(outBs)
 	outB1, err := kmgFormat.Source(outB)
 	if err == nil {
@@ -32,9 +34,16 @@ func MustGenerateCode(req GenerateRequest) {
 	return
 }
 
+// 使用缓存 生成代码
+func MustGenerateCodeWithCache(req *GenerateRequest) {
+	pkgFilePath := kmgConfig.DefaultEnv().PathInProject(filepath.Join("src", req.ObjectPkgPath))
+	kmgCache.MustMd5FileChangeCache("kmgRpc_"+req.OutFilePath, []string{req.OutFilePath, pkgFilePath}, func() {
+		MustGenerateCode(req)
+	})
+}
+
 type tplConfig struct {
 	OutPackageName string          //生成的package的名字 testPackage
-	OutKeyByteList string          //生成的key的base64的值
 	ObjectName     string          //对象名字	如 Demo
 	ObjectTypeStr  string          //对象的类型表示	如 *Demo
 	ImportPathMap  map[string]bool //ImportPath列表

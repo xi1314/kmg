@@ -1,0 +1,8 @@
+<? package kmgBootstrap
+func tplPopover (popover Popover) string { ?>
+data-toggle="<?= string(popover.Type) ?>"
+data-placement="<?= string(popover.Placement) ?>"
+title="<?= raw(popover.Title) ?>"
+data-content="<?= raw(popover.Content) ?>"
+data-html="true"
+<? } ?>

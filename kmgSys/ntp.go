@@ -7,8 +7,7 @@ import (
 
 //目前只支持 Ubuntu
 func SyncTime() {
-	currentPlatform := kmgPlatform.GetCompiledPlatform()
-	if currentPlatform.Os != kmgPlatform.LinuxAmd64.Os {
+	if kmgPlatform.GetCompiledPlatform().Os != kmgPlatform.LinuxAmd64.Os {
 		return
 	}
 	if !kmgCmd.Exist("ntpdate") {

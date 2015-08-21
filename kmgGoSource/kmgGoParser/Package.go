@@ -7,6 +7,7 @@ import (
 
 // 表示一个package,注意: 一个目录下最多会有2个package.暂时忽略xxx_test 这种package
 type Package struct {
+	Program       *Program
 	PkgPath       string
 	ImportMap     map[string]bool //这个package第一层import
 	FuncList      []*FuncOrMethodDeclaration
@@ -56,6 +57,7 @@ type File struct {
 	FuncList       []*FuncOrMethodDeclaration
 	MethodList     []*FuncOrMethodDeclaration
 	NamedTypeList  []*NamedType
+	Pkg            *Package
 }
 
 func (pkg *File) AddImport(pkgPath string, aliasPath string) {

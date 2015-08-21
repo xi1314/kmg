@@ -1,6 +1,7 @@
 package kmgIo
 
 import (
+	"github.com/bronze1man/kmg/errors"
 	"io"
 )
 
@@ -23,12 +24,12 @@ func (c multiCloser) Close() (err error) {
 }
 
 func MultiErrorHandle(fs ...func() error) error {
-	var err error
+	var errS string
 	for _, f := range fs {
 		err1 := f()
 		if err1 != nil {
-			err = err1
+			errS += "[" + err1.Error() + "] "
 		}
 	}
-	return err
+	return errors.New(errS)
 }

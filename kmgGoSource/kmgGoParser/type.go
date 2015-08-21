@@ -1,6 +1,9 @@
 package kmgGoParser
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -38,13 +41,22 @@ func (t FuncType) GetKind() Kind {
 }
 
 type NamedType struct {
-	PackagePath string // TODO 在全部ast读取出来之后,还要进行一次变换,把实际的PackagePath搞出来
+	PackagePath string
 	Name        string
-	UnderType   Type //TODO 第二次扫描AST获取此信息
+	underType   Type //TODO 第二次扫描AST获取此信息
+	Pkg         *Package
 }
 
 func (t *NamedType) GetKind() Kind {
 	return Named
+}
+
+func (t *NamedType) GetUnderType() Type {
+	if t.underType == nil {
+		definer := t.Pkg.Program.GetNamedType(t.PackagePath, t.Name)
+		t.underType = definer.underType
+	}
+	return t.underType
 }
 
 //TODO finish it
@@ -245,3 +257,240 @@ const (
 	SendDir                                 // chan<-
 	BothDir = RecvDir | SendDir             // chan
 )
+
+/*
+第一个字符可能为
+	letter -> identifier(单独的类型名,带package的类型的package部分)
+	"struct" struct类型开头
+	"func" func类型开头
+	"interface" interface类型开头
+	"*" 指针开头
+	"[" (数组,slice) 开头
+	"map[" map开头
+	"chan " chan开头
+	"chan<- " chan<- 开头
+	"<-chan" chan<- 开头
+*/
+func (gofile *File) readType(r *kmgGoReader.Reader) Type {
+	id := readIdentifier(r)
+	if len(id) == 0 {
+		if r.IsMatchAfter([]byte("<-chan")) {
+			r.MustReadMatch([]byte("<-chan"))
+			r.ReadAllSpace()
+			return ChanType{
+				Dir:  RecvDir,
+				Elem: gofile.readType(r),
+			}
+		}
+		b := r.ReadByte()
+		if b == '*' {
+			return PointerType{
+				Elem: gofile.readType(r),
+			}
+		} else if b == '[' {
+			content := readMatchMiddleParantheses(r)
+			if len(content) == 1 {
+				return SliceType{
+					Elem: gofile.readType(r),
+				}
+			} else {
+				// 仅跳过
+				return ArrayType{
+					Elem: gofile.readType(r),
+				}
+			}
+		} else if b == '(' {
+			typ := gofile.readType(r)
+			r.MustReadMatch([]byte(")"))
+			return typ
+		} else {
+			panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+		}
+	}
+	if bytes.Equal(id, []byte("struct")) {
+		return gofile.readStruct(r)
+	} else if bytes.Equal(id, []byte("interface")) {
+		// 仅跳过
+		r.ReadAllSpace()
+		b := r.ReadByte()
+		if b != '{' {
+			panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+		}
+		readMatchBigParantheses(r)
+		return InterfaceType{}
+	} else if bytes.Equal(id, []byte("map")) {
+		b := r.ReadByte()
+		m := MapType{}
+		if b != '[' {
+			panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+		}
+		m.Key = gofile.readType(r)
+		r.MustReadMatch([]byte("]"))
+		m.Value = gofile.readType(r)
+		return m
+	} else if bytes.Equal(id, []byte("func")) {
+		// 仅跳过
+		r.ReadAllSpace()
+		b := r.ReadByte()
+		if b != '(' {
+			panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+		}
+		readMatchSmallParantheses(r) //跳过输入参数
+		r.ReadAllSpaceWithoutLineBreak()
+		run := r.ReadRune() //跳过输出参数
+		if run == '(' {
+			readMatchSmallParantheses(r)
+		} else if run == '\n' { //换行符可以标识这个函数定义结束了.
+			return FuncType{}
+		} else if unicode.IsLetter(run) || run == '[' || run == '*' || run == '<' {
+			r.UnreadRune() //输出参数只有一个类型
+			gofile.readType(r)
+		} else {
+			r.UnreadRune() //读到了其他东西,退回.
+		}
+		return FuncType{}
+	} else if bytes.Equal(id, []byte("chan")) {
+		if r.IsMatchAfter([]byte("<-")) {
+			r.MustReadMatch([]byte("<-"))
+			r.ReadAllSpace()
+			return ChanType{
+				Dir:  SendDir,
+				Elem: gofile.readType(r),
+			}
+		} else {
+			r.ReadAllSpace()
+			return ChanType{
+				Dir:  BothDir,
+				Elem: gofile.readType(r),
+			}
+		}
+	} else {
+		b := r.ReadByte()
+		if b == '.' {
+			pkgPath := string(id)
+			pkgPath, err := gofile.LookupFullPackagePath(pkgPath)
+			if err != nil {
+				fmt.Println(r.GetFileLineInfo(), err.Error()) //TODO 以目前的复杂度暂时无解.需要把所有相关的package都看一遍才能正确.
+			}
+			id2 := readIdentifier(r)
+			return &NamedType{
+				PackagePath: pkgPath,
+				Name:        string(id2),
+				Pkg:         gofile.Pkg,
+			}
+		} else {
+			r.UnreadByte()
+			name := string(id)
+			if builtinTypeMap[BuiltinType(name)] != Invalid {
+				return BuiltinType(name)
+			} else {
+				return &NamedType{
+					PackagePath: gofile.PackagePath,
+					Name:        string(id),
+					Pkg:         gofile.Pkg,
+				}
+			}
+		}
+	}
+	/*
+		}else if r.IsMatchAfter([]byte("struct")) { //TODO 解决struct后面必须有一个空格的问题.
+			r.ReadAllSpace()
+			b := r.ReadByte()
+			if b!='{' {
+				panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+			}
+			readMatchBigParantheses(r)
+			return StructType{}
+		}else if r.IsMatchAfter([]byte("interface")) {
+			r.ReadAllSpace()
+			b := r.ReadByte()
+			if b!='{' {
+				panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+			}
+			readMatchBigParantheses(r)
+			return InterfaceType{}
+		}else if r.IsMatchAfter([]byte("map[")){
+
+		}else if r.IsMatchAfter([]byte("func")){
+			//TODO finish it.
+		}
+	*/
+}
+
+func (gofile *File) readStruct(r *kmgGoReader.Reader) StructType {
+	// 仅跳过
+	r.ReadAllSpace()
+	b := r.ReadByte()
+	if b != '{' {
+		panic(fmt.Errorf("%s unexcept %s", r.GetFileLineInfo(), string(rune(b))))
+	}
+	lastReadBuf := []bytesAndType{}
+	var lastTag []byte
+	out := StructType{}
+	for {
+		r.ReadAllSpaceWithoutLineBreak()
+		b := r.ReadByte()
+		if b == '}' {
+			return out
+		} else if b == '"' || b == '\'' {
+			r.UnreadByte()
+			lastTag = mustReadGoString(r)
+		} else if b == ',' {
+			continue
+		} else if b == '\n' {
+			if len(lastReadBuf) == 0 {
+				continue
+			} else if len(lastReadBuf) == 1 {
+				typ := lastReadBuf[0].typ
+				name := ""
+				ntyp, ok := typ.(*NamedType)
+				if ok {
+					name = ntyp.Name
+				} else {
+					ptyp, ok := typ.(PointerType)
+					if ok {
+						ntyp, ok = ptyp.Elem.(*NamedType)
+						if ok {
+							name = ntyp.Name
+						} else {
+							panic(fmt.Errorf("%s unexpect type %T", r.GetFileLineInfo(), typ))
+						}
+					} else {
+						panic(fmt.Errorf("%s unexpect type %T", r.GetFileLineInfo(), typ))
+					}
+				}
+				out.Field = append(out.Field, StructField{
+					Name:             name,
+					Elem:             typ,
+					IsAnonymousField: true,
+					Tag:              string(lastTag),
+				})
+				lastReadBuf = []bytesAndType{}
+			} else if len(lastReadBuf) >= 2 {
+				typ := lastReadBuf[len(lastReadBuf)-1].typ
+				for i := range lastReadBuf[:len(lastReadBuf)-1] {
+					out.Field = append(out.Field, StructField{
+						Name:             string(lastReadBuf[i].originByte),
+						Elem:             typ,
+						IsAnonymousField: false,
+						Tag:              string(lastTag),
+					})
+				}
+				lastReadBuf = []bytesAndType{}
+			}
+		} else {
+			r.UnreadByte()
+			startPos := r.Pos()
+			typ := gofile.readType(r)
+			lastReadBuf = append(lastReadBuf, bytesAndType{
+				originByte: r.BufToCurrent(startPos),
+				typ:        typ,
+			})
+		}
+	}
+}
+
+type bytesAndType struct {
+	originByte []byte
+	typ        Type
+}
