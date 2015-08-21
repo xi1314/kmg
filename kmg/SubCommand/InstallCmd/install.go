@@ -50,9 +50,9 @@ func installGolang() {
 
 func installGolang15() {
 	installGolangWithUrlMap(map[string]string{
-		"windows_amd64": "https://storage.googleapis.com/golang/go1.5rc1.windows-amd64.zip",
-		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5rc1.linux-amd64.tar.gz",
-		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5rc1.darwin-amd64.tar.gz",
+		"windows_amd64": "https://storage.googleapis.com/golang/go1.5.windows-amd64.zip",
+		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz",
+		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5.darwin-amd64.tar.gz",
 	})
 }
 
