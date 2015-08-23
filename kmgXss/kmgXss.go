@@ -22,7 +22,8 @@ func Urlv(obj interface{}) string {
 	return string(out)
 }
 
-func H(s string) string {
+func H(obj interface{}) string {
+	s := fmt.Sprint(obj)
 	return template.HTMLEscapeString(s)
 }
 
