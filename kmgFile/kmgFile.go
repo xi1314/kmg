@@ -12,6 +12,8 @@ import (
 	"github.com/bronze1man/kmg/kmgRand"
 )
 
+// .bashrc true
+// a.txt false
 func IsDotFile(path string) bool {
 	if path == "./" {
 		return false

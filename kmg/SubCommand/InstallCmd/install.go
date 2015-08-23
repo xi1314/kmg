@@ -4,6 +4,7 @@ import (
 	"github.com/bronze1man/kmg/kmgConsole"
 
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgSys"
 	//"strings"
 	"fmt"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
 	"path"
+	"time"
+	"github.com/bronze1man/kmg/kmgTime"
 )
 
 func AddCommandList() {
@@ -50,9 +53,9 @@ func installGolang() {
 
 func installGolang15() {
 	installGolangWithUrlMap(map[string]string{
-		"windows_amd64": "https://storage.googleapis.com/golang/go1.5rc1.windows-amd64.zip",
-		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5rc1.linux-amd64.tar.gz",
-		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5rc1.darwin-amd64.tar.gz",
+		"windows_amd64": "https://storage.googleapis.com/golang/go1.5.windows-amd64.zip",
+		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz",
+		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5.darwin-amd64.tar.gz",
 	})
 }
 
@@ -71,8 +74,9 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 		kmgConsole.ExitOnErr(err)
 		return
 	}
-	kmgFile.MustChangeToTmpPath()
-	if !kmgCmd.MustIsRoot() {
+	tmpPath:=kmgFile.MustChangeToTmpPath()
+	defer kmgFile.MustDelete(tmpPath)
+	if !kmgSys.MustIsRoot() {
 		fmt.Println("you need to be root to install golang")
 		return
 	}
@@ -86,6 +90,9 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 
 	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)
+	if kmgFile.MustFileExist("/usr/local/go"){
+		kmgCmd.ProxyRun("mv /usr/local/go /usr/local/go.bak."+time.Now().Format(kmgTime.FormatFileNameV2) )
+	}
 	kmgCmd.ProxyRun("cp -rf go /usr/local")
 	kmgFile.MustDeleteFile("/bin/go")
 	kmgCmd.ProxyRun("ln -s /usr/local/go/bin/go /bin/go")
