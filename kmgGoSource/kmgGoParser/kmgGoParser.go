@@ -52,14 +52,14 @@ func parseFile(pkgPath string, path string, pkg *Package) *File {
 	r := kmgGoReader.NewReader(content, posFile)
 
 	r.ReadAllSpace()
-	r.MustReadMatch([]byte("package"))
+	r.MustReadMatch(tokenPackage)
 	r.ReadUntilByte('\n')
 	for {
 		if r.IsEof() {
 			return gofile //没有 import 正确情况
 		}
 		r.ReadAllSpace()
-		if r.IsMatchAfter([]byte("import")) {
+		if r.IsMatchAfter(tokenImport) {
 			gofile.readImport(r)
 			continue
 		}
@@ -69,25 +69,25 @@ func parseFile(pkgPath string, path string, pkg *Package) *File {
 		switch {
 		case r.IsEof():
 			return gofile
-		case r.IsMatchAfter([]byte("func")):
+		case r.IsMatchAfter(tokenFunc):
 			funcDecl := gofile.readGoFunc(r)
 			if funcDecl.GetKind() == Func {
 				gofile.FuncList = append(gofile.FuncList, funcDecl)
 			} else {
 				gofile.MethodList = append(gofile.MethodList, funcDecl)
 			}
-		case r.IsMatchAfter([]byte("type")):
+		case r.IsMatchAfter(tokenType):
 			//r.ReadUntilByte('\n')
 			gofile.readGoType(r)
-		case r.IsMatchAfter([]byte("var")):
+		case r.IsMatchAfter(tokenVar):
 			gofile.readGoVar(r)
-		case r.IsMatchAfter([]byte("const")):
+		case r.IsMatchAfter(tokenConst):
 			gofile.readGoConst(r)
 		// 有一些没有分析的代码,里面可能包含import,此处先简单绕过.
-		case r.IsMatchAfter([]byte(`"`)) || r.IsMatchAfter([]byte("`")):
+		case r.IsMatchAfter(tokenDoubleQuate) || r.IsMatchAfter(tokenGraveAccent):
 			mustReadGoString(r)
 			//fmt.Println(string(ret))
-		case r.IsMatchAfter([]byte(`'`)):
+		case r.IsMatchAfter(tokenSingleQuate):
 			mustReadGoChar(r)
 		default:
 			r.ReadByte()

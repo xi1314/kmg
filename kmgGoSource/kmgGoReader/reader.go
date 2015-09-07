@@ -30,6 +30,9 @@ func (r *Reader) IsEof() bool {
 	return r.pos >= len(r.buf)
 }
 func (r *Reader) ReadByte() byte {
+	//if r.IsEof() {
+	//	panic(r.GetFileLineInfo() + " unexcept EOF")
+	//}
 	out := r.buf[r.pos]
 	r.pos++
 	return out
@@ -40,7 +43,7 @@ func (r *Reader) NextByte() byte {
 }
 
 func (r *Reader) IsMatchAfter(s []byte) bool {
-	return bytes.HasPrefix(r.buf[r.pos:], s)
+	return len(r.buf)-r.pos >= len(s) && r.buf[r.pos] == s[0] && bytes.Equal(r.buf[r.pos:r.pos+len(s)], s)
 }
 
 // 读取到某个字符,或者读取到结束(该字符会已经被读过)

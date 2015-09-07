@@ -30,6 +30,7 @@ func installCmd() {
 	cg := kmgConsole.NewCommandGroup()
 	cg.AddCommandWithName("golang", installGolang)
 	cg.AddCommandWithName("golang1.5", installGolang15)
+	cg.AddCommandWithName("mysql", installMysql)
 	cg.Main()
 }
 
@@ -53,9 +54,9 @@ func installGolang() {
 
 func installGolang15() {
 	installGolangWithUrlMap(map[string]string{
-		"windows_amd64": "https://storage.googleapis.com/golang/go1.5.windows-amd64.zip",
-		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz",
-		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5.darwin-amd64.tar.gz",
+		"windows_amd64": "http://kmgtools.qiniudn.com/go1.5.windows-amd64.zip",
+		"linux_amd64":   "http://kmgtools.qiniudn.com/go1.5.linux-amd64.tar.gz",
+		"darwin_amd64":  "http://kmgtools.qiniudn.com/go1.5.darwin-amd64.tar.gz",
 	})
 }
 
@@ -103,4 +104,9 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 	kmgFile.MustEnsureBinPath("/bin/go")
 	kmgFile.MustEnsureBinPath("/bin/godoc")
 	kmgFile.MustEnsureBinPath("/bin/gofmt")
+}
+
+func installMysql() {
+	kmgCmd.ProxyRun("apt-get update")
+	kmgCmd.CmdString("apt-get -y install mysql-server").MustSetEnv("DEBIAN_FRONTEND", "noninteractive").ProxyRun()
 }

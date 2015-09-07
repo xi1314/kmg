@@ -18,3 +18,4 @@ func MustIsRootOnCmd() {
 		os.Exit(1)
 	}
 }
+

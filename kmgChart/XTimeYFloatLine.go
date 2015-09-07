@@ -26,7 +26,7 @@ func CreateLineFromTimeFloatPair(inputList []TimeFloatPair) *Chart {
 			},
 		},
 	}
-	line.Option.YAxis.Min, line.Option.YAxis.Max = getYMinMax(inputList)
+	line.Option.YAxis.Min, line.Option.YAxis.Max = getTimeFloatPairYMinMax(inputList)
 	for _, v := range inputList {
 		line.Option.Series[0].Data = append(line.Option.Series[0].Data, []interface{}{v.X, v.Y})
 	}
@@ -178,7 +178,30 @@ func AccTimePerSecondFloatPair(input []TimeFloatPair, Density time.Duration) []T
 	return output
 }
 
-func getYMinMax(inputList []TimeFloatPair) (min float64, max float64) {
+func getTimeFloatPairYMinMax(inputList []TimeFloatPair) (min float64, max float64) {
+	if len(inputList) == 0 {
+		return 0, 1
+	}
+	min = inputList[0].Y
+	max = inputList[0].Y
+	for i := range inputList {
+		if min > inputList[i].Y {
+			min = inputList[i].Y
+		}
+		if max < inputList[i].Y {
+			max = inputList[i].Y
+		}
+	}
+	if min > 0 && max > 0 {
+		min = 0
+	}
+	if max == min {
+		max = min + 1 //如果只有一个Y值,就啥也看不到了.
+	}
+	return min, max
+}
+
+func getFloatVector2YMinMax(inputList []FloatVector2) (min float64, max float64) {
 	if len(inputList) == 0 {
 		return 0, 1
 	}

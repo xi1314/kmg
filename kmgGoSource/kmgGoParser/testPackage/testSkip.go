@@ -24,6 +24,8 @@ var test64err = func() (err interface{}) {
 	return nil
 }()
 
+var test1 = "string"
+
 type serverType func()
 
 // dial constructs a new test server and returns a *ClientConn.

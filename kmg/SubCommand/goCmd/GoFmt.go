@@ -35,7 +35,7 @@ func isGoFile(f os.FileInfo) bool {
 	return !f.IsDir() && !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".go")
 }
 
-func GoFmtDir(path string) (outErr error) {
+func GoFmtDir(path string) error {
 	dir := &goFmtDir{
 		cacheMap:    map[string]bool{},
 		newCacheMap: map[string]bool{},
@@ -49,7 +49,7 @@ func GoFmtDir(path string) (outErr error) {
 	filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
 		if err != nil {
 			dir.addErr(err)
-			return err
+			return errors.New(path + " " + err.Error())
 		}
 		if !isGoFile(f) {
 			return nil
@@ -57,7 +57,7 @@ func GoFmtDir(path string) (outErr error) {
 		dir.tasker.AddFunc(func() {
 			err = dir.processFile(path)
 			if err != nil {
-				dir.addErr(err)
+				dir.addErr(errors.New(path + " " + err.Error()))
 			}
 		})
 		return nil
