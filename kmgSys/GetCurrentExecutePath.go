@@ -1,7 +1,10 @@
 package kmgSys
 
-import "github.com/kardianos/osext"
+import (
+	"path/filepath"
+)
 
 func GetCurrentExecutePath() (string, error) {
-	return osext.Executable()
+	p, err := getCurrentExecutePath()
+	return filepath.Clean(p), err
 }
