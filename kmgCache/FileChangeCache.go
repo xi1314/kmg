@@ -16,6 +16,12 @@ func getFileChangeCachePath(key string) string {
 	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", kmgCrypto.Md5HexFromString(key))
 }
 
+// key 表示一组缓存，pathList 即这组缓存相关的文件
+// 比较容易用错的情况：
+// key := 1
+// pathList := []string{"/a.txt","/b.txt"}
+// a.txt 或者 b.txt 中任意有文件发生变化，这个 key 对应的缓存都会被更新
+// 如果要对单个文件进行缓存控制，那么应该一个文件一个 key
 func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 	// 此处需要考虑,
 	//   用户新添加了一个文件

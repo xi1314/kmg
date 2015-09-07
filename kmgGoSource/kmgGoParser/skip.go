@@ -1,6 +1,9 @@
 package kmgGoParser
 
-import "github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
+import (
+	"github.com/bronze1man/kmg/kmgGoSource/kmgGoReader"
+	//	"fmt"
+)
 
 // 此处暂时仅跳过该部分
 func (gofile *File) readGoType(r *kmgGoReader.Reader) {
@@ -47,6 +50,13 @@ func (gofile *File) readGoVar(r *kmgGoReader.Reader) {
 	if b == '(' {
 		readMatchSmallParantheses(r)
 		return
+	}
+	r.UnreadByte()
+	readIdentifier(r)
+	r.ReadAllSpace()
+	b = r.ReadByte()
+	if b == '=' {
+		r.ReadAllSpace()
 	}
 	for {
 		if b == '"' || b == '`' {

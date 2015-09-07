@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgConsole"
@@ -55,8 +56,15 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 	//	goCmd.GoRunCmd()
 	//	return
 	//}
-	err := kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
-		SetDir(kmgc.ProjectPath).
-		RunAndTeeOutputToFile(thisLogFilePath)
-	kmgConsole.ExitOnErr(err)
+	// 下面的做法不靠谱,会让signle无法传递
+	//err := kmgCmd.CmdSlice(append(args, os.Args[1:]...)).
+	//	SetDir(kmgc.ProjectPath).
+	//	RunAndTeeOutputToFile(thisLogFilePath)
+	// TODO bash转义
+	bashCmd := strings.Join(append(args, os.Args[1:]...), " ")
+	err := kmgCmd.CmdBash(bashCmd + " 2>&1 | tee -i " + thisLogFilePath + " ; test ${PIPESTATUS[0]} -eq 0").SetDir(kmgc.ProjectPath).StdioRun()
+	if err != nil {
+		err = fmt.Errorf("kmg make: %s", err)
+		kmgConsole.ExitOnErr(err)
+	}
 }

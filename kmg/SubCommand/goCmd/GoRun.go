@@ -78,12 +78,15 @@ func GoRunCmd() {
 func runCmdSliceWithGoPath(gopath string, cmdSlice []string) {
 	err := kmgCmd.CmdSlice(cmdSlice).
 		MustSetEnv("GOPATH", gopath).StdioRun()
-	kmgConsole.ExitOnErr(err)
+	if err != nil {
+		err = fmt.Errorf("kmg gorun: %s", err)
+		kmgConsole.ExitOnErr(err)
+	}
 }
 
 func goRunPackageName(goPath string, pathOrPkg string) {
 	//goRunInstall(goPath, pathOrPkg)
-	goRunInstallSimple(goPath,pathOrPkg)
+	goRunInstallSimple(goPath, pathOrPkg)
 	//run
 	outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
 	runCmdSliceWithGoPath(goPath, append([]string{outPath}, os.Args[2:]...))

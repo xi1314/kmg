@@ -417,6 +417,22 @@ func (gofile *File) readType(r *kmgGoReader.Reader) Type {
 	*/
 }
 
+func getTypeStructAnonymousName(typ Type) string {
+	ntyp, ok := typ.(*NamedType)
+	if ok {
+		return ntyp.Name
+	}
+	ptyp, ok := typ.(PointerType)
+	if ok {
+		return "*" + getTypeStructAnonymousName(ptyp.Elem)
+	}
+	btyp, ok := typ.(BuiltinType)
+	if ok {
+		return string(btyp)
+	}
+	panic(fmt.Errorf("[getTypeStructAnonymousName] unexpect type %T", typ))
+}
+
 func (gofile *File) readStruct(r *kmgGoReader.Reader) StructType {
 	// 仅跳过
 	r.ReadAllSpace()
@@ -432,7 +448,7 @@ func (gofile *File) readStruct(r *kmgGoReader.Reader) StructType {
 		b := r.ReadByte()
 		if b == '}' {
 			return out
-		} else if b == '"' || b == '\'' {
+		} else if b == '"' || b == '\'' || b == '`' {
 			r.UnreadByte()
 			lastTag = mustReadGoString(r)
 		} else if b == ',' {
@@ -442,23 +458,7 @@ func (gofile *File) readStruct(r *kmgGoReader.Reader) StructType {
 				continue
 			} else if len(lastReadBuf) == 1 {
 				typ := lastReadBuf[0].typ
-				name := ""
-				ntyp, ok := typ.(*NamedType)
-				if ok {
-					name = ntyp.Name
-				} else {
-					ptyp, ok := typ.(PointerType)
-					if ok {
-						ntyp, ok = ptyp.Elem.(*NamedType)
-						if ok {
-							name = ntyp.Name
-						} else {
-							panic(fmt.Errorf("%s unexpect type %T", r.GetFileLineInfo(), typ))
-						}
-					} else {
-						panic(fmt.Errorf("%s unexpect type %T", r.GetFileLineInfo(), typ))
-					}
-				}
+				name := getTypeStructAnonymousName(typ)
 				out.Field = append(out.Field, StructField{
 					Name:             name,
 					Elem:             typ,

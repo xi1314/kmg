@@ -12,9 +12,9 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
+	"github.com/bronze1man/kmg/kmgTime"
 	"path"
 	"time"
-	"github.com/bronze1man/kmg/kmgTime"
 )
 
 func AddCommandList() {
@@ -30,6 +30,7 @@ func installCmd() {
 	cg := kmgConsole.NewCommandGroup()
 	cg.AddCommandWithName("golang", installGolang)
 	cg.AddCommandWithName("golang1.5", installGolang15)
+	cg.AddCommandWithName("mysql", installMysql)
 	cg.Main()
 }
 
@@ -53,9 +54,9 @@ func installGolang() {
 
 func installGolang15() {
 	installGolangWithUrlMap(map[string]string{
-		"windows_amd64": "https://storage.googleapis.com/golang/go1.5.windows-amd64.zip",
-		"linux_amd64":   "https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz",
-		"darwin_amd64":  "https://storage.googleapis.com/golang/go1.5.darwin-amd64.tar.gz",
+		"windows_amd64": "http://kmgtools.qiniudn.com/go1.5.windows-amd64.zip",
+		"linux_amd64":   "http://kmgtools.qiniudn.com/go1.5.linux-amd64.tar.gz",
+		"darwin_amd64":  "http://kmgtools.qiniudn.com/go1.5.darwin-amd64.tar.gz",
 	})
 }
 
@@ -74,7 +75,7 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 		kmgConsole.ExitOnErr(err)
 		return
 	}
-	tmpPath:=kmgFile.MustChangeToTmpPath()
+	tmpPath := kmgFile.MustChangeToTmpPath()
 	defer kmgFile.MustDelete(tmpPath)
 	if !kmgSys.MustIsRoot() {
 		fmt.Println("you need to be root to install golang")
@@ -90,8 +91,8 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 
 	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)
-	if kmgFile.MustFileExist("/usr/local/go"){
-		kmgCmd.ProxyRun("mv /usr/local/go /usr/local/go.bak."+time.Now().Format(kmgTime.FormatFileNameV2) )
+	if kmgFile.MustFileExist("/usr/local/go") {
+		kmgCmd.ProxyRun("mv /usr/local/go /usr/local/go.bak." + time.Now().Format(kmgTime.FormatFileNameV2))
 	}
 	kmgCmd.ProxyRun("cp -rf go /usr/local")
 	kmgFile.MustDeleteFile("/bin/go")
@@ -103,4 +104,9 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 	kmgFile.MustEnsureBinPath("/bin/go")
 	kmgFile.MustEnsureBinPath("/bin/godoc")
 	kmgFile.MustEnsureBinPath("/bin/gofmt")
+}
+
+func installMysql() {
+	kmgCmd.ProxyRun("apt-get update")
+	kmgCmd.CmdString("apt-get -y install mysql-server").MustSetEnv("DEBIAN_FRONTEND", "noninteractive").ProxyRun()
 }

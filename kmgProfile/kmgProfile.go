@@ -3,11 +3,16 @@ package kmgProfile
 import (
 	"expvar"
 	"fmt"
+	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
+	"github.com/bronze1man/kmg/kmgSys"
 	"net/http"
 	"net/http/pprof"
+	"os"
 	"path/filepath"
 	"runtime/debug"
+	runtimePprof "runtime/pprof"
 )
 
 // 可以使用PrefixPath提高安全性
@@ -62,4 +67,24 @@ func GcHandler(w http.ResponseWriter, r *http.Request) {
 func heap(w http.ResponseWriter, r *http.Request) {
 	debug.FreeOSMemory()
 	pprof.Handler("heap").ServeHTTP(w, r)
+}
+
+func CpuProfile(funcer func()) {
+	selfPath, err := kmgSys.GetCurrentExecutePath()
+	if err != nil {
+		panic(err)
+	}
+	tmpPath := kmgFile.NewTmpFilePath()
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	runtimePprof.StartCPUProfile(f)
+	defer runtimePprof.StopCPUProfile()
+	funcer()
+	runtimePprof.StopCPUProfile()
+	f.Close()
+	kmgCmd.CmdSlice([]string{"go", "tool", "pprof", "-top", "-cum", selfPath, tmpPath}).MustRun()
+	kmgCmd.CmdSlice([]string{"go", "tool", "pprof", "-top", "-cum", "-lines", selfPath, tmpPath}).MustRun()
 }

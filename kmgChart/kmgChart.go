@@ -105,21 +105,64 @@ func (l Chart) HtmlRender() string {
 	return tplChart(l)
 }
 
-////X 是任意东西，均匀分布，类似枚举；Y 是数值,离散非均匀的
-//func NewLineXIsAnyYIsNumber(data []Vector2) *Chart {
-//	l := newChartBaseConfig()
-//	l.Option.XAxis.Type = "category"
-//	l.Option.XAxis.Data = []interface{}{}
-//	l.Option.YAxis.Type = "value"
-//	l.Option.Series = []series{
-//		series{
-//			Type: "line",
-//			Data: []interface{}{},
-//		},
-//	}
-//	for _, v := range data {
-//		l.Option.XAxis.Data = append(l.Option.XAxis.Data, v.X)
-//		l.Option.Series[0].Data = append(l.Option.Series[0].Data, v.Y)
-//	}
-//	return l
-//}
+//X 是任意东西，均匀分布，类似枚举；Y 是数值,离散非均匀的
+func NewLineXIsAnyYIsNumber(data []Vector2) *Chart {
+	l := newChartBaseConfig()
+	l.Option.XAxis.Type = "category"
+	l.Option.XAxis.Data = []interface{}{}
+	l.Option.YAxis.Type = "value"
+	l.Option.Series = []series{
+		series{
+			Type: "line",
+			Data: []interface{}{},
+		},
+	}
+	for _, v := range data {
+		l.Option.XAxis.Data = append(l.Option.XAxis.Data, v.X)
+		l.Option.Series[0].Data = append(l.Option.Series[0].Data, v.Y)
+	}
+	return l
+}
+
+type FloatVector2 struct {
+	X float64
+	Y float64
+}
+
+func CreateLineFloatVector2(inputList []FloatVector2) *Chart {
+	line := newChartBaseConfig()
+	line.Option.XAxis.Type = "value"
+	line.Option.YAxis.Type = "value"
+	line.Option.Series = []series{
+		series{
+			Type:          "line",
+			ShowAllSymbol: true,
+			Data:          []interface{}{},
+			MarkPoint: &markPoint{
+				Data: []*markPointData{},
+			},
+		},
+	}
+	line.Option.YAxis.Min, line.Option.YAxis.Max = getFloatVector2YMinMax(inputList)
+	for _, v := range inputList {
+		line.Option.Series[0].Data = append(line.Option.Series[0].Data, []interface{}{v.X, v.Y})
+	}
+	line.JS = `
+		delete option.title
+        option.xAxis.axisLabel = {
+        	formatter : function(data){
+        		return parseFloat(data).toPrecision(3);
+        	}
+        };
+        option.yAxis.axisLabel = {
+        	formatter : function(data){
+        		return data.toPrecision(3);
+        	}
+        };
+        option.tooltip.formatter = function (params) {
+            return "X: " + params.value[0]
+                    + "<br /> Y: " + params.value[1]
+        };
+	`
+	return line
+}
