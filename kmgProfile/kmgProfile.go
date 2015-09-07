@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgSys"
 	"net/http"
 	"net/http/pprof"
@@ -100,7 +99,6 @@ func heap(w http.ResponseWriter, r *http.Request) {
 	pprof.Handler("heap").ServeHTTP(w, r)
 }
 
-<<<<<<< HEAD
 func Index(w http.ResponseWriter,r *http.Request){
 	content:=kmgBootstrap.Table{}
 	for _,url:=range []string{
@@ -127,7 +125,7 @@ func startTime() interface{}{
 func uptime() interface{}{
 	return time.Since(gStartTime).String()
 }
-=======
+
 func CpuProfile(funcer func()) {
 	selfPath, err := kmgSys.GetCurrentExecutePath()
 	if err != nil {
@@ -147,4 +145,3 @@ func CpuProfile(funcer func()) {
 	kmgCmd.CmdSlice([]string{"go", "tool", "pprof", "-top", "-cum", selfPath, tmpPath}).MustRun()
 	kmgCmd.CmdSlice([]string{"go", "tool", "pprof", "-top", "-cum", "-lines", selfPath, tmpPath}).MustRun()
 }
->>>>>>> d36a5cd90c036d7a32fcf3c23deb9a60bbb57058
