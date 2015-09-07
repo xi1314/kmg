@@ -116,13 +116,14 @@ func (sdk *RackspaceSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
 		serverSlice, err := servers.ExtractServers(p)
 		for _, server := range serverSlice {
 			if server.Status != string(RackspaceInstanceStatusACTIVE) {
-				fmt.Println(server.AccessIPv4, server.Status)
+				fmt.Println("[kmgThirdCloud SDKRackspace]", server.Status, server.AccessIPv4, server.Status)
 				continue
 			}
 			ipInstanceMap[server.AccessIPv4] = Instance{
-				Ip:   server.AccessIPv4,
-				Id:   server.ID,
-				Name: server.Name,
+				Ip:          server.AccessIPv4,
+				Id:          server.ID,
+				Name:        server.Name,
+				BelongToSDK: sdk,
 			}
 		}
 		return true, err

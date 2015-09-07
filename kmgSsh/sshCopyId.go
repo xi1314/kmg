@@ -1,4 +1,4 @@
-package kmgSys
+package kmgSsh
 
 import (
 	"fmt"
@@ -16,17 +16,13 @@ type RemoteServer struct {
 	SshPort  int    //默认 22
 }
 
-func completeRemote(remote *RemoteServer) {
-	if remote.SshPort == 0 {
-		remote.SshPort = 22
-	}
-	if remote.UserName == "" {
-		remote.UserName = "root"
-	}
-}
-
 func (r *RemoteServer) String() string {
-	completeRemote(r)
+	if r.SshPort == 0 {
+		r.SshPort = 22
+	}
+	if r.UserName == "" {
+		r.UserName = "root"
+	}
 	cmd := []string{}
 	cmd = append(cmd, "-p", strconv.Itoa(r.SshPort), r.UserName+"@"+r.Address)
 	return strings.Join(cmd, " ")
@@ -42,7 +38,11 @@ func SshCertCopyLocalToRemote(remote *RemoteServer) {
 	if remote.Address == "" {
 		return
 	}
-	if IsLocalSshCertCopyToRemote(remote) {
+	isReachable, havePermission := AvailableCheck(remote)
+	if !isReachable {
+		panic("[kmgSsh SshCertCopyLocalToRemote]" + remote.String() + " unreachable!")
+	}
+	if havePermission {
 		return
 	}
 	if remote.Password == "" {
@@ -53,25 +53,6 @@ func SshCertCopyLocalToRemote(remote *RemoteServer) {
 		"ssh-copy-id "+remote.String(),
 		remote.Password,
 	)
-}
-
-func IsLocalSshCertCopyToRemoteRoot(remoteAddress string) bool {
-	return IsLocalSshCertCopyToRemote(&RemoteServer{
-		Address: remoteAddress,
-	})
-}
-
-func IsLocalSshCertCopyToRemote(remote *RemoteServer) bool {
-	cmd := "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no " + remote.String() + " echo OK"
-	err := kmgCmd.Run(cmd)
-	if err != nil {
-		return false
-	}
-	b := kmgCmd.MustRunAndReturnOutput(cmd)
-	if strings.Contains(string(b), "OK") {
-		return true
-	}
-	return false
 }
 
 func SshCertCopyCertToRemote(cert string, remoteList []RemoteServer) {

@@ -3,11 +3,15 @@ package kmgProfile
 import (
 	"expvar"
 	"fmt"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"net/http"
 	"net/http/pprof"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
+	"github.com/bronze1man/kmg/kmgView/kmgBootstrap"
+	"github.com/bronze1man/kmg/kmgView"
+	"time"
+	"sync"
 )
 
 // 可以使用PrefixPath提高安全性
@@ -27,18 +31,44 @@ func RegisterProfile(prefixPath string) {
 
 // 暂时使用默认http的handler
 func StartProfileOnAddr(prefixPath string, profileAddr string) {
-	kmgHttp.ClearHttpDefaultServer()
-	RegisterProfile("/48qcA6SYYyGGXg/")
+
+	mux:=http.NewServeMux()
+	registerProfile(prefixPath,mux)
 	go func() {
-		err := http.ListenAndServe(profileAddr, nil)
+		err := http.ListenAndServe(profileAddr, mux)
 		if err != nil {
 			panic(err)
 		}
 	}()
 }
 
+var initOnce sync.Once
+
+func registerProfile(prefixPath string,mux *http.ServeMux){
+	prefixPath = strings.Trim(prefixPath,"/")
+	if prefixPath!=""{
+		prefixPath = "/" + prefixPath
+	}
+
+	mux.HandleFunc(prefixPath+"/pprof/profile",pprof.Profile)
+	mux.HandleFunc(prefixPath+"/pprof/symbol",pprof.Symbol)
+	mux.HandleFunc(prefixPath+"/pprof/heap",heap)
+	mux.Handle(prefixPath+"/pprof/block",pprof.Handler("block"))
+	mux.Handle( prefixPath+"/pprof/goroutine", pprof.Handler("goroutine"))
+	mux.Handle( prefixPath+"/pprof/threadcreate", pprof.Handler("threadcreate"))
+	mux.HandleFunc( prefixPath+"/pprof/", pprof.Index)
+	mux.HandleFunc( prefixPath+"/vars", ExpvarHandler)
+	mux.HandleFunc( prefixPath+"/gc", GcHandler)
+	mux.HandleFunc( prefixPath +"/",Index)
+
+	initOnce.Do(func(){
+		gStartTime = time.Now()
+		expvar.Publish("startTime",expvar.Func(startTime))
+		expvar.Publish("uptime",expvar.Func(uptime))
+	})
+}
+
 // Replicated from expvar.go as not public.
-// TODO 自行实现一个,灭掉自带的几个变量
 func ExpvarHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	fmt.Fprintf(w, "{\n")
@@ -55,11 +85,38 @@ func ExpvarHandler(w http.ResponseWriter, r *http.Request) {
 
 func GcHandler(w http.ResponseWriter, r *http.Request) {
 	debug.FreeOSMemory()
-	w.Header().Set("Content-Type", "application/text; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte("SUCCESS"))
 }
 
 func heap(w http.ResponseWriter, r *http.Request) {
 	debug.FreeOSMemory()
 	pprof.Handler("heap").ServeHTTP(w, r)
+}
+
+func Index(w http.ResponseWriter,r *http.Request){
+	content:=kmgBootstrap.Table{}
+	for _,url:=range []string{
+		"gc",
+		"vars",
+		//"pprof/profile?debug=1",
+		"pprof/heap?debug=1",
+		"pprof/threadcreate?debug=1",
+		"pprof/goroutine?debug=1",
+		"pprof/goroutine?debug=2",
+	}{
+		content.DataList = append(content.DataList,[]kmgView.HtmlRenderer{
+			kmgBootstrap.A{Href:url,Title:url},
+		})
+	}
+	w.Write([]byte(kmgBootstrap.NewWrap("debug page",content).HtmlRender()))
+}
+
+var gStartTime time.Time
+
+func startTime() interface{}{
+	return gStartTime.String()
+}
+func uptime() interface{}{
+	return time.Since(gStartTime).String()
 }

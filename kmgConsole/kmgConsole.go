@@ -113,6 +113,7 @@ func (g *CommandGroup) AddCommandWithName(name string, runner func()) *CommandGr
 
 var DefaultCommandGroup = NewCommandGroup()
 
+// mac上 能正常传递signle
 func Main() {
 	if VERSION != "" {
 		DefaultCommandGroup.AddCommand(Command{

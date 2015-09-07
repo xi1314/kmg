@@ -16,6 +16,7 @@ func getFileChangeCachePath(key string) string {
 	return filepath.Join(kmgConfig.DefaultEnv().TmpPath, "FileChangeCache", kmgCrypto.Md5HexFromString(key))
 }
 
+// 不想缓存,请
 func MustMd5FileChangeCache(key string, pathList []string, f func()) {
 	// 此处需要考虑,
 	//   用户新添加了一个文件

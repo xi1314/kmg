@@ -92,6 +92,9 @@ func (aliyunInstance AliyunInstance) getIp() string {
 	if l == nil || len(l) == 0 {
 		return ""
 	}
+	if len(l["IpAddress"]) == 0 {
+		return ""
+	}
 	return l["IpAddress"][0]
 }
 
@@ -183,7 +186,7 @@ func (sdk *AliyunSDK) CreateInstance() (ip string) {
 	}
 	param.Set("Password", sdk.InstancePassword)
 	resp := sdk.MustCall(param)
-	sdk.startInstance(resp.InstanceId)
+	sdk.StartInstance(resp.InstanceId)
 	ip = sdk.AllocatePublicIpAddress(resp.InstanceId)
 	sdk.rebootInstance(resp.InstanceId)
 	return ip
@@ -208,22 +211,22 @@ func (sdk *AliyunSDK) WaitUntil(instanceId string, status AliyunInstanceStatus) 
 	}
 }
 
-func (sdk *AliyunSDK) startInstance(instanceId string) {
+func (sdk *AliyunSDK) StartInstance(instanceId string) {
 	sdk.runSingleAction(instanceId, "StartInstance", AliyunInstanceStatusRunning)
 }
 
-func (sdk *AliyunSDK) stopInstance(instanceId string) {
+func (sdk *AliyunSDK) StopInstance(instanceId string) {
 	sdk.runSingleAction(instanceId, "StopInstance", AliyunInstanceStatusStopped)
 }
 
 func (sdk *AliyunSDK) rebootInstance(instanceId string) {
 	//不用阿里云API自带的重启接口，异步重启比较难做
-	sdk.stopInstance(instanceId)
-	sdk.startInstance(instanceId)
+	sdk.StopInstance(instanceId)
+	sdk.StartInstance(instanceId)
 }
 
 func (sdk *AliyunSDK) deleteInstance(instanceId string) {
-	sdk.stopInstance(instanceId)
+	sdk.StopInstance(instanceId)
 	param := &url.Values{}
 	param.Set("Action", "DeleteInstance")
 	param.Set("InstanceId", instanceId)
@@ -234,7 +237,7 @@ func (sdk *AliyunSDK) DeleteInstance(ip string) {
 	aliyunInstance := sdk.getInstanceByIp(ip)
 	//包年包月不能直接释放，只能先关机了
 	if aliyunInstance.InstanceChargeType == AliyunPaidTypePre && aliyunInstance.Status == AliyunInstanceStatusRunning {
-		sdk.stopInstance(aliyunInstance.InstanceId)
+		sdk.StopInstance(aliyunInstance.InstanceId)
 		return
 	}
 	instance, exist := sdk.ListAllInstance()[ip]
@@ -261,7 +264,7 @@ func (sdk *AliyunSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
 	ipInstanceMap = map[string]Instance{}
 	for _, i := range all {
 		if i.Status != AliyunInstanceStatusRunning {
-			fmt.Println(i.Status, i.InstanceName, i.getIp())
+			fmt.Println("[kmgThirdCloud SDKAliyun]", i.Status, i.InstanceName, i.getIp())
 			continue
 		}
 		ip := i.getIp()
@@ -269,9 +272,10 @@ func (sdk *AliyunSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
 			continue
 		}
 		ipInstanceMap[ip] = Instance{
-			Id:   i.InstanceId,
-			Ip:   ip,
-			Name: i.InstanceName,
+			Id:          i.InstanceId,
+			Ip:          ip,
+			Name:        i.InstanceName,
+			BelongToSDK: sdk,
 		}
 	}
 	return

@@ -50,7 +50,7 @@ func runFileHttpServer() {
 	if path == "" {
 		path, err = os.Getwd()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "os.Getwd() fail %s", err)
+			fmt.Printf("os.Getwd() fail %s", err)
 			return
 		}
 	}
@@ -75,7 +75,7 @@ func runFileHttpServer() {
 	fmt.Println("start server at", listenAddr)
 	err = http.ListenAndServe(listenAddr, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "http.ListenAndServe() fail %s", err)
+		fmt.Printf("http.ListenAndServe() fail %s", err)
 		return
 	}
 	return

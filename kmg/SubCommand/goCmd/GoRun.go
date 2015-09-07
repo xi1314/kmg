@@ -83,7 +83,7 @@ func runCmdSliceWithGoPath(gopath string, cmdSlice []string) {
 
 func goRunPackageName(goPath string, pathOrPkg string) {
 	//goRunInstall(goPath, pathOrPkg)
-	goRunInstallSimple(goPath,pathOrPkg)
+	goRunInstallSimple(goPath, pathOrPkg)
 	//run
 	outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
 	runCmdSliceWithGoPath(goPath, append([]string{outPath}, os.Args[2:]...))

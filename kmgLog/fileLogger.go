@@ -2,7 +2,6 @@ package kmgLog
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/bronze1man/kmg/kmgFile"
@@ -25,13 +24,13 @@ type fileLoger struct {
 func (lw fileLoger) LogWrite(r LogRow) {
 	b, err := r.Marshal()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[fileLoger] logToJson fail", err)
+		fmt.Println("[fileLoger] logToJson fail", err)
 		return
 	}
 	toWrite := append(b, byte('\n'))
 	err = kmgFile.AppendFile(filepath.Join(lw.logDir, r.Cat+".log"), toWrite)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[fileLoger] logToJson fail", err)
+		fmt.Println("[fileLoger] logToJson fail", err)
 		return
 	}
 }

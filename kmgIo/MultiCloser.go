@@ -24,12 +24,25 @@ func (c multiCloser) Close() (err error) {
 }
 
 func MultiErrorHandle(fs ...func() error) error {
-	var errS string
-	for _, f := range fs {
-		err1 := f()
-		if err1 != nil {
-			errS += "[" + err1.Error() + "] "
+	return NewMultiErrorHandler(fs...)()
+}
+
+func NewMultiErrorHandler(fs ...func() error) func() error {
+	return func() error {
+		var errS string
+		for _, f := range fs {
+			err1 := f()
+			if err1 != nil {
+				errS += "[" + err1.Error() + "] "
+			}
 		}
+		if errS == "" {
+			return nil
+		}
+		return errors.New(errS)
 	}
-	return errors.New(errS)
+}
+
+func ErrorHandlerNil() error {
+	return nil
 }

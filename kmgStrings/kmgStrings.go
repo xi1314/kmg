@@ -98,3 +98,16 @@ func LastTwoPartSplit(originS string, splitS string) (p1 string, p2 string, ok b
 	}
 	return strings.Join(part[:len(part)-1], splitS), part[len(part)-1], true
 }
+
+func LineDataToSlice(lineData string) []string {
+	part := strings.Split(lineData, "\n")
+	out := []string{}
+	for _, s := range part {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		out = append(out, s)
+	}
+	return out
+}

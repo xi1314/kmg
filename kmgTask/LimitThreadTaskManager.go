@@ -55,8 +55,13 @@ func (t *LimitThreadTaskManager) Wait() {
 	t.wg.Wait()
 }
 
+func (t *LimitThreadTaskManager) WaitAndClose() {
+	t.Close()
+}
+
 //关闭管理器
 //需要等待所有任务完成后,返回
+// @deprecated
 func (t *LimitThreadTaskManager) Close() {
 	defer close(t.task_chan)
 	t.Wait()

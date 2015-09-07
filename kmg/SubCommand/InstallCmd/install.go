@@ -12,9 +12,9 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgPlatform"
+	"github.com/bronze1man/kmg/kmgTime"
 	"path"
 	"time"
-	"github.com/bronze1man/kmg/kmgTime"
 )
 
 func AddCommandList() {
@@ -74,7 +74,7 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 		kmgConsole.ExitOnErr(err)
 		return
 	}
-	tmpPath:=kmgFile.MustChangeToTmpPath()
+	tmpPath := kmgFile.MustChangeToTmpPath()
 	defer kmgFile.MustDelete(tmpPath)
 	if !kmgSys.MustIsRoot() {
 		fmt.Println("you need to be root to install golang")
@@ -90,8 +90,8 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 
 	kmgFile.MustWriteFile(packageName, contentB)
 	kmgCmd.ProxyRun("tar -xf " + packageName)
-	if kmgFile.MustFileExist("/usr/local/go"){
-		kmgCmd.ProxyRun("mv /usr/local/go /usr/local/go.bak."+time.Now().Format(kmgTime.FormatFileNameV2) )
+	if kmgFile.MustFileExist("/usr/local/go") {
+		kmgCmd.ProxyRun("mv /usr/local/go /usr/local/go.bak." + time.Now().Format(kmgTime.FormatFileNameV2))
 	}
 	kmgCmd.ProxyRun("cp -rf go /usr/local")
 	kmgFile.MustDeleteFile("/bin/go")

@@ -298,6 +298,10 @@ func (c *Context) NewTestContextWithSession() *Context {
 	return nc
 }
 
+func (c *Context) SetResponseCode(code int) {
+	c.responseCode = code
+}
+
 func (c *Context) Redirect(url string) {
 	c.redirectUrl = url
 	c.responseCode = 302

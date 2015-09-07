@@ -10,6 +10,10 @@ func UpperEncodeBytesToString(b []byte) string {
 	return strings.ToUpper(hex.EncodeToString(b))
 }
 
+func EncodeBytesToString(b []byte) string {
+	return hex.EncodeToString(b)
+}
+
 // 生成的字符串是小写
 func EncodeStringToString(s string) string {
 	return hex.EncodeToString([]byte(s))

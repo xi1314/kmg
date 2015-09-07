@@ -10,6 +10,9 @@ import (
 
 // wait for the system sign or ctrl-c or command kill.
 //等用户按CTRL+c退出,或者等到被kill掉,接受到这个信号之后还可以运行一些代码.
+// darwin
+// 		CTRL+c 会发出 os.Interrupt 也是 syscall.SIGINT
+//      kill 命令 会发出 syscall.SIGTERM
 func WaitForExit() {
 	//不要在这个地方检查WaitForExit和AddExitAction一起使用,因为程序自身会进行调用
 	ch := make(chan os.Signal)
@@ -41,3 +44,13 @@ func AddExitActionWithError(f func() error) {
 func UseExitActionRegister() {
 	AddExitAction(func() {})
 }
+
+/*
+func InitExitProcessor(){
+	go func(){
+		ch := make(chan os.Signal,10)
+		signal.Notify(ch, os.Interrupt, os.Kill, syscall.SIGTERM)
+		thisSignal:=<-ch
+	}()
+}
+*/

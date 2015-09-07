@@ -190,6 +190,8 @@ public class `)
             conn.setUseCaches(false);
             conn.setDoInput(true);
             conn.setDoOutput(true);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(5000);
             OutputStream os = conn.getOutputStream();
             os.write(inByte);
             os.flush();

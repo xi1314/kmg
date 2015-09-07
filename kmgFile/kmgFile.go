@@ -60,6 +60,31 @@ func MustReadFile(path string) (content []byte) {
 	return content
 }
 
+//从文件尾部开始往回读，读 size 个 byte
+func TailByte(filePath string, size int64) (content []byte) {
+	e := func(err error) {
+		if err == io.EOF {
+			return
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
+	f, err := os.Open(filePath)
+	e(err)
+	defer f.Close()
+	info, err := f.Stat()
+	e(err)
+	start := int64(0)
+	if info.Size() >= size {
+		start = info.Size() - size
+	}
+	content = make([]byte, size)
+	_, err = f.ReadAt(content, start)
+	e(err)
+	return content
+}
+
 //如果这个目录已经创建过了,不报错
 func Mkdir(path string) (err error) {
 	return os.MkdirAll(path, os.FileMode(0777))
@@ -104,6 +129,7 @@ func MustAppendFile(path string, content []byte) {
 	}
 }
 
+// 文件或者目录是否存在
 func FileExist(path string) (exist bool, err error) {
 	_, err = os.Stat(path)
 	if err != nil {
@@ -121,6 +147,19 @@ func MustFileExist(path string) bool {
 		panic(err)
 	}
 	return exist
+}
+
+// 目录是否存在,如果不存在会返回false,如果存在但是不是目录,会返回false
+// 其他此处无法预料的错误会panic
+func MustDirectoryExist(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		panic(err)
+	}
+	return fi.IsDir()
 }
 
 //from http://stackoverflow.com/a/13027975/1586797

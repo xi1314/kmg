@@ -10,6 +10,19 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 )
 
+// 获取当前地址的列表的字符串
+func GetCurrentAddrListString() string{
+	addrList,err:=net.InterfaceAddrs()
+	if err!=nil{
+		return "[GetCurrentAddrListString] fail "+err.Error()
+	}
+	out:=""
+	for _,addr:=range addrList{
+		out+=addr.String()+";"
+	}
+	return out
+}
+
 //一个网络设备上面的地址
 type DeviceAddr struct {
 	IP        net.IP     //地址上面的ip

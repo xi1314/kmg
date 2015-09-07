@@ -1,4 +1,4 @@
-package kmgTapTun
+package kmgSys
 
 import (
 	"os"
@@ -17,7 +17,7 @@ type iInterface struct {
 // Create a new TAP interface whose name is ifName.
 // If ifName is empty, a default name (tap0, tap1, ... ) will be assigned.
 // ifName should not exceed 16 bytes.
-func NewTap(ifName string) (ifce Interface, err error) {
+func NewTap(ifName string) (ifce TunTapInterface, err error) {
 	file, err := os.OpenFile("/dev/net/tun", os.O_RDWR, 0)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func NewTap(ifName string) (ifce Interface, err error) {
 // Create a new TUN interface whose name is ifName.
 // If ifName is empty, a default name (tap0, tap1, ... ) will be assigned.
 // ifName should not exceed 16 bytes.
-func NewTun(ifName string) (ifce Interface, err error) {
+func NewTun(ifName string) (ifce TunTapInterface, err error) {
 	file, err := os.OpenFile("/dev/net/tun", os.O_RDWR, 0)
 	if err != nil {
 		return nil, err
@@ -44,6 +44,10 @@ func NewTun(ifName string) (ifce Interface, err error) {
 	}
 	ifce = &iInterface{deviceType: DeviceTypeTun, file: file, name: name}
 	return
+}
+
+func NewTunNoName() (ifce TunTapInterface, err error) {
+	return NewTun("")
 }
 
 func (ifce *iInterface) GetDeviceType() DeviceType {

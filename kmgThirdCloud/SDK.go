@@ -7,11 +7,13 @@ func handleErr(err error) {
 }
 
 type Instance struct {
-	Ip   string
-	Id   string //第三方只认他们自己产生的ID
-	Name string
+	Ip          string
+	Id          string //第三方只认他们自己产生的ID
+	Name        string
+	BelongToSDK SDK
 }
 
+//检查是否满足 interface
 var _ SDK = (*RackspaceSDK)(nil)
 var _ SDK = (*AliyunSDK)(nil)
 

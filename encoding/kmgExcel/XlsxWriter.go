@@ -8,8 +8,17 @@ import (
 	"os"
 	"strconv"
 	"text/template"
+	"bytes"
 )
 
+func Array2XlsxByte(data [][]string) (b []byte,err error) {
+	fileBuf := &bytes.Buffer{}
+	err = Array2XlsxIo(data, fileBuf)
+	if err!=nil{
+		return nil,err
+	}
+	return fileBuf.Bytes(),nil
+}
 //write raw data into xlsx file
 //data key means: rowIndex,columnIndex,value
 func Array2XlsxFile(data [][]string, path string) (err error) {

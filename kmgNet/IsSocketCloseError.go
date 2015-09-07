@@ -19,3 +19,7 @@ func IsSocketCloseError(err error) bool {
 	//strings.Contains(err.Error(), "Stream closed") || //来自 muxado
 	//strings.Contains(err.Error(), "Session closed")) //来自 muxado
 }
+
+func IsBadFileDescripter(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "bad file descriptor")
+}

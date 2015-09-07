@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	//"os/signal"
+	//"syscall"
 )
 
 //please use Cmd* function to new a Cmd,do not create one yourself.
@@ -73,7 +75,7 @@ func (c *Cmd) ProxyRun() {
 	err := c.Run()
 	if err != nil {
 		//不使用 kmgConsole.ExitOnErr ,以避免依赖循环
-		os.Stderr.Write([]byte(err.Error()))
+		fmt.Println(err)
 		os.Exit(2)
 		return
 	}
@@ -92,6 +94,11 @@ func (c *Cmd) RunAndReturnOutput() (b []byte, err error) {
 	return b, err
 }
 
+func (c *Cmd) CombinedOutput() (b []byte, err error) {
+	return c.cmd.CombinedOutput()
+}
+
+// 不能传递signel
 func (c *Cmd) RunAndTeeOutputToFile(path string) (err error) {
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(0777))
 	if err != nil {
@@ -220,6 +227,11 @@ func (c *Cmd) MustRunWithStdin(stdin []byte) {
 		panic(err)
 	}
 }
+
+// TODO 实现和编程复杂度高,而且接口不能很容易的变成单独函数接口.
+//func (c *Cmd) MustRunWithSingle(){
+//	c.MustRun()
+//}
 
 type exitStatuser interface {
 	ExitStatus() int

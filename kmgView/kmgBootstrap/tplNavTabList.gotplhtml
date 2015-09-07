@@ -1,0 +1,20 @@
+<?
+package kmgBootstrap
+
+func tplNavTabList(conf NavTabList)string { ?>
+
+<?if conf.CustomClass == "" {
+    conf.CustomClass="nav-pills"
+} ?>
+    <ul class="nav <?=conf.CustomClass?>">
+   <? for _,opt:=range conf.OptionList { ?>
+    <li
+        <?if opt.Name==conf.ActiveName { ?>
+           class="active")
+        <?}?>
+            >
+        <a href="<?=opt.Url?>"><?=opt.Name?></a>
+    </li>
+    <?}?>
+</ul>
+<? } ?>

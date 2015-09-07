@@ -114,6 +114,36 @@ func Dispatcher(ctx *kmgHttp.Context, processorList []HttpProcessor) {
 	return
 }
 
+/**
+Example:
+在 kmgControllerRunner.StartServerCommand() 前调用
+needAuthFilter 返回 true 表示需要验证身份
+下面这个例子是：只有在访问前缀是 "/?n=Admin.User.Info" 时才验证身份
+kmgControllerRunner.AddHTTPBasicAuthenticationDispatcher("UserName", "Password", func(ctx *kmgHttp.Context) bool {
+	return strings.HasPrefix(ctx.GetRequestUrl(), "/?n=Admin.User.Info")
+})
+*/
+func AddHTTPBasicAuth(username, password string) {
+	AddHTTPBasicAuthWithFilter(username, password, nil)
+}
+
+func AddHTTPBasicAuthWithFilter(username, password string, needAuthFilter func(ctx *kmgHttp.Context) bool) {
+	f := func(ctx *kmgHttp.Context, processorList []HttpProcessor) {
+		authName, authPass, ok := ctx.GetRequest().BasicAuth()
+		needAuth := true
+		if needAuthFilter != nil {
+			needAuth = needAuthFilter(ctx)
+		}
+		if needAuth && (authName != username || authPass != password || !ok) {
+			ctx.SetResponseHeader("WWW-Authenticate", `Basic realm="kmgControllerRunner"`)
+			ctx.SetResponseCode(401)
+			return
+		}
+		processorList[0](ctx, processorList[1:])
+	}
+	HttpProcessorList = append([]HttpProcessor{f}, HttpProcessorList...)
+}
+
 // 默认不用这个,容易搞的测试里面到处都是log.
 // TODO 静态文件的log问题
 // TODO 尝试搞出更好用的log系统.

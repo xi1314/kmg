@@ -277,8 +277,16 @@ type overseaTradeTransactionQueryResponse struct {
 	Error       string             `xml:"error"`
 }
 
+func (ot *OverseaTrade) MustSingleTransactionQuery(outTradeId string) *OverseaTradeTransaction {
+	tran, err := ot.SingleTransactionQuery(outTradeId)
+	if err != nil {
+		panic(err)
+	}
+	return tran
+}
+
 // 单条交易查询接口
-func (ot *OverseaTrade) MustSingleTransactionQuery(outTradeId string) OverseaTradeTransaction {
+func (ot *OverseaTrade) SingleTransactionQuery(outTradeId string) (tran *OverseaTradeTransaction, err error) {
 	query := map[string]string{
 		"service":        "single_trade_query",
 		"partner":        ot.PartnerId,
@@ -288,19 +296,19 @@ func (ot *OverseaTrade) MustSingleTransactionQuery(outTradeId string) OverseaTra
 	ot.md5Sign(query)
 	content := kmgHttp.MustUrlGetContent(kmgHttp.MustSetParameterMapToUrl("https://mapi.alipay.com/gateway.do", query))
 	response := overseaTradeTransactionQueryResponse{}
-	err := xml.Unmarshal(content, &response)
+	err = xml.Unmarshal(content, &response)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if response.IsSuccess != "T" {
-		panic(fmt.Errorf("支付宝返回错误 [%s]", response.Error))
+		return nil, fmt.Errorf("[支付宝单条交易查询接口错误] [%s]", response.Error)
 	}
-	return OverseaTradeTransaction{
+	return &OverseaTradeTransaction{
 		TradeNo:     response.TradeNo,
 		OutTradeNo:  response.OutTradeNo,
 		Subject:     response.Subject,
 		TradeStatus: response.TradeStatus,
-	}
+	}, nil
 }
 
 // TODO 批量退款 上传退款文件接口

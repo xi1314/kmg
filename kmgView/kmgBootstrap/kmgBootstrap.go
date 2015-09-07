@@ -6,6 +6,7 @@ import (
 	"github.com/bronze1man/kmg/kmgView"
 	"github.com/bronze1man/kmg/kmgXss"
 	"strconv"
+	"strings"
 )
 
 type Panel struct {
@@ -81,8 +82,9 @@ func (p HorizontalHtmlRenderList) HtmlRender() string {
 }
 
 type NavTabList struct {
-	ActiveName string //选中的名称
-	OptionList []NavTabOption
+	ActiveName  string //选中的名称
+	OptionList  []NavTabOption
+	CustomClass string //自定义样式的类名
 }
 
 type NavTabOption struct {
@@ -287,16 +289,11 @@ func (l Label) HtmlRender() string {
 }
 
 func Blank(num int) kmgView.HtmlRenderer {
-	b := kmgView.HtmlRendererList{}
-	i := 0
-	for {
-		if i >= num {
-			break
-		}
-		i++
-		b = append(b, kmgView.Html("&nbsp;"))
-	}
-	return b
+	return kmgView.Html(strings.Repeat("&nbsp;", num))
+}
+
+func BlankChinese(num int) kmgView.HtmlRenderer {
+	return kmgView.Html(strings.Repeat("&#12288;", num))
 }
 
 func H(index int, content kmgView.HtmlRenderer) kmgView.HtmlRenderer {
@@ -308,4 +305,12 @@ func H(index int, content kmgView.HtmlRenderer) kmgView.HtmlRenderer {
 	}
 	iStr := strconv.Itoa(index)
 	return kmgView.Html(`<h` + iStr + `>` + content.HtmlRender() + `</h` + iStr + `>`)
+}
+
+func Pre(content string) kmgView.HtmlRenderer {
+	return kmgView.Html(`<pre>` + kmgXss.H(content) + `</pre>`)
+}
+
+func Br(num int) kmgView.HtmlRenderer {
+	return kmgView.Html(strings.Repeat("<br />", num))
 }
