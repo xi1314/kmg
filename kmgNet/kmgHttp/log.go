@@ -10,6 +10,7 @@ type LogStruct struct {
 	RemoteAddr string
 	UA         string `json:",omitempty"`
 	Refer      string `json:",omitempty"`
+	Host       string `json:",omitempty"`
 }
 
 func NewLogStruct(req *http.Request) *LogStruct {
@@ -19,5 +20,6 @@ func NewLogStruct(req *http.Request) *LogStruct {
 		RemoteAddr: req.RemoteAddr,
 		UA:         req.UserAgent(),
 		Refer:      req.Referer(),
+		Host:       req.Host,
 	}
 }
