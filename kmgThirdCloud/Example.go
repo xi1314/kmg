@@ -9,13 +9,13 @@ func ExampleAliyunSDK() {
 	sdk.InstancePaidType = AliyunPaidTypePost
 	sdk.InstancePassword = "" //Enter your instance password
 	ip := sdk.CreateInstance()
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Rackspace CreateInstance Failed")
 	}
 	kmgTest.Equal(instance.Name, "Hello-Aliyun")
 	sdk.RenameInstanceByIp("Bye-Aliyun", ip)
-	instance, exist = sdk.ListAllInstance()[ip]
+	instance, exist = sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Aliyun Rename Failed")
 	}
@@ -26,13 +26,13 @@ func ExampleAliyunSDK() {
 func ExampleRackspace() {
 	sdk := NewRackspaceSDK("UserName", "ApiKey", "SSHKeyName")
 	ip := sdk.CreateInstance()
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Rackspace CreateInstance Failed")
 	}
 	kmgTest.Equal(instance.Name, "Hello-Rackspace")
 	sdk.RenameInstanceByIp("Bye-Rackspace", ip)
-	instance, exist = sdk.ListAllInstance()[ip]
+	instance, exist = sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Rackspace Rename Failed")
 	}
@@ -45,13 +45,13 @@ func ExampleRackspaceForTest() {
 	sdk.FlavorName = "512MB Standard Instance"
 	sdk.InstanceName = "Hello-Rackspace"
 	ip := sdk.CreateInstance()
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Rackspace CreateInstance Failed")
 	}
 	kmgTest.Equal(instance.Name, "Hello-Rackspace")
 	sdk.RenameInstanceByIp("Bye-Rackspace", ip)
-	instance, exist = sdk.ListAllInstance()[ip]
+	instance, exist = sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		panic("Rackspace Rename Failed")
 	}

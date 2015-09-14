@@ -34,14 +34,14 @@ func (gofile *File) readImportSpec(r *kmgGoReader.Reader) {
 	//fmt.Println(b,string(rune(b)))
 	if b == '"' || b == '`' {
 		r.UnreadByte()
-		gofile.AddImport(string(mustReadGoString(r)), "")
+		gofile.AddImport(string(MustReadGoString(r)), "")
 	} else if b == '.' {
 		r.ReadAllSpace()
-		gofile.AddImport(string(mustReadGoString(r)), ".")
+		gofile.AddImport(string(MustReadGoString(r)), ".")
 	} else {
 		r.UnreadByte()
 		alias := readIdentifier(r)
 		r.ReadAllSpace()
-		gofile.AddImport(string(mustReadGoString(r)), string(alias))
+		gofile.AddImport(string(MustReadGoString(r)), string(alias))
 	}
 }

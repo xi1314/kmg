@@ -85,7 +85,7 @@ func parseFile(pkgPath string, path string, pkg *Package) *File {
 			gofile.readGoConst(r)
 		// 有一些没有分析的代码,里面可能包含import,此处先简单绕过.
 		case r.IsMatchAfter(tokenDoubleQuate) || r.IsMatchAfter(tokenGraveAccent):
-			mustReadGoString(r)
+			MustReadGoString(r)
 			//fmt.Println(string(ret))
 		case r.IsMatchAfter(tokenSingleQuate):
 			mustReadGoChar(r)
@@ -146,7 +146,7 @@ func readMatchChar(r *kmgGoReader.Reader, starter byte, ender byte) []byte {
 		b := r.ReadByte()
 		if b == '"' || b == '`' {
 			r.UnreadByte()
-			mustReadGoString(r)
+			MustReadGoString(r)
 		} else if b == '\'' {
 			r.UnreadByte()
 			mustReadGoChar(r)

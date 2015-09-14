@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var logPrefixAliyun = "[kmgThirdCloud SDKAliyun]"
+
 type AliyunSDK struct {
 	ConfigParam      *url.Values
 	AccessKeyId      string
@@ -204,11 +206,25 @@ func (sdk *AliyunSDK) GetInstanceStatus(instanceId string) AliyunInstanceStatus 
 
 func (sdk *AliyunSDK) WaitUntil(instanceId string, status AliyunInstanceStatus) {
 	for {
-		if sdk.GetInstanceStatus(instanceId) == status {
+		var instance AliyunInstance
+		for _, ins := range sdk.getAllInstance() {
+			if ins.InstanceId == instanceId {
+				instance = ins
+				break
+			}
+		}
+		fmt.Println(logPrefixAliyun, instance.InstanceId, instance.getIp(), instance.Status)
+		if instance.Status == status {
 			break
 		}
 		time.Sleep(time.Second)
 	}
+	//	for {
+	//		if sdk.GetInstanceStatus(instanceId) == status {
+	//			break
+	//		}
+	//		time.Sleep(time.Second)
+	//	}
 }
 
 func (sdk *AliyunSDK) StartInstance(instanceId string) {
@@ -216,7 +232,9 @@ func (sdk *AliyunSDK) StartInstance(instanceId string) {
 }
 
 func (sdk *AliyunSDK) StopInstance(instanceId string) {
-	sdk.runSingleAction(instanceId, "StopInstance", AliyunInstanceStatusStopped)
+	if sdk.GetInstanceStatus(instanceId) == AliyunInstanceStatusRunning {
+		sdk.runSingleAction(instanceId, "StopInstance", AliyunInstanceStatusStopped)
+	}
 }
 
 func (sdk *AliyunSDK) rebootInstance(instanceId string) {
@@ -225,30 +243,37 @@ func (sdk *AliyunSDK) rebootInstance(instanceId string) {
 	sdk.StartInstance(instanceId)
 }
 
-func (sdk *AliyunSDK) deleteInstance(instanceId string) {
-	sdk.StopInstance(instanceId)
+func (sdk *AliyunSDK) delete(instance AliyunInstance) {
+	//包年包月不能直接释放，只能先关机了
+	if instance.InstanceChargeType == AliyunPaidTypePre && instance.Status == AliyunInstanceStatusRunning {
+		sdk.StopInstance(instance.InstanceId)
+		return
+	}
+	sdk.StopInstance(instance.InstanceId)
 	param := &url.Values{}
 	param.Set("Action", "DeleteInstance")
-	param.Set("InstanceId", instanceId)
+	param.Set("InstanceId", instance.InstanceId)
 	sdk.MustCall(param)
 }
 
+func (sdk *AliyunSDK) DeleteInstanceById(id string) {
+	for _, instance := range sdk.getAllInstance() {
+		if instance.InstanceId == id {
+			sdk.delete(instance)
+		}
+	}
+}
+
 func (sdk *AliyunSDK) DeleteInstance(ip string) {
-	aliyunInstance := sdk.getInstanceByIp(ip)
-	//包年包月不能直接释放，只能先关机了
-	if aliyunInstance.InstanceChargeType == AliyunPaidTypePre && aliyunInstance.Status == AliyunInstanceStatusRunning {
-		sdk.StopInstance(aliyunInstance.InstanceId)
-		return
+	for _, instance := range sdk.getAllInstance() {
+		if instance.getIp() == ip {
+			sdk.delete(instance)
+		}
 	}
-	instance, exist := sdk.ListAllInstance()[ip]
-	if !exist {
-		return
-	}
-	sdk.deleteInstance(instance.Id)
 }
 
 func (sdk *AliyunSDK) RenameInstanceByIp(name, ip string) {
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if !exist {
 		return
 	}
@@ -259,12 +284,12 @@ func (sdk *AliyunSDK) RenameInstanceByIp(name, ip string) {
 	sdk.MustCall(param)
 }
 
-func (sdk *AliyunSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
+func (sdk *AliyunSDK) ListAllRunningInstance() (ipInstanceMap map[string]Instance) {
 	all := sdk.getAllInstance()
 	ipInstanceMap = map[string]Instance{}
 	for _, i := range all {
 		if i.Status != AliyunInstanceStatusRunning {
-			fmt.Println("[kmgThirdCloud SDKAliyun]", i.Status, i.InstanceName, i.getIp())
+			fmt.Println(logPrefixAliyun, i.Status, i.InstanceName, i.getIp())
 			continue
 		}
 		ip := i.getIp()
@@ -274,6 +299,20 @@ func (sdk *AliyunSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
 		ipInstanceMap[ip] = Instance{
 			Id:          i.InstanceId,
 			Ip:          ip,
+			Name:        i.InstanceName,
+			BelongToSDK: sdk,
+		}
+	}
+	return
+}
+
+func (sdk *AliyunSDK) ListAllInstance() (idInstanceMap map[string]Instance) {
+	all := sdk.getAllInstance()
+	idInstanceMap = map[string]Instance{}
+	for _, i := range all {
+		idInstanceMap[i.InstanceId] = Instance{
+			Id:          i.InstanceId,
+			Ip:          i.getIp(),
 			Name:        i.InstanceName,
 			BelongToSDK: sdk,
 		}
@@ -308,16 +347,6 @@ func (sdk *AliyunSDK) getAllInstance() []AliyunInstance {
 		p++
 	}
 	return all
-}
-
-func (sdk *AliyunSDK) getInstanceByIp(ip string) *AliyunInstance {
-	all := sdk.getAllInstance()
-	for _, instance := range all {
-		if instance.getIp() == ip {
-			return &instance
-		}
-	}
-	return (*AliyunInstance)(nil)
 }
 
 func (sdk *AliyunSDK) AllocatePublicIpAddress(instanceId string) (ip string) {

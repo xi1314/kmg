@@ -5,13 +5,7 @@ import (
 	"os"
 )
 
-var StdoutLogger Logger = NewLogger(stdoutLogWriter{})
-var StdoutLogWriter LogWriter = stdoutLogWriter{}
-
-type stdoutLogWriter struct {
-}
-
-func (nl stdoutLogWriter) LogWrite(r LogRow) {
+func StdoutLogWriter(r LogRow){
 	b, err := r.Marshal()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[StdoutLogger] Marshal fail", err)

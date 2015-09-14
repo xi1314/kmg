@@ -8,6 +8,7 @@ import (
 
 	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCmd"
+	"github.com/bronze1man/kmg/kmgPlatform"
 )
 
 // 获取当前地址的列表的字符串
@@ -30,14 +31,37 @@ type DeviceAddr struct {
 	DevString string     //设备名称 eth0 什么的
 }
 
+// 返回nil表示没找到这个设备,或者这个设备上面没有ip
+func MustGetFirstIPByNetDeviceName(devname string) net.IP{
+	if !kmgPlatform.IsLinux(){
+		panic("[GetFirstIPByNetDeviceName] only support linux now")
+	}
+	deviceAddrList, err := GetCurrentDeviceAddr()
+	if err != nil {
+		panic(err)
+	}
+	for _,deviceAddr:=range deviceAddrList{
+		if deviceAddr.DevString==devname{
+			return deviceAddr.IP
+		}
+	}
+	return nil
+}
+
 //目前仅支持linux
 func (a DeviceAddr) IpAddrDel() (err error) {
+	if !kmgPlatform.IsLinux(){
+		panic("[DeviceAddr.IpAddrDel] only support linux now")
+	}
 	one, _ := a.IPNet.Mask.Size()
 	return kmgCmd.CmdString(fmt.Sprintf("ip addr del %s/%d dev %s", a.IP.String(), one, a.DevString)).Run()
 }
 
 //目前仅支持linux
 func GetCurrentDeviceAddr() (ipnets []DeviceAddr, err error) {
+	if !kmgPlatform.IsLinux(){
+		panic("[GetCurrentDeviceAddr] only support linux now")
+	}
 	out, err := kmgCmd.CmdString("ip addr").RunAndReturnOutput()
 	if err != nil {
 		return
@@ -47,6 +71,9 @@ func GetCurrentDeviceAddr() (ipnets []DeviceAddr, err error) {
 
 //返回当前机器上面的所有ip列表.没有ip会报错
 func MustGetCurrentIpList() (ipList []net.IP) {
+	if !kmgPlatform.IsLinux(){
+		panic("[MustGetCurrentIpList] only support linux now")
+	}
 	deviceAddrList, err := GetCurrentDeviceAddr()
 	if err != nil {
 		panic(err)
@@ -62,6 +89,9 @@ func MustGetCurrentIpList() (ipList []net.IP) {
 }
 
 func MustGetCurrentIpWithPortList(port uint16) (sList []string) {
+	if !kmgPlatform.IsLinux(){
+		panic("[MustGetCurrentIpWithPortList] only support linux now")
+	}
 	deviceAddrList, err := GetCurrentDeviceAddr()
 	if err != nil {
 		panic(err)

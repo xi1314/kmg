@@ -34,7 +34,6 @@ func RegisterProfile(prefixPath string) {
 	http.Handle(filepath.Join(prefixPath, "/debug/gc"), http.HandlerFunc(GcHandler))
 }
 
-// 暂时使用默认http的handler
 func StartProfileOnAddr(prefixPath string, profileAddr string) {
 
 	mux:=http.NewServeMux()

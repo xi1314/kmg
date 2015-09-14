@@ -24,6 +24,7 @@ public class Main {
             if (!RpcDemo.KmgTime.ParseGolangDate("2001-01-01T02:01:01.101+08:00").equals(outT)){
                 throw new Exception("3 "+RpcDemo.KmgTime.FormatGolangDate(outT));
             }
+            RpcDemo.GetDefaultClient().DemoFunc4(new RpcDemo.DemoRequest(),new RpcDemo.DemoRequest());
             System.out.println("Success");
         }catch (Exception e){
             System.out.println(e.getMessage());

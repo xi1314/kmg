@@ -33,3 +33,11 @@ func GetCompiledPlatform() Platform {
 		Arch: runtime.GOARCH,
 	}
 }
+
+func IsLinux()bool{
+	return runtime.GOOS=="linux"
+}
+
+func IsDarwin() bool{
+	return runtime.GOOS=="darwin"
+}

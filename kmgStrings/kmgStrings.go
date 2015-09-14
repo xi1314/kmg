@@ -16,6 +16,15 @@ func IsInSlice(slice []string, s string) bool {
 	return false
 }
 
+func SliceNoRepeatMerge(s1 []string,s2 []string) []string{
+	for _, s :=range s2{
+		if !IsInSlice(s1, s){
+			s1 = append(s1, s)
+		}
+	}
+	return s1
+}
+
 //里面的字符串有3种状态,
 // 1. false 表示需要检查,但是还没有遇到
 // 2. true	表示需要检查,并且遇到了

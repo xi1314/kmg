@@ -47,7 +47,7 @@ func CompressAndEncryptBytesDecodeV2(key *[32]byte, data []byte) (output []byte,
 		return nil, errors.New("[kmgCipher.CompressAndEncryptBytesDecode] input data too small")
 	}
 	aseKey := key[:]
-	Iv := data[:16] //此处把cap改低一点,使后面的append不会覆盖已有数据
+	Iv := data[:16]
 	block, err := aes.NewCipher(aseKey)
 	if err != nil {
 		return nil, err

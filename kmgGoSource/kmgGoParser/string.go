@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-// 可以读这两种 "abc" `abc`
-func mustReadGoString(r *kmgGoReader.Reader) (output []byte) {
+// 可以读这两种 "abc" `abc` ,返回这个东西实际存放的信息.
+func MustReadGoString(r *kmgGoReader.Reader) (output []byte) {
 	b := r.ReadByte()
 	if b == '"' {
 		buf := &bytes.Buffer{}

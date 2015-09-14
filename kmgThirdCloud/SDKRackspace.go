@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var logPrefixRackspace = "[kmgThirdCloud SDKRackspace]"
+
 type RackspaceInstanceStatus string
 
 const (
@@ -71,24 +73,25 @@ func (sdk *RackspaceSDK) CreateInstance() (ip string) {
 	one, err := result.Extract()
 	handleErr(err)
 	for {
-		rackspaceInstance, err := servers.Get(sdk.p, one.ID).Extract()
+		instance, err := servers.Get(sdk.p, one.ID).Extract()
 		handleErr(err)
-		if rackspaceInstance.Status == string(RackspaceInstanceStatusACTIVE) {
-			one = rackspaceInstance
+		fmt.Println(logPrefixRackspace, instance.ID, instance.AccessIPv4, instance.Status)
+		if instance.Status == string(RackspaceInstanceStatusACTIVE) {
+			one = instance
 			break
 		}
-		if rackspaceInstance.Status == string(RackspaceInstanceStatusBUILD) {
+		if instance.Status == string(RackspaceInstanceStatusBUILD) {
 			time.Sleep(time.Second)
 		}
-		if rackspaceInstance.Status == string(RackspaceInstanceStatusUNKNOWN) || rackspaceInstance.Status == string(RackspaceInstanceStatusERROR) {
-			panic("Rackspace CreateInstance got ERROR/UNKNOWN " + rackspaceInstance.AccessIPv4 + " " + rackspaceInstance.ID)
+		if instance.Status == string(RackspaceInstanceStatusUNKNOWN) || instance.Status == string(RackspaceInstanceStatusERROR) {
+			panic("Rackspace CreateInstance got ERROR/UNKNOWN " + instance.AccessIPv4 + " " + instance.ID)
 		}
 	}
 	return one.AccessIPv4
 }
 
 func (sdk *RackspaceSDK) RenameInstanceByIp(name, ip string) {
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if exist {
 		servers.Update(sdk.p, instance.Id, OpenStackServers.UpdateOpts{
 			Name: name,
@@ -97,12 +100,12 @@ func (sdk *RackspaceSDK) RenameInstanceByIp(name, ip string) {
 }
 
 func (sdk *RackspaceSDK) DeleteInstance(ip string) {
-	instance, exist := sdk.ListAllInstance()[ip]
+	instance, exist := sdk.ListAllRunningInstance()[ip]
 	if exist {
 		servers.Delete(sdk.p, instance.Id)
 	}
 	for {
-		_, exist := sdk.ListAllInstance()[ip]
+		_, exist := sdk.ListAllRunningInstance()[ip]
 		if !exist {
 			break
 		}
@@ -110,16 +113,48 @@ func (sdk *RackspaceSDK) DeleteInstance(ip string) {
 	}
 }
 
-func (sdk *RackspaceSDK) ListAllInstance() (ipInstanceMap map[string]Instance) {
+func (sdk *RackspaceSDK) DeleteInstanceById(id string) {
+	instance, exist := sdk.ListAllInstance()[id]
+	if exist {
+		servers.Delete(sdk.p, instance.Id)
+	}
+	for {
+		_, exist := sdk.ListAllInstance()[id]
+		if !exist {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+}
+
+func (sdk *RackspaceSDK) ListAllRunningInstance() (ipInstanceMap map[string]Instance) {
 	ipInstanceMap = map[string]Instance{}
 	err := servers.List(sdk.p, nil).EachPage(func(p pagination.Page) (quit bool, err error) {
 		serverSlice, err := servers.ExtractServers(p)
 		for _, server := range serverSlice {
 			if server.Status != string(RackspaceInstanceStatusACTIVE) {
-				fmt.Println("[kmgThirdCloud SDKRackspace]", server.Status, server.AccessIPv4, server.Status)
+				fmt.Println(logPrefixRackspace, server.ID, server.AccessIPv4, server.Status)
 				continue
 			}
 			ipInstanceMap[server.AccessIPv4] = Instance{
+				Ip:          server.AccessIPv4,
+				Id:          server.ID,
+				Name:        server.Name,
+				BelongToSDK: sdk,
+			}
+		}
+		return true, err
+	})
+	handleErr(err)
+	return
+}
+
+func (sdk *RackspaceSDK) ListAllInstance() (idInstanceMap map[string]Instance) {
+	idInstanceMap = map[string]Instance{}
+	err := servers.List(sdk.p, nil).EachPage(func(p pagination.Page) (quit bool, err error) {
+		serverSlice, err := servers.ExtractServers(p)
+		for _, server := range serverSlice {
+			idInstanceMap[server.ID] = Instance{
 				Ip:          server.AccessIPv4,
 				Id:          server.ID,
 				Name:        server.Name,

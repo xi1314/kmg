@@ -61,7 +61,7 @@ func (gofile *File) readGoVar(r *kmgGoReader.Reader) {
 	for {
 		if b == '"' || b == '`' {
 			r.UnreadByte()
-			mustReadGoString(r)
+			MustReadGoString(r)
 		}
 		if b == '\'' {
 			r.UnreadByte()
@@ -110,7 +110,7 @@ func (gofile *File) readGoConst(r *kmgGoReader.Reader) {
 	for {
 		if b == '"' || b == '`' {
 			r.UnreadByte()
-			mustReadGoString(r)
+			MustReadGoString(r)
 		}
 		if b == '\'' {
 			r.UnreadByte()

@@ -19,6 +19,11 @@ func NewReader(buf []byte, filePos *FilePos) *Reader {
 	}
 }
 
+func NewReaderWithPosFile(filename string,content []byte) *Reader{
+	pos:=NewPosFile(filename,content)
+	return NewReader(content,pos)
+}
+
 func (r *Reader) Pos() int {
 	return r.pos
 }

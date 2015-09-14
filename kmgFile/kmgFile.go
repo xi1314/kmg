@@ -33,6 +33,10 @@ func GetFileBaseWithoutExt(p string) string {
 	return filepath.Base(p[:len(p)-len(filepath.Ext(p))])
 }
 
+func GetExt(path string) string{
+	return strings.ToLower(filepath.Ext(path))
+}
+
 func WriteFile(path string, content []byte) (err error) {
 	return ioutil.WriteFile(path, content, os.FileMode(0777))
 }
@@ -151,6 +155,7 @@ func MustFileExist(path string) bool {
 
 // 目录是否存在,如果不存在会返回false,如果存在但是不是目录,会返回false
 // 其他此处无法预料的错误会panic
+// TODO 解决名称歧义问题.
 func MustDirectoryExist(path string) bool {
 	fi, err := os.Stat(path)
 	if err != nil {
@@ -195,6 +200,10 @@ func MustDelete(path string) {
 	return
 }
 
+// 拷贝文件
+// 不能拷贝目录
+// 如果目标文件存在,直接覆盖
+// 如果目标文件的文件夹不存在,创建文件夹,然后再拷贝
 // copy file
 // can not copy directory
 // * override dst file if it exist,

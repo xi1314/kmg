@@ -206,6 +206,10 @@ func (ctx *Context) GetSchemeAndDomain() string {
 	return "http://" + ctx.domain
 }
 
+func (ctx *Context) GetName() string{
+	return ctx.bucket
+}
+
 type FileInfo struct {
 	Path    string //
 	Hash    string

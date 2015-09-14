@@ -25,7 +25,6 @@ func GetAllProcessByBinName(binName string) []*Process {
 	if !kmgPlatform.LinuxAmd64.Compatible(kmgPlatform.GetCompiledPlatform()) {
 		panic(ErrPlatformNotSupport)
 	}
-	//	b := kmgCmd.CmdBash(CmdProcessListByBinName(binName)).MustRunAndReturnOutputAndNotExitStatusCheck()
 	b, err := kmgCmd.CmdBash(CmdProcessListByBinName(binName)).GetExecCmd().CombinedOutput()
 	if err != err {
 		fmt.Println(err)

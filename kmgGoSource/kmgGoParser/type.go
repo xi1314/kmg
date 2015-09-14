@@ -450,7 +450,7 @@ func (gofile *File) readStruct(r *kmgGoReader.Reader) StructType {
 			return out
 		} else if b == '"' || b == '\'' || b == '`' {
 			r.UnreadByte()
-			lastTag = mustReadGoString(r)
+			lastTag = MustReadGoString(r)
 		} else if b == ',' {
 			continue
 		} else if b == '\n' {

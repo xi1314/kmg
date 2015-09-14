@@ -58,7 +58,7 @@ func goSourceRemoveComment(in []byte, filePos *kmgGoReader.FilePos) (out []byte)
 			r.UnreadByte()
 			startPos := r.Pos()
 			//fmt.Println("string start "+r.GetFileLineInfo())
-			mustReadGoString(r)
+			MustReadGoString(r)
 			buf.Write(r.BufToCurrent(startPos))
 		case '\'':
 			r.UnreadByte()

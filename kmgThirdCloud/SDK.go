@@ -17,16 +17,23 @@ type Instance struct {
 var _ SDK = (*RackspaceSDK)(nil)
 var _ SDK = (*AliyunSDK)(nil)
 
-//以下函数均需做成「同步」的形式
+//本接口中，为降低调用者复杂度，不提供机器「状态」，因为状态较为复杂，而调用者其实只关心正在可用的，即正在运行的机器
 type SDK interface {
+	//Field
 	//Region       string //实例所在地区
 	//InstanceName string
 	//ImageName    string //操作系统
 	//FlavorName   string //实例配置，如 4 CPU / 4GB RAM
+
+	//以实例外网 Ip 为主键的方法，通常用这些已经够了
 	CreateInstance() (ip string)
 	DeleteInstance(ip string)
 	RenameInstanceByIp(name, ip string)
-	ListAllInstance() (ipInstanceMap map[string]Instance)
+	ListAllRunningInstance() (ipInstanceMap map[string]Instance)
+
+	//以实例 Id 为主键的方法，一般不使用，当没有实例没有 ip 时可以使用
+	ListAllInstance() (idInstanceMap map[string]Instance)
+	DeleteInstanceById(id string)
 }
 
 type SDKCache struct {
@@ -34,6 +41,7 @@ type SDKCache struct {
 	Init  func() SDK
 }
 
+//Lazy Getter
 func (sdkCache SDKCache) Get() SDK {
 	if sdkCache.cache == nil {
 		sdkCache.cache = sdkCache.Init()

@@ -8,6 +8,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -146,40 +147,11 @@ public class RpcDemo {
                 reqData.T = T;
                 return this.sendRequest("DemoTime2", reqData, DemoTime2RpcResponse.class).Out;
         }
-        //引入的不会变的库代码.
+        //引入的不会变的库代码.还需要com.google.gson 这个package的依赖
         public String RemoteUrl;
         public byte[] Psk;
         private <T> T sendRequest(String apiName,Object reqData,Class<T> tClass) throws Exception{
-            JsonSerializer<Date> ser = new JsonSerializer<Date>() {
-                @Override
-                public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext
-                        context) {
-                    if (src==null){
-                        return null;
-                    }else{
-                        return new JsonPrimitive(KmgTime.FormatGolangDate(src));
-                    }
-                }
-            };
-            JsonDeserializer<Date> deser = new JsonDeserializer<Date>() {
-                @Override
-                public Date deserialize(JsonElement json, Type typeOfT,
-                                        JsonDeserializationContext context) throws JsonParseException {
-                    if (json==null){
-                        return null;
-                    }else{
-                        try {
-                            return KmgTime.ParseGolangDate(json.getAsString());
-                        }catch (Exception e){
-                            throw new JsonParseException(e.getMessage());
-                        }
-                    }
-                }
-            };
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Date.class, ser)
-                    .registerTypeAdapter(Date.class, deser).create();
-            String inDataString = gson.toJson(reqData); // UTF8? 啥编码?
+            String inDataString = kmgJson.MarshalToString(reqData); // UTF8? 啥编码?
             if (apiName.length()>255){
                 throw new Exception("len(apiName)>255");
             }
@@ -189,10 +161,10 @@ public class RpcDemo {
             baos.write(KmgString.StringToArrayByte(inDataString));
             byte[] inByte = baos.toByteArray();
             if (this.Psk!=null){
-                inByte = KmgCrypto.CompressAndEncryptBytesEncodeV2(this.Psk, inByte);
+                inByte = kmgCrypto.CompressAndEncryptBytesEncodeV2(this.Psk, inByte);
             }
-            byte[] outBytes =  KmgHttp.SimplePost(this.RemoteUrl,inByte);
-            outBytes = KmgCrypto.CompressAndEncryptBytesDecodeV2(this.Psk, outBytes);
+            byte[] outBytes =  kmgHttp.SimplePost(this.RemoteUrl, inByte);
+            outBytes = kmgCrypto.CompressAndEncryptBytesDecodeV2(this.Psk, outBytes);
             if (outBytes.length==0){
                 throw new Exception("outBytes.length==0");
             }
@@ -200,7 +172,7 @@ public class RpcDemo {
             if (outBytes[0]==1){ //error
                 throw new Exception(AfterString);
             }else if (outBytes[0]==2) { //success
-                return gson.fromJson(AfterString, tClass);
+                return kmgJson.UnmarshalFromString(AfterString, tClass);
             }
             throw new Exception("httpjsonApi protocol error 1 "+outBytes[0]);
         }
@@ -208,7 +180,7 @@ public class RpcDemo {
     public static void ConfigDefaultClient(String RemoteUrl,String pskStr){
         defaultClient = new Client();
         defaultClient.RemoteUrl = RemoteUrl;
-        defaultClient.Psk = KmgCrypto.Get32PskFromString(pskStr);
+        defaultClient.Psk = kmgCrypto.Get32PskFromString(pskStr);
     }
     private static Client defaultClient;
     public static Client GetDefaultClient(){
@@ -223,37 +195,37 @@ public class RpcDemo {
             return new String(bytes, UTF_8);
         }
     }
-    public static class KmgBytes{
+    public static class kmgBytes {
         public static byte[] Slice(byte[] in,int start,int end){
             return Arrays.copyOfRange(in,start,end);
         }
     }
-    public static class KmgIo{
+    public static class kmgIo {
         private static final int EOF = -1;
         public static byte[] InputStreamReadAll(final InputStream input) throws IOException {
-                final ByteArrayOutputStream output = new ByteArrayOutputStream();
-                copy(input, output);
-                return output.toByteArray();
-            }
+            final ByteArrayOutputStream output = new ByteArrayOutputStream();
+            copy(input, output);
+            return output.toByteArray();
+        }
         public static int copy(final InputStream input, final OutputStream output) throws IOException {
-                final long count = copyLarge(input, output,new byte[8192]);
-                if (count > Integer.MAX_VALUE) {
-                    return -1;
-                }
-                return (int) count;
+            final long count = copyLarge(input, output,new byte[8192]);
+            if (count > Integer.MAX_VALUE) {
+                return -1;
             }
+            return (int) count;
+        }
         public static long copyLarge(final InputStream input, final OutputStream output, final byte[] buffer)
                 throws IOException {
-                long count = 0;
-                int n = 0;
-                while (EOF != (n = input.read(buffer))) {
-                    output.write(buffer, 0, n);
-                    count += n;
-                }
-                return count;
+            long count = 0;
+            int n = 0;
+            while (EOF != (n = input.read(buffer))) {
+                output.write(buffer, 0, n);
+                count += n;
+            }
+            return count;
         }
     }
-    public static class KmgHttp{
+    public static class kmgHttp {
         public static byte[] SimplePost(String urls,byte[] inByte) throws Exception{
             URL url = new URL(urls);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -262,6 +234,8 @@ public class RpcDemo {
             conn.setUseCaches(false);
             conn.setDoInput(true);
             conn.setDoOutput(true);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(5000);
             OutputStream os = conn.getOutputStream();
             os.write(inByte);
             os.flush();
@@ -272,12 +246,12 @@ public class RpcDemo {
             }else{
                 is = conn.getErrorStream();
             }
-            byte[] outByte = KmgIo.InputStreamReadAll(is);
+            byte[] outByte = kmgIo.InputStreamReadAll(is);
             is.close();
             return outByte;
         }
     }
-    public static class KmgCrypto{
+    public static class kmgCrypto {
         private static byte[] magicCode4 = new byte[]{(byte)0xa7,(byte)0x97,0x6d,0x15};
         // key lenth 32
         public static byte[] CompressAndEncryptBytesEncodeV2(byte[] key,byte[] data) throws Exception{
@@ -296,22 +270,22 @@ public class RpcDemo {
         }
         // key lenth 32
         public static byte[] CompressAndEncryptBytesDecodeV2(byte[] key,byte[] data) throws Exception {
-            if (data.length < 32) {
-                throw new Exception("[KmgCrypto.CompressAndEncryptBytesDecode] input data too small");
+            if (data.length < 21) {
+                throw new Exception("[kmgCrypto.CompressAndEncryptBytesDecode] input data too small");
             }
-            byte[] cbcIv = KmgBytes.Slice(data, 0, 16);
-            byte[] encrypted = KmgBytes.Slice(data, 16, data.length);
+            byte[] cbcIv = kmgBytes.Slice(data, 0, 16);
+            byte[] encrypted = kmgBytes.Slice(data, 16, data.length);
             Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(cbcIv));
             byte[] decrypted = cipher.doFinal(encrypted);
-            byte[] compressed = KmgBytes.Slice(decrypted, 0, decrypted.length - 4);
-            if (!Arrays.equals(magicCode4, KmgBytes.Slice(decrypted,decrypted.length-4,decrypted.length))){
-                throw new Exception("[KmgCrypto.CompressAndEncryptBytesDecode] magicCode not match");
+            byte[] compressed = kmgBytes.Slice(decrypted, 0, decrypted.length - 4);
+            if (!Arrays.equals(magicCode4, kmgBytes.Slice(decrypted, decrypted.length - 4, decrypted.length))){
+                throw new Exception("[kmgCrypto.CompressAndEncryptBytesDecode] magicCode not match");
             }
             return uncompressV2(compressed);
         }
         private static byte[] compressV2(byte[] data) throws Exception{
-            byte[] outData = KmgCompress.ZlibMustCompress(data);
+            byte[] outData = kmgCompress.ZlibMustCompress(data);
             if (outData.length>=data.length){
                 ByteArrayOutputStream buf = new ByteArrayOutputStream();
                 buf.write(0);
@@ -329,9 +303,9 @@ public class RpcDemo {
                 throw new Exception("[uncopressV2] len(inData)==0");
             }
             if (data[0]==0){
-                return KmgBytes.Slice(data,1,data.length);
+                return kmgBytes.Slice(data, 1, data.length);
             }
-            return KmgCompress.ZlibUnCompress(KmgBytes.Slice(data,1,data.length));
+            return kmgCompress.ZlibUnCompress(kmgBytes.Slice(data, 1, data.length));
         }
         public static byte[] Sha512Sum(byte[] data) {
             try {
@@ -345,10 +319,10 @@ public class RpcDemo {
             return null;
         }
         public static byte[] Get32PskFromString(String s){
-            return KmgBytes.Slice(KmgCrypto.Sha512Sum(KmgString.StringToArrayByte(s)), 0, 32);
+            return kmgBytes.Slice(kmgCrypto.Sha512Sum(KmgString.StringToArrayByte(s)), 0, 32);
         }
     }
-    public static class KmgCompress{
+    public static class kmgCompress {
         public static byte[] ZlibMustCompress(byte[] inB){
             Deflater deflater = new Deflater();
             deflater.setInput(inB);
@@ -377,6 +351,71 @@ public class RpcDemo {
             }
             deflater.end();
             return baos.toByteArray();
+        }
+    }
+    public static class kmgSync {
+        public static class Once{
+            private Object locker = new Object();
+            private boolean isInit = false;
+            public void Do(Runnable f){
+                synchronized (locker){
+                    if (isInit){
+                        return;
+                    }
+                    f.run();
+                    isInit = true;
+                }
+            }
+        }
+    }
+    public static class kmgJson {
+        public static String MarshalToString(Object data){
+            return getGson().toJson(data);
+        }
+        public static<T> T UnmarshalFromString(String s,Class<T> t) throws JsonSyntaxException {
+            if (t==void.class){
+                return null;
+            }
+            return getGson().fromJson(s,t);
+        }
+        private static Gson gson;
+        private static kmgSync.Once gsonOnce = new kmgSync.Once();
+        private static Gson getGson(){
+            gsonOnce.Do(new Runnable() {
+                @Override
+                public void run() {
+                    JsonSerializer<Date> ser = new JsonSerializer<Date>() {
+                        @Override
+                        public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext
+                                context) {
+                            if (src == null) {
+                                return null;
+                            } else {
+                                return new JsonPrimitive(KmgTime.FormatGolangDate(src));
+                            }
+                        }
+                    };
+                    JsonDeserializer<Date> deser = new JsonDeserializer<Date>() {
+                        @Override
+                        public Date deserialize(JsonElement json, Type typeOfT,
+                                                JsonDeserializationContext context) throws JsonParseException {
+                            if (json == null) {
+                                return null;
+                            } else {
+                                try {
+                                    return KmgTime.ParseGolangDate(json.getAsString());
+                                } catch (Exception e) {
+                                    throw new JsonParseException(e.getMessage());
+                                }
+                            }
+                        }
+                    };
+                    gson = new GsonBuilder()
+                            .registerTypeAdapter(Date.class, ser)
+                            .registerTypeAdapter(Date.class, deser).create();
+                }
+            });
+            return gson;
         }
     }
     public static class KmgRand{
