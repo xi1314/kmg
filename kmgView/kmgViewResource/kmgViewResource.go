@@ -17,6 +17,7 @@ type ResourceUploadRequest struct {
 	Qiniu         *kmgQiniu.Context
 	QiniuPrefix   string
 	OutGoFilePath string
+	FuncPrefix    string
 }
 
 func ResourceBuild(req *ResourceUploadRequest){
@@ -37,11 +38,14 @@ func ResourceBuild(req *ResourceUploadRequest){
 	req.Qiniu.MustUploadFromBytes(req.QiniuPrefix+"/"+jsFileName, builder.JsContent)
 
 	packageName := filepath.Base(filepath.Dir(req.OutGoFilePath))
+	if req.FuncPrefix == "" {
+		req.FuncPrefix = "getManaged"
+	}
 	outGoContent := []byte(`package ` + packageName + `
-func getManagedJsUrl()string{
+func ` + req.FuncPrefix + `JsUrl()string{
 	return ` + fmt.Sprintf("%#v", req.Qiniu.GetSchemeAndDomain()+"/"+req.QiniuPrefix+"/"+jsFileName) + `
 }
-func getManagedCssUrl()string{
+func ` + req.FuncPrefix + `CssUrl()string{
 	return ` + fmt.Sprintf("%#v", req.Qiniu.GetSchemeAndDomain()+"/"+req.QiniuPrefix+"/"+cssFileName) + `
 }
 `)

@@ -1,6 +1,9 @@
 package kmgBootstrap
 
-import "github.com/bronze1man/kmg/kmgView"
+import (
+	"github.com/bronze1man/kmg/kmgView"
+	"github.com/bronze1man/kmg/kmgXss"
+)
 
 type Wrap struct {
 	//<html><head><title>
@@ -21,15 +24,46 @@ func NewWrap(title string, content ...kmgView.HtmlRenderer) *Wrap {
 	wrap := &Wrap{
 		Title: title,
 		Head: kmgView.HtmlRendererList{
-			GetJQueryCDN(),
-			GetBootstrapCDN(),
-			GetMomentJsCDN(),
+			IncludeScriptFile(getBootstrapJsUrl()),
+			InclueCssFile(getBootstrapCssUrl()),
+			//GetJQueryCDN(),
+			//GetBootstrapCDN(),
+			//GetMomentJsCDN(),
 		},
 		Body: body,
 	}
 	return wrap
 }
 
+func NewWrapWithChart(title string, content ...kmgView.HtmlRenderer) *Wrap {
+	body := kmgView.HtmlRendererList{}
+	for _, r := range content {
+		body = append(body, r)
+	}
+	wrap := &Wrap{
+		Title: title,
+		Head: kmgView.HtmlRendererList{
+			IncludeScriptFile(getEchartsJsUrl()),
+			InclueCssFile(getEchartsCssUrl()),
+		},
+		Body: body,
+	}
+	return wrap
+}
+
+func IncludeScriptFile(url string) kmgView.HtmlRenderer {
+	return kmgView.Html(`
+	<script src="` + kmgXss.H(url) + `"></script>
+	`)
+}
+
+func InclueCssFile(url string) kmgView.HtmlRenderer {
+	return kmgView.Html(`
+	<link rel="stylesheet" href="` + kmgXss.H(url) + `">
+	`)
+}
+
+/*
 //带有 ECharts JS CDN 信息，ECharts JS 有 1MB 左右，不是图表的页面慎用
 func NewWrapWithChart(title string, content ...kmgView.HtmlRenderer) *Wrap {
 	w := NewWrap(title, content...)
@@ -71,3 +105,4 @@ func GetMomentJsCDN() kmgView.HtmlRenderer {
 	<script src="http://7xjyrb.com2.z0.glb.qiniucdn.com/moment.js"></script>
 	`)
 }
+*/

@@ -12,14 +12,14 @@ import (
 )
 
 // 获取当前地址的列表的字符串
-func GetCurrentAddrListString() string{
-	addrList,err:=net.InterfaceAddrs()
-	if err!=nil{
-		return "[GetCurrentAddrListString] fail "+err.Error()
+func GetCurrentAddrListString() string {
+	addrList, err := net.InterfaceAddrs()
+	if err != nil {
+		return "[GetCurrentAddrListString] fail " + err.Error()
 	}
-	out:=""
-	for _,addr:=range addrList{
-		out+=addr.String()+";"
+	out := ""
+	for _, addr := range addrList {
+		out += addr.String() + ";"
 	}
 	return out
 }
