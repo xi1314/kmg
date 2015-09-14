@@ -12,7 +12,7 @@ import (
 // 		kmgLog.DefaultLogger = kmgLog.NewFileLogger("log")
 func NewFileLogWriter(logDir string) LogWriter {
 	kmgFile.MustMkdirAll(logDir)
-	return func(r LogRow){
+	return func(r LogRow) {
 		b, err := r.Marshal()
 		if err != nil {
 			fmt.Println("[fileLoger] logToJson fail", err)

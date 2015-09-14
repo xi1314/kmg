@@ -47,6 +47,6 @@ func MonthAndDayFormat(t time.Time) string {
 	return t.In(DefaultTimeZone).Format(FormatMysqlMouthAndDay)
 }
 
-func NowWithFileNameFormatV2()string{
+func NowWithFileNameFormatV2() string {
 	return NowFromDefaultNower().Format(FormatFileNameV2)
 }

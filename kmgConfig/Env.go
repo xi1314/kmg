@@ -113,6 +113,13 @@ func (context *Env) GetGOROOT() string {
 	return context.GOROOT
 }
 
+func (context *Env) GetFirstGOPATH() string {
+	if len(context.GOPATH) == 0 {
+		return ""
+	}
+	return context.GOPATH[0]
+}
+
 func FindFromPath(p string) (context *Env, err error) {
 	p, err = kmgFile.SearchFileInParentDir(p, ".kmg.yml")
 	if err != nil {

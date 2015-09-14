@@ -16,9 +16,9 @@ func IsInSlice(slice []string, s string) bool {
 	return false
 }
 
-func SliceNoRepeatMerge(s1 []string,s2 []string) []string{
-	for _, s :=range s2{
-		if !IsInSlice(s1, s){
+func SliceNoRepeatMerge(s1 []string, s2 []string) []string {
+	for _, s := range s2 {
+		if !IsInSlice(s1, s) {
 			s1 = append(s1, s)
 		}
 	}

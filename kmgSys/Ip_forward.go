@@ -9,7 +9,7 @@ import (
 )
 
 func IsIpForwardOn() bool {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[IsIpForwardOn] only support linux now")
 	}
 	b := kmgFile.MustReadFile("/proc/sys/net/ipv4/ip_forward")
@@ -24,7 +24,7 @@ func IsIpForwardOn() bool {
 
 // 证实可用
 func SetIpForwardOn() {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[SetIpForwardOn] only support linux now")
 	}
 	kmgFile.MustWriteFile("/proc/sys/net/ipv4/ip_forward", []byte("1"))

@@ -33,7 +33,7 @@ func GetFileBaseWithoutExt(p string) string {
 	return filepath.Base(p[:len(p)-len(filepath.Ext(p))])
 }
 
-func GetExt(path string) string{
+func GetExt(path string) string {
 	return strings.ToLower(filepath.Ext(path))
 }
 

@@ -1,8 +1,8 @@
 package kmgBootstrap
 
 func getEchartsJsUrl() string {
-	return "http://kmgtools.qiniudn.com/kmgBootstrap/031e1e932da20afbb96f1edd21047e8f.js"
+	return "http://kmgtools.qiniudn.com/kmgBootstrap/df41c1d5c015f3fc194e7bc28381e89b.js"
 }
 func getEchartsCssUrl() string {
-	return "http://kmgtools.qiniudn.com/kmgBootstrap/2c650552ff89f2dbc983a3b25d83dd4b.css"
+	return "http://kmgtools.qiniudn.com/kmgBootstrap/c149d94bd8d56ad09c6b6f5c2447e6ea.css"
 }

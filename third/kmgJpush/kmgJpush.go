@@ -11,15 +11,15 @@ type Client struct {
 	c            *jpush.PushClient
 	IsIosProduct bool
 	name         string
-	Platform  	 string
+	Platform     string
 }
 
 type NewClientRequest struct {
-	Name         	string //这个客户端的名字
-	AppKey       	string
-	Secret       	string
-	Platform 	 	string  //iOS、Android平台
-	IsIosProduct 	bool //如果是否false表示向测试设备推送,如果是true表示向正式设备推送,后台的那个开发与正式似乎没有作用.
+	Name         string //这个客户端的名字
+	AppKey       string
+	Secret       string
+	Platform     string //iOS、Android平台
+	IsIosProduct bool   //如果是否false表示向测试设备推送,如果是true表示向正式设备推送,后台的那个开发与正式似乎没有作用.
 }
 
 func NewClient(req NewClientRequest) *Client {
@@ -27,7 +27,7 @@ func NewClient(req NewClientRequest) *Client {
 		c:            jpush.NewPushClient(req.Secret, req.AppKey),
 		IsIosProduct: req.IsIosProduct,
 		name:         req.Name,
-		Platform:  	  req.Platform,
+		Platform:     req.Platform,
 	}
 }
 

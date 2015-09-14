@@ -1,4 +1,5 @@
 package kmgLog
+
 import "github.com/bronze1man/kmg/kmgTime"
 
 // 写一条log, category是分类名 data是需要调试的对象
@@ -17,7 +18,7 @@ func Log(cat string, data ...interface{}) {
 	//defaultLogger(cat, data...)
 }
 
-func LogToRow(row LogRow){
+func LogToRow(row LogRow) {
 	defaultWriter(row)
 }
 
@@ -26,11 +27,10 @@ var defaultWriter LogWriter = StdoutLogWriter
 /*
 example:
 	kmgLog.SetLogWriter(kmgLog.StdoutLogWriter)
- */
-func SetLogWriter(w LogWriter){
+*/
+func SetLogWriter(w LogWriter) {
 	defaultWriter = w
 }
-
 
 func SetDefaultThreadFileLog(logDir string) {
 	defaultWriter = ThreadLogWriter(NewFileLogWriter(logDir))

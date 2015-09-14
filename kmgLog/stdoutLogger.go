@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func StdoutLogWriter(r LogRow){
+func StdoutLogWriter(r LogRow) {
 	b, err := r.Marshal()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[StdoutLogger] Marshal fail", err)

@@ -34,10 +34,10 @@ func GetCompiledPlatform() Platform {
 	}
 }
 
-func IsLinux()bool{
-	return runtime.GOOS=="linux"
+func IsLinux() bool {
+	return runtime.GOOS == "linux"
 }
 
-func IsDarwin() bool{
-	return runtime.GOOS=="darwin"
+func IsDarwin() bool {
+	return runtime.GOOS == "darwin"
 }

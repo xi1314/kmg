@@ -32,16 +32,16 @@ type DeviceAddr struct {
 }
 
 // 返回nil表示没找到这个设备,或者这个设备上面没有ip
-func MustGetFirstIPByNetDeviceName(devname string) net.IP{
-	if !kmgPlatform.IsLinux(){
+func MustGetFirstIPByNetDeviceName(devname string) net.IP {
+	if !kmgPlatform.IsLinux() {
 		panic("[GetFirstIPByNetDeviceName] only support linux now")
 	}
 	deviceAddrList, err := GetCurrentDeviceAddr()
 	if err != nil {
 		panic(err)
 	}
-	for _,deviceAddr:=range deviceAddrList{
-		if deviceAddr.DevString==devname{
+	for _, deviceAddr := range deviceAddrList {
+		if deviceAddr.DevString == devname {
 			return deviceAddr.IP
 		}
 	}
@@ -50,7 +50,7 @@ func MustGetFirstIPByNetDeviceName(devname string) net.IP{
 
 //目前仅支持linux
 func (a DeviceAddr) IpAddrDel() (err error) {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[DeviceAddr.IpAddrDel] only support linux now")
 	}
 	one, _ := a.IPNet.Mask.Size()
@@ -59,7 +59,7 @@ func (a DeviceAddr) IpAddrDel() (err error) {
 
 //目前仅支持linux
 func GetCurrentDeviceAddr() (ipnets []DeviceAddr, err error) {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[GetCurrentDeviceAddr] only support linux now")
 	}
 	out, err := kmgCmd.CmdString("ip addr").RunAndReturnOutput()
@@ -71,7 +71,7 @@ func GetCurrentDeviceAddr() (ipnets []DeviceAddr, err error) {
 
 //返回当前机器上面的所有ip列表.没有ip会报错
 func MustGetCurrentIpList() (ipList []net.IP) {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[MustGetCurrentIpList] only support linux now")
 	}
 	deviceAddrList, err := GetCurrentDeviceAddr()
@@ -89,7 +89,7 @@ func MustGetCurrentIpList() (ipList []net.IP) {
 }
 
 func MustGetCurrentIpWithPortList(port uint16) (sList []string) {
-	if !kmgPlatform.IsLinux(){
+	if !kmgPlatform.IsLinux() {
 		panic("[MustGetCurrentIpWithPortList] only support linux now")
 	}
 	deviceAddrList, err := GetCurrentDeviceAddr()

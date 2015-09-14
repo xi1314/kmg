@@ -206,7 +206,7 @@ func (ctx *Context) GetSchemeAndDomain() string {
 	return "http://" + ctx.domain
 }
 
-func (ctx *Context) GetName() string{
+func (ctx *Context) GetName() string {
 	return ctx.bucket
 }
 
