@@ -12,7 +12,7 @@ import (
 )
 
 type ResourceUploadRequest struct {
-	EnterPointPackageName string
+	ImportPathList []string
 	//ResourceList  []string //传入一堆资源目录的列表,然后传到七牛上.
 	Qiniu         *kmgQiniu.Context
 	QiniuPrefix   string
@@ -24,7 +24,9 @@ func ResourceBuild(req *ResourceUploadRequest){
 	builder:=&tBuilder{
 		pkgMap: map[string]*pkg{},
 	}
-	builder.handlePkg(req.EnterPointPackageName)
+	for _,importPath:=range req.ImportPathList {
+		builder.handlePkg(importPath)
+	}
 	for _,pkg:=range builder.pkgDepOrder{
 		builder.JsContent = append(builder.JsContent,pkg.JsContent...)
 		builder.JsContent = append(builder.JsContent,byte('\n'))
