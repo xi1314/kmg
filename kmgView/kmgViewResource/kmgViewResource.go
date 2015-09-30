@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
 )
 
 type ResourceUploadRequest struct {
@@ -18,14 +19,72 @@ type ResourceUploadRequest struct {
 	Qiniu         *kmgQiniu.Context
 	QiniuPrefix   string
 	OutGoFilePath string
-	FuncPrefix    string
+	Name          string //缓存和区分不同实例使用.
 }
 
+var allowResourceExt = []string{".otf", ".eot", ".svg", ".ttf", ".woff", ".woff2", ".jpg", ".jpeg", ".png", ".gif", ".ico"}
+
 func ResourceBuild(req *ResourceUploadRequest) {
+	if req.Name == "" {
+		panic(`[ResourceBuild] req.Name == ""`)
+	}
+	tmpDirPath := kmgConfig.DefaultEnv().PathInTmp("kmgViewResource_build/" + req.Name)
+	kmgFile.MustDelete(tmpDirPath)
+	response := resourceBuildToDir(req.ImportPathList, tmpDirPath)
+	req.Qiniu.MustUploadFromFile(tmpDirPath, req.QiniuPrefix)
+
+	packageName := filepath.Base(filepath.Dir(req.OutGoFilePath))
+
+	urlPrefix := req.Qiniu.GetSchemeAndDomain() + "/" + req.QiniuPrefix
+	//jsUrl:=urlPrefix+"/"+response.JsFileName
+	//cssUrl:=urlPrefix+"/"+response.CssFileName
+
+	// 不可以使用 fmt.Sprintf("%#v",generated) 会导出私有变量.
+	//generated:=&Generated{
+	//	Name: req.Name,
+	//	GeneratedJsFileUrl: jsUrl,
+	//	GeneratedCssFileUrl: cssUrl,
+	//	GeneratedUrlPrefix: urlPrefix,
+	//	RequestImportList: req.ImportPathList,
+	//}
+	outGoContent := []byte(`package ` + packageName + `
+import (
+	"github.com/bronze1man/kmg/kmgView/kmgViewResource"
+	"sync"
+)
+var ` + req.Name + `Once sync.Once
+var ` + req.Name + `generated *kmgViewResource.Generated
+func get` + req.Name + `ViewResource() *kmgViewResource.Generated{
+	` + req.Name + `Once.Do(func(){
+		` + req.Name + `generated = &kmgViewResource.Generated{
+			Name: ` + fmt.Sprintf("%#v", req.Name) + `,
+			GeneratedJsFileName: ` + fmt.Sprintf("%#v", response.JsFileName) + `,
+			GeneratedCssFileName: ` + fmt.Sprintf("%#v", response.CssFileName) + `,
+			GeneratedUrlPrefix: ` + fmt.Sprintf("%#v", urlPrefix) + `,
+			RequestImportList: ` + fmt.Sprintf("%#v", req.ImportPathList) + `,
+		}
+	})
+	return ` + req.Name + `generated
+}
+`)
+	outGoContent,err := kmgFormat.Source(outGoContent)
+	if err!=nil{
+		panic(err)
+	}
+	kmgFile.MustWriteFile(req.OutGoFilePath, outGoContent)
+}
+
+type resourceBuildToDirResponse struct {
+	NeedCachePathList []string
+	CssFileName       string
+	JsFileName        string
+}
+
+func resourceBuildToDir(importPkgList []string, tmpDirPath string) (response resourceBuildToDirResponse) {
 	builder := &tBuilder{
 		pkgMap: map[string]*pkg{},
 	}
-	for _, importPath := range req.ImportPathList {
+	for _, importPath := range importPkgList {
 		builder.handlePkg(importPath)
 	}
 	for _, pkg := range builder.pkgDepOrder {
@@ -35,24 +94,21 @@ func ResourceBuild(req *ResourceUploadRequest) {
 		builder.CssContent = append(builder.CssContent, byte('\n'))
 	}
 
-	cssFileName := kmgCrypto.Md5Hex(builder.CssContent) + ".css"
-	jsFileName := kmgCrypto.Md5Hex(builder.JsContent) + ".js"
-	req.Qiniu.MustUploadFromBytes(req.QiniuPrefix+"/"+cssFileName, builder.CssContent)
-	req.Qiniu.MustUploadFromBytes(req.QiniuPrefix+"/"+jsFileName, builder.JsContent)
+	response.CssFileName = kmgCrypto.Md5Hex(builder.CssContent) + ".css"
+	response.JsFileName = kmgCrypto.Md5Hex(builder.JsContent) + ".js"
 
-	packageName := filepath.Base(filepath.Dir(req.OutGoFilePath))
-	if req.FuncPrefix == "" {
-		req.FuncPrefix = "getManaged"
+	kmgFile.MustMkdir(tmpDirPath)
+	kmgFile.MustWriteFile(filepath.Join(tmpDirPath, response.CssFileName), builder.CssContent)
+	kmgFile.MustWriteFile(filepath.Join(tmpDirPath, response.JsFileName), builder.JsContent)
+	for _, pkg := range builder.pkgDepOrder {
+		for _, filePath := range pkg.ResourceFilePathList {
+			kmgFile.MustWriteFile(filepath.Join(tmpDirPath, filepath.Base(filePath)), kmgFile.MustReadFile(filePath))
+		}
 	}
-	outGoContent := []byte(`package ` + packageName + `
-func ` + req.FuncPrefix + `JsUrl()string{
-	return ` + fmt.Sprintf("%#v", req.Qiniu.GetSchemeAndDomain()+"/"+req.QiniuPrefix+"/"+jsFileName) + `
-}
-func ` + req.FuncPrefix + `CssUrl()string{
-	return ` + fmt.Sprintf("%#v", req.Qiniu.GetSchemeAndDomain()+"/"+req.QiniuPrefix+"/"+cssFileName) + `
-}
-`)
-	kmgFile.MustWriteFile(req.OutGoFilePath, outGoContent)
+	for _, pkg := range builder.pkgDepOrder {
+		response.NeedCachePathList = append(response.NeedCachePathList, pkg.Dirpath)
+	}
+	return response
 }
 
 type tBuilder struct {
@@ -63,15 +119,19 @@ type tBuilder struct {
 	JsContent         []byte
 	CssContent        []byte
 	CacheNeedCheckDir []string
+
+	ResourceFileNameMap map[string]bool // 不允许资源文件的名称完全相同.
 }
 
 type pkg struct {
 	PackageName    string
+	Dirpath        string
 	ImportPathList []string
 
 	JsFilePathList  []string
 	CssFilePathList []string
 
+	ResourceFilePathList []string
 	// 合并好的js和css的内容,
 	JsContent  []byte
 	CssContent []byte
@@ -101,11 +161,11 @@ func (b *tBuilder) parsePkg(packageName string) *pkg {
 	thisPkg := &pkg{
 		PackageName: packageName,
 	}
-	dirPath := path.Join(kmgConfig.DefaultEnv().GetFirstGOPATH(), "src", packageName)
-	if !kmgFile.MustDirectoryExist(dirPath) {
-		panic("[kmgViewResource] can not found dir " + dirPath)
+	thisPkg.Dirpath = path.Join(kmgConfig.DefaultEnv().GetFirstGOPATH(), "src", packageName)
+	if !kmgFile.MustDirectoryExist(thisPkg.Dirpath) {
+		panic("[kmgViewResource] can not found dir " + thisPkg.Dirpath)
 	}
-	fileList := kmgFile.MustGetAllFiles(dirPath)
+	fileList := kmgFile.MustGetAllFileOneLevel(thisPkg.Dirpath)
 	for _, file := range fileList {
 		ext := kmgFile.GetExt(file)
 		if ext == ".js" {
@@ -118,17 +178,26 @@ func (b *tBuilder) parsePkg(packageName string) *pkg {
 
 			importPathList := parseImportPath(file, kmgFile.MustReadFile(file))
 			thisPkg.ImportPathList = kmgStrings.SliceNoRepeatMerge(thisPkg.ImportPathList, importPathList)
+		} else if kmgStrings.IsInSlice(allowResourceExt, ext) {
+			name := filepath.Base(file)
+			if b.ResourceFileNameMap[name] {
+				panic("[kmgViewResource] resource file name " + name + " repeat path " + file)
+			}
+			thisPkg.ResourceFilePathList = append(thisPkg.ResourceFilePathList, file)
 		}
 	}
 	sort.Strings(thisPkg.JsFilePathList)
 	sort.Strings(thisPkg.CssFilePathList)
 
 	for _, file := range thisPkg.JsFilePathList {
+		// 这个泄漏信息比较严重.暂时关掉吧.
+		//thisPkg.JsContent = append(thisPkg.JsContent, []byte("\n/* "+file+" */\n\n")...)
 		thisPkg.JsContent = append(thisPkg.JsContent, kmgFile.MustReadFile(file)...)
 		thisPkg.JsContent = append(thisPkg.JsContent, byte('\n'))
 	}
 
 	for _, file := range thisPkg.CssFilePathList {
+		//thisPkg.CssContent = append(thisPkg.CssContent, []byte("\n/* "+file+"*/\n\n")...)
 		thisPkg.CssContent = append(thisPkg.CssContent, kmgFile.MustReadFile(file)...)
 		thisPkg.CssContent = append(thisPkg.CssContent, byte('\n'))
 	}

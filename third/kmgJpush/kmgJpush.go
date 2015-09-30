@@ -11,16 +11,24 @@ type Client struct {
 	c            *jpush.PushClient
 	IsIosProduct bool
 	name         string
-	Platform     string
+	Platform     SystemPlatform
 }
 
 type NewClientRequest struct {
 	Name         string //这个客户端的名字
 	AppKey       string
 	Secret       string
-	Platform     string //iOS、Android平台
-	IsIosProduct bool   //如果是否false表示向测试设备推送,如果是true表示向正式设备推送,后台的那个开发与正式似乎没有作用.
+	Platform     SystemPlatform //iOS、Android平台
+	IsIosProduct bool           //如果是否false表示向测试设备推送,如果是true表示向正式设备推送,后台的那个开发与正式似乎没有作用.
 }
+
+type SystemPlatform string
+
+const (
+	Android     SystemPlatform = "Android"
+	IOS         SystemPlatform = "iOS"
+	AllPlatform SystemPlatform = "AllPlatform"
+)
 
 func NewClient(req NewClientRequest) *Client {
 	return &Client{
@@ -68,7 +76,7 @@ func (c *Client) PushToOne(alias string, content string) (err error) {
 	return fmt.Errorf("code:%d err: %s", ret.Error.Code, ret.Error.Message)
 }
 
-func (c *Client) PushToAll(content string, platform string) (err error) {
+func (c *Client) PushToAll(content string) (err error) {
 	nb := jpush.NewNoticeBuilder()
 	nb.SetPlatform(jpush.AllPlatform())
 	nb.SetAudience(jpush.AllAudience())

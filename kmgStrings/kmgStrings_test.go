@@ -12,6 +12,13 @@ func TestIsAllAphphabet(ot *testing.T) {
 	kmgTest.Equal(IsAllAphphabet("123"), false)
 }
 
+func TestIsAllNum(ot *testing.T) {
+	kmgTest.Equal(IsAllNum("abc"), false)
+	kmgTest.Equal(IsAllNum(""), true)
+	kmgTest.Equal(IsAllNum("123"), true)
+	kmgTest.Equal(IsAllNum("123.1"), false)
+}
+
 func TestFirstLetterToUpper(t *testing.T) {
 	s := FirstLetterToUpper("title")
 	kmgTest.Equal("Title", s)

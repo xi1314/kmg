@@ -89,9 +89,12 @@ func (c *Cmd) GetExecCmd() *exec.Cmd {
 //回显命令,并且运行,返回运行的输出结果.并且把输出结果放在stdout中
 func (c *Cmd) RunAndReturnOutput() (b []byte, err error) {
 	c.PrintCmdLine()
-	b, err = c.cmd.CombinedOutput()
-	os.Stdout.Write(b)
-	return b, err
+	buf := &bytes.Buffer{}
+	w := io.MultiWriter(buf, os.Stdout)
+	c.cmd.Stdout = w
+	c.cmd.Stderr = w
+	err = c.cmd.Run()
+	return buf.Bytes(), err
 }
 
 func (c *Cmd) CombinedOutput() (b []byte, err error) {

@@ -24,8 +24,8 @@ func NewWrap(title string, content ...kmgView.HtmlRenderer) *Wrap {
 	wrap := &Wrap{
 		Title: title,
 		Head: kmgView.HtmlRendererList{
-			IncludeScriptFile(getBootstrapJsUrl()),
-			InclueCssFile(getBootstrapCssUrl()),
+			IncludeJsFile(getBootstrapJsUrl()),
+			IncludeCssFile(getBootstrapCssUrl()),
 			//GetJQueryCDN(),
 			//GetBootstrapCDN(),
 			//GetMomentJsCDN(),
@@ -43,21 +43,21 @@ func NewWrapWithChart(title string, content ...kmgView.HtmlRenderer) *Wrap {
 	wrap := &Wrap{
 		Title: title,
 		Head: kmgView.HtmlRendererList{
-			IncludeScriptFile(getEchartsJsUrl()),
-			InclueCssFile(getEchartsCssUrl()),
+			IncludeJsFile(getEchartsJsUrl()),
+			IncludeCssFile(getEchartsCssUrl()),
 		},
 		Body: body,
 	}
 	return wrap
 }
 
-func IncludeScriptFile(url string) kmgView.HtmlRenderer {
+func IncludeJsFile(url string) kmgView.HtmlRenderer {
 	return kmgView.Html(`
 	<script src="` + kmgXss.H(url) + `"></script>
 	`)
 }
 
-func InclueCssFile(url string) kmgView.HtmlRenderer {
+func IncludeCssFile(url string) kmgView.HtmlRenderer {
 	return kmgView.Html(`
 	<link rel="stylesheet" href="` + kmgXss.H(url) + `">
 	`)

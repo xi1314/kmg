@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/bronze1man/kmg/kmgLog"
 	"github.com/bronze1man/kmg/kmgNet"
 	"github.com/bronze1man/kmg/kmgNet/kmgProxy"
 )
@@ -24,14 +25,10 @@ func SmtpSendEmail(req *SmtpRequest) (err error) {
 		req.Subject,
 		req.Message,
 	}
-
 	buffer := new(bytes.Buffer)
-
 	t := template.Must(template.New("emailTemplate").Parse(_EmailScript()))
 	t.Execute(buffer, parameters)
-
 	auth := smtp.PlainAuth("", req.From, req.SmtpPassword, req.SmtpHost)
-
 	var conn net.Conn
 	if req.Socks4aProxyAddr != "" {
 		conn, err = kmgProxy.Socks4aDial(req.Socks4aProxyAddr, kmgNet.JoinHostPortInt(req.SmtpHost, req.SmtpPort))
@@ -39,10 +36,12 @@ func SmtpSendEmail(req *SmtpRequest) (err error) {
 		conn, err = net.Dial("tcp", kmgNet.JoinHostPortInt(req.SmtpHost, req.SmtpPort))
 	}
 	if err != nil {
+		kmgLog.Log("Email", "1", err.Error())
 		return
 	}
 	c, err := smtp.NewClient(conn, req.SmtpHost)
 	if err != nil {
+		kmgLog.Log("Email", err.Error())
 		return
 	}
 	err = smtpSendMailPart2(c,

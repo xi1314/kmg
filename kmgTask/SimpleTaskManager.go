@@ -13,8 +13,20 @@ type SimpleTaskManager struct {
 func (t *SimpleTaskManager) AddTask(task Task) {
 	t.wg.Add(1)
 	go func() {
-		defer t.wg.Done()
+		//defer t.wg.Done()
 		task.Run()
+		// panic不会完成.
+		t.wg.Done()
+	}()
+}
+
+func (t *SimpleTaskManager) AddFunc(task func()) {
+	t.wg.Add(1)
+	go func() {
+		//defer t.wg.Done()
+		task()
+		// panic不会完成.
+		t.wg.Done()
 	}()
 }
 

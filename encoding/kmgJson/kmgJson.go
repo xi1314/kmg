@@ -3,6 +3,7 @@ package kmgJson
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/typeTransform"
 	"io/ioutil"
 	"os"
@@ -25,6 +26,7 @@ func MustReadFile(path string, obj interface{}) {
 }
 
 func MustWriteFileIndent(path string, obj interface{}) {
+	kmgFile.MustMkdirForFile(path)
 	output, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
 		panic(err)

@@ -17,6 +17,9 @@ func PanicIfError(err error) {
 }
 
 func LogErrorWithStack(err error) {
+	if err == nil {
+		return
+	}
 	s := ""
 	if err != nil {
 		s = err.Error()
@@ -25,6 +28,9 @@ func LogErrorWithStack(err error) {
 }
 
 func LogUserErrorWithStack(err error) {
+	if err == nil {
+		return
+	}
 	s := ""
 	if err != nil {
 		s = err.Error()

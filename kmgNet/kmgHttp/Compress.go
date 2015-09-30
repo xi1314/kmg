@@ -3,8 +3,10 @@ package kmgHttp
 import (
 	"compress/flate"
 	"compress/gzip"
+	"github.com/bronze1man/kmg/kmgCompress"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -85,4 +87,31 @@ func HttpHandleCompressGzipWrap(fn http.Handler) http.Handler {
 		gzr := ResponseWriterWraper{Writer: gzw, ResponseWriter: w}
 		fn.ServeHTTP(gzr, r)
 	})
+}
+
+// 如果使用了这个,golang的猜测返回类型的东西会挂掉.请设置输出的内容的类型
+// 这个地方返回错误没有什么意义,(调用者无法处理)
+func CompressWriteByte(r *http.Request, w http.ResponseWriter, b []byte) {
+	acceptEncoding := r.Header.Get("Accept-Encoding")
+	switch {
+	case strings.Contains(acceptEncoding, "deflate"):
+		w.Header().Set("Content-Encoding", "deflate")
+		b = kmgCompress.FlateMustCompress(b)
+		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
+		w.Write(b)
+		return
+	case strings.Contains(acceptEncoding, "gzip"):
+		w.Header().Set("Content-Encoding", "gzip")
+		b = kmgCompress.GzipMustCompress(b)
+		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
+		w.Write(b)
+	default:
+		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
+		w.Write(b)
+	}
+}
+
+func CompressWriteHtml(req *http.Request, w http.ResponseWriter, html []byte) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	CompressWriteByte(req, w, html)
 }

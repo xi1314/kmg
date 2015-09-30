@@ -68,6 +68,22 @@ func MustGetAllFiles(root string) (out []string) {
 	return out
 }
 
+// 只返回这个目录额一层文件.
+// 获得所有文件,不包括目录
+// 返回绝对路径
+func MustGetAllFileOneLevel(path string) (fileList []string) {
+	fiList, err := ioutil.ReadDir(path)
+	if err != nil {
+		panic(err)
+	}
+	for _, fi := range fiList {
+		if !fi.IsDir() {
+			fileList = append(fileList, filepath.Join(path, fi.Name()))
+		}
+	}
+	return fileList
+}
+
 // 获得所有文件,不包括目录
 func MustGetAllFileFromPathList(pathlist []string) (outList []string) {
 	for _, root := range pathlist {

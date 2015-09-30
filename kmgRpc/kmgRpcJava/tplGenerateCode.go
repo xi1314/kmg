@@ -157,6 +157,7 @@ public class `)
     }
     public static class kmgHttp {
         public static byte[] SimplePost(String urls,byte[] inByte) throws Exception{
+            System.setProperty("http.keepAlive", "false");
             URL url = new URL(urls);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("POST");

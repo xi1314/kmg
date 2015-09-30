@@ -176,3 +176,10 @@ func IsWdHaveEnv() bool {
 	_, err := LoadEnvFromWd()
 	return err == nil
 }
+
+func HasDefaultEnv() bool {
+	envOnce.Do(func() {
+		env, _ = LoadEnvFromWd()
+	})
+	return env != nil
+}

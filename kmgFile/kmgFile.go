@@ -37,6 +37,8 @@ func GetExt(path string) string {
 	return strings.ToLower(filepath.Ext(path))
 }
 
+// 写入文件
+// open xxx: no such file or directory 表示父级目录没有建立.
 func WriteFile(path string, content []byte) (err error) {
 	return ioutil.WriteFile(path, content, os.FileMode(0777))
 }

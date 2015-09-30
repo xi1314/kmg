@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bronze1man/kmg/kmgFile"
+	"strconv"
 )
 
 // 向http默认服务器加入一个本地文件或目录
@@ -54,4 +55,13 @@ func MustAddFileToHttpPathToServeMux(mux *http.ServeMux, httpPath string, localF
 		}
 	*/
 	return
+}
+
+func MustAddContentToDefaultServer(uri string, content []byte) {
+	uri = "/" + strings.Trim(uri, "/")
+	http.DefaultServeMux.HandleFunc(uri, func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Cache-Control", "max-age=3600")
+		w.Header().Set("Content-Length", strconv.Itoa(len(content)))
+		w.Write(content)
+	})
 }

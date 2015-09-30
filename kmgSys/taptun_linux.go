@@ -24,6 +24,7 @@ func NewTap(ifName string) (ifce TunTapInterface, err error) {
 	}
 	name, err := createInterface(file.Fd(), ifName, cIFF_TAP|cIFF_NO_PI)
 	if err != nil {
+		file.Close()
 		return nil, err
 	}
 	ifce = &iInterface{deviceType: DeviceTypeTap, file: file, name: name}
@@ -40,6 +41,7 @@ func NewTun(ifName string) (ifce TunTapInterface, err error) {
 	}
 	name, err := createInterface(file.Fd(), ifName, cIFF_TUN|cIFF_NO_PI)
 	if err != nil {
+		file.Close()
 		return nil, err
 	}
 	ifce = &iInterface{deviceType: DeviceTypeTun, file: file, name: name}
