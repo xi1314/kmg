@@ -63,6 +63,7 @@ func get` + req.Name + `ViewResource() *kmgViewResource.Generated{
 			GeneratedUrlPrefix: ` + fmt.Sprintf("%#v", urlPrefix) + `,
 			RequestImportList: ` + fmt.Sprintf("%#v", req.ImportPathList) + `,
 		}
+		` + req.Name + `generated.Init()
 	})
 	return ` + req.Name + `generated
 }

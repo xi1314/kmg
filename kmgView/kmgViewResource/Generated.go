@@ -22,6 +22,7 @@ type Generated struct {
 
 	locker     sync.Mutex
 	cachedInfo resourceBuildToDirResponse
+	initOnce sync.Once
 }
 
 type htmlTplData struct {
@@ -88,16 +89,41 @@ func (g *Generated) GetUrlPrefix() string {
 	}
 }
 
-// TODO 这个init的体验不好.考虑其他实现方式
-func (g *Generated) Init() {
+func (g *Generated) GetJsUrl()string{
 	if kmgConfig.HasDefaultEnv() {
 		g.recheckAndReloadCache()
-		kmgHttp.MustAddFileToHttpPathToDefaultServer("/kmgViewResource."+g.Name+"/",
-			kmgConfig.DefaultEnv().PathInProject("tmp/kmgViewResource_debug/"+g.Name))
+		g.locker.Lock()
+		cachedInfo := g.cachedInfo
+		g.locker.Unlock()
+		return "/kmgViewResource." + g.Name+"/"+cachedInfo.JsFileName
 	} else {
-		// 默认使用反向代理方式提供数据.
-		kmgHttp.MustAddUriProxyRefToUriToDefaultServer("/kmgViewResource."+g.Name+"/", g.GeneratedUrlPrefix)
+		return "/kmgViewResource." + g.Name+ "/" + g.GeneratedJsFileName
 	}
+}
+func (g *Generated) GetCssUrl()string{
+	if kmgConfig.HasDefaultEnv() {
+		g.recheckAndReloadCache()
+		g.locker.Lock()
+		cachedInfo := g.cachedInfo
+		g.locker.Unlock()
+		return "/kmgViewResource." + g.Name+"/"+cachedInfo.CssFileName
+	} else {
+		return "/kmgViewResource." + g.Name+ "/" + g.GeneratedCssFileName
+	}
+}
+
+// 这个初始化会在第一次使用的时候,自动进行,如果嫌自动初始化太慢,可以手动初始化.
+func (g *Generated) Init() {
+	g.initOnce.Do(func(){
+		if kmgConfig.HasDefaultEnv() {
+			g.recheckAndReloadCache()
+			kmgHttp.MustAddFileToHttpPathToDefaultServer("/kmgViewResource."+g.Name+"/",
+				kmgConfig.DefaultEnv().PathInProject("tmp/kmgViewResource_debug/"+g.Name))
+		} else {
+			// 默认使用反向代理方式提供数据.
+			kmgHttp.MustAddUriProxyRefToUriToDefaultServer("/kmgViewResource."+g.Name+"/", g.GeneratedUrlPrefix)
+		}
+	})
 }
 
 // 获取某个资源文件的内容
