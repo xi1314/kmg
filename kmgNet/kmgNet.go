@@ -5,6 +5,7 @@ import (
 	"net"
 	"strconv"
 	"time"
+	"strings"
 )
 
 //从一个net.Listener里面读取需要Dial的地址(测试用的比较多)
@@ -44,6 +45,12 @@ func SpeedString(byteNum int, dur time.Duration) string {
 }
 
 func SizeString(byteNum int64) string {
+	if byteNum > 1e15 || byteNum < -1e15 {
+		return fmt.Sprintf("%.2fPB", float64(byteNum)/(1024*1024*1024*1024*1024))
+	}
+	if byteNum > 1e12 || byteNum < -1e12 {
+		return fmt.Sprintf("%.2fTB", float64(byteNum)/(1024*1024*1024*1024))
+	}
 	if byteNum > 1e9 || byteNum < -1e9 {
 		return fmt.Sprintf("%.2fGB", float64(byteNum)/(1024*1024*1024))
 	}
@@ -54,6 +61,15 @@ func SizeString(byteNum int64) string {
 		return fmt.Sprintf("%.2fKB", float64(byteNum)/(1024))
 	}
 	return fmt.Sprintf("%dB", byteNum)
+}
+
+// 在开头加padding,尝试使长度一致,如果数据超级大有可能会坏掉
+func SizeStringWithPadding(byteNum int64) string{
+	s:=SizeString(byteNum)
+	if len(s)<10{
+		return strings.Repeat(" ",10-len(s))+s
+	}
+	return s
 }
 
 func CloseRead(conn net.Conn) error {

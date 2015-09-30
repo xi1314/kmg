@@ -218,13 +218,12 @@ type FileInfo struct {
 	//还有几个字段暂时用不着.
 }
 
-// 返回的path前面不带 /
-func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
+func (ctx *Context) ListPrefix(prefix string) (output []FileInfo,err error) {
 	ctx.singleContextCheck()
 	prefix = strings.TrimPrefix(prefix, "/")
 	entries, err := ListPrefix(ctx, prefix)
 	if err != nil {
-		panic(err)
+		return nil,err
 	}
 	output = make([]FileInfo, len(entries))
 	for i := range entries {
@@ -232,6 +231,14 @@ func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
 		output[i].Hash = entries[i].Hash
 		output[i].Size = entries[i].Fsize
 		output[i].ModTime = time.Unix(entries[i].PutTime/1e7, entries[i].PutTime%1e7*100)
+	}
+	return output,nil
+}
+// 返回的path前面不带 /
+func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
+	output,err:=ctx.ListPrefix(prefix)
+	if err!=nil {
+		panic(err)
 	}
 	return output
 }
