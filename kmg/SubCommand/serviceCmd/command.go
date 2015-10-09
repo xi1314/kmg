@@ -22,8 +22,7 @@ func AddCommandList() {
 		Name:   "setAndRestart",
 		Desc:   "install the service,and restart the service,uninstall and stop if need",
 		Runner: setAndRestartCmd,
-	}).
-		AddCommand(kmgConsole.Command{
+	}).AddCommand(kmgConsole.Command{
 		Name:   "install",
 		Desc:   "install the service",
 		Runner: installCmd,

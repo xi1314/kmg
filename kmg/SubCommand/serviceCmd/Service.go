@@ -97,7 +97,11 @@ func Uninstall(name string) (err error) {
 }
 
 func Start(name string) (err error) {
-	return kmgCmd.CmdSlice([]string{"service", name, "start"}).Run()
+	err = kmgCmd.CmdSlice([]string{"service", name, "start"}).Run()
+	if err != nil {
+		return err
+	}
+	return waitRpcRespond()
 }
 
 //TODO 已经关闭不是错误
@@ -106,7 +110,11 @@ func Stop(name string) (err error) {
 }
 
 func Restart(name string) (err error) {
-	return kmgCmd.CmdSlice([]string{"service", name, "restart"}).Run()
+	err = kmgCmd.CmdSlice([]string{"service", name, "restart"}).Run()
+	if err != nil {
+		return err
+	}
+	return waitRpcRespond()
 }
 
 const sysvScript = `#!/bin/bash
