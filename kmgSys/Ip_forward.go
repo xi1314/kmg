@@ -13,10 +13,10 @@ func IsIpForwardOn() bool {
 		panic("[IsIpForwardOn] only support linux now")
 	}
 	b := kmgFile.MustReadFile("/proc/sys/net/ipv4/ip_forward")
-	if bytes.Equal(b, []byte{'0'}) {
+	if bytes.Contains(b, []byte{'0'}) {
 		return false
 	}
-	if bytes.Equal(b, []byte{'1'}) {
+	if bytes.Contains(b, []byte{'1'}) {
 		return true
 	}
 	panic(fmt.Errorf("[IsIpForwardOn] unable to understand info in /proc/sys/net/ipv4/ip_forward %#v", b))
