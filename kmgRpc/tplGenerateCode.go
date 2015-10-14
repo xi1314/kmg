@@ -98,7 +98,7 @@ func (s *generateServer_`)
 			return
 		}
 	}
-	outBuf, err := s.handleApiV1(b1)
+	outBuf, err := s.handleApiV1(b1,w,req)
 	if err != nil {
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
 		outBuf = append([]byte{1}, err.Error()...) // error
@@ -161,7 +161,7 @@ func (c *Client_`)
 
 func (s *generateServer_`)
 	_buf.WriteString(config.ObjectName)
-	_buf.WriteString(`) handleApiV1(inBuf []byte) (outBuf []byte, err error) {
+	_buf.WriteString(`) handleApiV1(inBuf []byte,_httpW http.ResponseWriter, _httpReq *http.Request) (outBuf []byte, err error) {
 	//从此处开始协议正确了,换一种返回方式
 	// 1 byte api name len apiNameLen
 	// apiNameLen byte api name
@@ -180,104 +180,8 @@ func (s *generateServer_`)
 	`)
 	for _, api := range config.ApiList {
 		_buf.WriteString(`
-	case "`)
-		_buf.WriteString(api.Name)
-		_buf.WriteString(`":
-	    `)
-		for _, args := range api.GetOutArgsListWithoutError() {
-			_buf.WriteString(`
-	       var `)
-			_buf.WriteString(args.Name)
-			_buf.WriteString(` `)
-			_buf.WriteString(args.ObjectTypeStr)
-			_buf.WriteString(`
-	    `)
-		}
-		_buf.WriteString(`
-		var Err error
-		reqData := &struct {
-            `)
-		for _, args := range api.InArgsList {
-			_buf.WriteString(`
-               `)
-			_buf.WriteString(args.Name)
-			_buf.WriteString(` `)
-			_buf.WriteString(args.ObjectTypeStr)
-			_buf.WriteString(`
-            `)
-		}
-		_buf.WriteString(`
-		}{}
-		Err = json.Unmarshal(b2, reqData)
-		if Err != nil {
-			return nil, Err
-		}
 		`)
-		if api.HasReturnArgument() {
-			_buf.WriteString(`
-		    `)
-			_buf.WriteString(api.GetOutArgsNameListForAssign())
-			_buf.WriteString(` = s.obj.`)
-			_buf.WriteString(api.Name)
-			_buf.WriteString(`(`)
-			for _, args := range api.InArgsList {
-				_buf.WriteString(` reqData.`)
-				_buf.WriteString(args.Name)
-				_buf.WriteString(`,`)
-			}
-			_buf.WriteString(` )
-            if Err != nil {
-                return nil, Err
-            }
-		`)
-		} else {
-			_buf.WriteString(`
-		    s.obj.`)
-			_buf.WriteString(api.Name)
-			_buf.WriteString(`(`)
-			for _, args := range api.InArgsList {
-				_buf.WriteString(` reqData.`)
-				_buf.WriteString(args.Name)
-				_buf.WriteString(`,`)
-			}
-			_buf.WriteString(` )
-		`)
-		}
-		_buf.WriteString(`
-		`)
-		if api.IsOutExpendToOneArgument() {
-			_buf.WriteString(`
-			return json.Marshal(Response)
-        `)
-		} else {
-			_buf.WriteString(`
-			return json.Marshal(struct {
-			    `)
-			for _, arg := range api.GetOutArgsListWithoutError() {
-				_buf.WriteString(`
-			        `)
-				_buf.WriteString(arg.Name)
-				_buf.WriteString(` `)
-				_buf.WriteString(arg.ObjectTypeStr)
-				_buf.WriteString(`
-			    `)
-			}
-			_buf.WriteString(`
-			}{
-                `)
-			for _, arg := range api.GetOutArgsListWithoutError() {
-				_buf.WriteString(`
-                    `)
-				_buf.WriteString(arg.Name)
-				_buf.WriteString(`:`)
-				_buf.WriteString(arg.Name)
-				_buf.WriteString(`,
-                `)
-			}
-			_buf.WriteString(`
-			})
-		`)
-		}
+		_buf.WriteString(tplApiServerCase(config, api))
 		_buf.WriteString(`
 	`)
 	}
@@ -289,90 +193,9 @@ func (s *generateServer_`)
 `)
 	for _, api := range config.ApiList {
 		_buf.WriteString(`
-func (c *Client_`)
-		_buf.WriteString(config.ObjectName)
-		_buf.WriteString(` ) `)
-		_buf.WriteString(api.Name)
-		_buf.WriteString(`( `)
-		for _, arg := range api.InArgsList {
-			_buf.WriteString(arg.Name)
-			_buf.WriteString(` `)
-			_buf.WriteString(arg.ObjectTypeStr)
-			_buf.WriteString(`, `)
-		}
-		_buf.WriteString(`  ) (`)
-		for _, arg := range api.GetClientOutArgument() {
-			_buf.WriteString(arg.Name)
-			_buf.WriteString(` `)
-			_buf.WriteString(arg.ObjectTypeStr)
-			_buf.WriteString(`, `)
-		}
-		_buf.WriteString(` ) {
-	reqData := &struct {
-	    `)
-		for _, arg := range api.InArgsList {
-			_buf.WriteString(`
-	        `)
-			_buf.WriteString(arg.Name)
-			_buf.WriteString(` `)
-			_buf.WriteString(arg.ObjectTypeStr)
-			_buf.WriteString(`
-	    `)
-		}
-		_buf.WriteString(`
-	}{
-        `)
-		for _, arg := range api.InArgsList {
-			_buf.WriteString(`
-            `)
-			_buf.WriteString(arg.Name)
-			_buf.WriteString(`:`)
-			_buf.WriteString(arg.Name)
-			_buf.WriteString(`,
-        `)
-		}
-		_buf.WriteString(`
-	}
 	`)
-		if api.IsOutExpendToOneArgument() {
-			_buf.WriteString(`
-	    var respData `)
-			_buf.WriteString(api.OutArgsList[0].ObjectTypeStr)
-			_buf.WriteString(`
-        Err = c.sendRequest("`)
-			_buf.WriteString(api.Name)
-			_buf.WriteString(`", reqData, &respData)
-        return respData,Err
-	`)
-		} else {
-			_buf.WriteString(`
-        respData := &struct {
-            `)
-			for _, arg := range api.GetOutArgsListWithoutError() {
-				_buf.WriteString(`
-                `)
-				_buf.WriteString(arg.Name)
-				_buf.WriteString(` `)
-				_buf.WriteString(arg.ObjectTypeStr)
-				_buf.WriteString(`
-            `)
-			}
-			_buf.WriteString(`
-        }{}
-        Err = c.sendRequest("`)
-			_buf.WriteString(api.Name)
-			_buf.WriteString(`", reqData, &respData)
-        return `)
-			for _, arg := range api.GetOutArgsListWithoutError() {
-				_buf.WriteString(`respData.`)
-				_buf.WriteString(arg.Name)
-				_buf.WriteString(`,`)
-			}
-			_buf.WriteString(` Err
-    `)
-		}
+		_buf.WriteString(tplApiClient(config, api))
 		_buf.WriteString(`
-}
 `)
 	}
 	_buf.WriteString(`

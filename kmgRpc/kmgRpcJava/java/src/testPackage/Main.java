@@ -25,6 +25,11 @@ public class Main {
                 throw new Exception("3 "+RpcDemo.KmgTime.FormatGolangDate(outT));
             }
             RpcDemo.GetDefaultClient().DemoFunc4(new RpcDemo.DemoRequest(),new RpcDemo.DemoRequest());
+
+            out = RpcDemo.GetDefaultClient().DemoClientIp();
+            if (!out.equals("127.0.0.1")){
+                throw new Exception("4 "+out);
+            }
             System.out.println("Success");
         }catch (Exception e){
             System.out.println(e.getMessage());

@@ -85,6 +85,7 @@ func (api Api) HasReturnArgument() bool {
 }
 
 func (api Api) GetClientOutArgument() []ArgumentNameTypePair {
+	// 确保客户端的接口的返回变量一定有一个error,用来返回错误.
 	for _, pair := range api.OutArgsList {
 		if pair.ObjectTypeStr == "error" {
 			return api.OutArgsList
@@ -101,6 +102,40 @@ func (api Api) IsOutExpendToOneArgument() bool {
 	return len(api.OutArgsList) == 2 &&
 		api.OutArgsList[0].Name == "Response" &&
 		api.OutArgsList[1].ObjectTypeStr == "error"
+}
+
+func (api Api) GetClientInArgsList() []ArgumentNameTypePair{
+	// 删去特殊输入参数 Ctx *http.Context
+	out:=[]ArgumentNameTypePair{}
+	for _,pair:=range api.InArgsList{
+		if pair.ObjectTypeStr == "*kmgHttp.Context"{
+			continue
+		}
+		out = append(out,pair)
+	}
+	return out
+}
+
+func (api Api) HasHttpContextArgument() bool{
+	for _,pair:=range api.InArgsList{
+		if pair.ObjectTypeStr == "*kmgHttp.Context"{
+			return true
+		}
+	}
+	return false
+}
+
+// 服务器端,函数调用的那个括号里面的东西
+func (api Api) serverCallArgumentStr() string{
+	out:=""
+	for _,pair:=range api.InArgsList{
+		if pair.ObjectTypeStr == "*kmgHttp.Context"{
+			out+="Ctx,"
+		}else{
+			out+="reqData."+pair.Name+","
+		}
+	}
+	return out
 }
 
 type ArgumentNameTypePair struct {

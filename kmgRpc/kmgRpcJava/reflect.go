@@ -47,6 +47,10 @@ func reflectToTplConfig(req *GenerateRequest) *tplConfig {
 			IsPublic: false,
 		}
 		for _, pairObj := range methodObj.InParameter {
+			if isPointerToKmgHttpContext(pairObj.Type){
+				// 此处忽略掉特殊传入参数 *kmgHttp.Context
+				continue
+			}
 			pair := NameTypePair{
 				Name: kmgStrings.FirstLetterToUpper(pairObj.Name),
 			}
@@ -95,6 +99,18 @@ func reflectToTplConfig(req *GenerateRequest) *tplConfig {
 		config.ApiList = append(config.ApiList, api)
 	}
 	return config
+}
+
+func isPointerToKmgHttpContext(typi kmgGoParser.Type) bool{
+	typ1,ok:=typi.(kmgGoParser.PointerType)
+	if !ok{
+		return false
+	}
+	typ2,ok:=typ1.Elem.(*kmgGoParser.NamedType)
+	if !ok{
+		return false
+	}
+	return typ2.Name == "Context" && typ2.PackagePath == "github.com/bronze1man/kmg/kmgNet/kmgHttp"
 }
 
 func (config *tplConfig) addType(typi kmgGoParser.Type) string {

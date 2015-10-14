@@ -59,7 +59,7 @@ func (s *generateServer_<?=config.ObjectName?>) ServeHTTP(w http.ResponseWriter,
 			return
 		}
 	}
-	outBuf, err := s.handleApiV1(b1)
+	outBuf, err := s.handleApiV1(b1,w,req)
 	if err != nil {
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
 		outBuf = append([]byte{1}, err.Error()...) // error
@@ -118,7 +118,7 @@ func (c *Client_<?=config.ObjectName?>) sendRequest(apiName string, inData inter
 
 
 
-func (s *generateServer_<?=config.ObjectName?>) handleApiV1(inBuf []byte) (outBuf []byte, err error) {
+func (s *generateServer_<?=config.ObjectName?>) handleApiV1(inBuf []byte,_httpW http.ResponseWriter, _httpReq *http.Request) (outBuf []byte, err error) {
 	//从此处开始协议正确了,换一种返回方式
 	// 1 byte api name len apiNameLen
 	// apiNameLen byte api name
@@ -135,71 +135,14 @@ func (s *generateServer_<?=config.ObjectName?>) handleApiV1(inBuf []byte) (outBu
 
 	switch name {
 	<? for _,api:=range config.ApiList{ ?>
-	case "<?=api.Name?>":
-	    <? for _,args:=range api.GetOutArgsListWithoutError() { ?>
-	       var <?=args.Name?> <?=args.ObjectTypeStr?>
-	    <? } ?>
-		var Err error
-		reqData := &struct {
-            <? for _,args:=range api.InArgsList { ?>
-               <?=args.Name?> <?=args.ObjectTypeStr?>
-            <? } ?>
-		}{}
-		Err = json.Unmarshal(b2, reqData)
-		if Err != nil {
-			return nil, Err
-		}
-		<? if api.HasReturnArgument() { ?>
-		    <?=api.GetOutArgsNameListForAssign()?> = s.obj.<?=api.Name?>(<?for _,args:=range api.InArgsList {?> reqData.<?=args.Name?>,<? } ?> )
-            if Err != nil {
-                return nil, Err
-            }
-		<? }else{ ?>
-		    s.obj.<?=api.Name?>(<?for _,args:=range api.InArgsList {?> reqData.<?=args.Name?>,<? } ?> )
-		<? } ?>
-		<? if api.IsOutExpendToOneArgument() { ?>
-			return json.Marshal(Response)
-        <? } else { ?>
-			return json.Marshal(struct {
-			    <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
-			        <?=arg.Name?> <?=arg.ObjectTypeStr?>
-			    <? } ?>
-			}{
-                <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
-                    <?=arg.Name?>:<?=arg.Name?>,
-                <? } ?>
-			})
-		<? } ?>
+		<?=tplApiServerCase(config,api)?>
 	<? } ?>
 	}
 	return nil, fmt.Errorf("api %s not found", name)
 }
 
 <? for _,api:=range config.ApiList { ?>
-func (c *Client_<?=config.ObjectName?> ) <?=api.Name?>( <?for _,arg:=range api.InArgsList {?><?=arg.Name?> <?=arg.ObjectTypeStr?>, <? } ?>  ) (<?for _,arg:=range api.GetClientOutArgument() {?><?=arg.Name?> <?=arg.ObjectTypeStr?>, <? } ?> ) {
-	reqData := &struct {
-	    <?for _,arg:=range api.InArgsList {?>
-	        <?=arg.Name?> <?=arg.ObjectTypeStr?>
-	    <? } ?>
-	}{
-        <?for _,arg:=range api.InArgsList {?>
-            <?=arg.Name?>:<?=arg.Name?>,
-        <? } ?>
-	}
-	<? if api.IsOutExpendToOneArgument() { ?>
-	    var respData <?=api.OutArgsList[0].ObjectTypeStr?>
-        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
-        return respData,Err
-	<? } else { ?>
-        respData := &struct {
-            <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
-                <?=arg.Name?> <?=arg.ObjectTypeStr?>
-            <? } ?>
-        }{}
-        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
-        return <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>respData.<?=arg.Name?>,<? } ?> Err
-    <? } ?>
-}
+	<?=tplApiClient(config,api)?>
 <? } ?>
 
 var gClient_<?=config.ObjectName?> *Client_<?=config.ObjectName?>

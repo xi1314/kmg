@@ -1,0 +1,33 @@
+<?
+package kmgRpc
+func tplApiClient(config *tplConfig,api Api) string {
+?>
+
+func (c *Client_<?=config.ObjectName?> ) <?=api.Name?>( <?for _,arg:=range api.GetClientInArgsList() {?><?=arg.Name?> <?=arg.ObjectTypeStr?>, <? } ?>  ) (<?for _,arg:=range api.GetClientOutArgument() {?><?=arg.Name?> <?=arg.ObjectTypeStr?>, <? } ?> ) {
+	reqData := &struct {
+	    <?for _,arg:=range api.GetClientInArgsList() {?>
+	        <?=arg.Name?> <?=arg.ObjectTypeStr?>
+	    <? } ?>
+	}{
+        <?for _,arg:=range api.GetClientInArgsList() {?>
+            <?=arg.Name?>:<?=arg.Name?>,
+        <? } ?>
+	}
+	<? if api.IsOutExpendToOneArgument() { ?>
+	    var respData <?=api.OutArgsList[0].ObjectTypeStr?>
+        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
+        return respData,Err
+	<? } else { ?>
+        respData := &struct {
+            <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
+                <?=arg.Name?> <?=arg.ObjectTypeStr?>
+            <? } ?>
+        }{}
+        Err = c.sendRequest("<?=api.Name?>", reqData, &respData)
+        return <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>respData.<?=arg.Name?>,<? } ?> Err
+    <? } ?>
+}
+
+<?
+}
+?>

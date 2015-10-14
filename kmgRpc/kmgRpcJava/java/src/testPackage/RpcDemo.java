@@ -92,6 +92,11 @@ public class RpcDemo {
     public static class DemoTime2RpcResponse{
             public Date Out;
     }
+    private static class DemoClientIpRpcRequest{
+    }
+    public static class DemoClientIpRpcResponse{
+            public String Ip;
+    }
     public static class Client{
         // 所有Api列表
         public String PostScoreInt(String LbId,Integer Score) throws Exception{
@@ -146,6 +151,10 @@ public class RpcDemo {
             DemoTime2RpcRequest reqData = new DemoTime2RpcRequest();
                 reqData.T = T;
                 return this.sendRequest("DemoTime2", reqData, DemoTime2RpcResponse.class).Out;
+        }
+        public String DemoClientIp() throws Exception{
+            DemoClientIpRpcRequest reqData = new DemoClientIpRpcRequest();
+                return this.sendRequest("DemoClientIp", reqData, DemoClientIpRpcResponse.class).Ip;
         }
         //引入的不会变的库代码.还需要com.google.gson 这个package的依赖
         public String RemoteUrl;
@@ -227,6 +236,7 @@ public class RpcDemo {
     }
     public static class kmgHttp {
         public static byte[] SimplePost(String urls,byte[] inByte) throws Exception{
+            System.setProperty("http.keepAlive", "false");
             URL url = new URL(urls);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("POST");

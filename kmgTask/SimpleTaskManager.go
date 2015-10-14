@@ -41,6 +41,10 @@ func (t *SimpleTaskManager) Close() {
 	t.Wait()
 }
 
+func NewSimpleTaskManager() *SimpleTaskManager{
+	return &SimpleTaskManager{}
+}
+
 func RunTaskRepeat(f func(), num int) {
 	var wg sync.WaitGroup
 	for i := 0; i < num; i++ {

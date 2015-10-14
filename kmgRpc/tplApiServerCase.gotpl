@@ -1,0 +1,47 @@
+<?
+package kmgRpc
+func tplApiServerCase(config *tplConfig,api Api) string {
+?>
+
+	case "<?=api.Name?>":
+	    <? for _,args:=range api.GetOutArgsListWithoutError() { ?>
+	       var <?=args.Name?> <?=args.ObjectTypeStr?>
+	    <? } ?>
+		var Err error
+		reqData := &struct {
+            <? for _,args:=range api.GetClientInArgsList() { ?>
+               <?=args.Name?> <?=args.ObjectTypeStr?>
+            <? } ?>
+		}{}
+		Err = json.Unmarshal(b2, reqData)
+		if Err != nil {
+			return nil, Err
+		}
+		<? if api.HasHttpContextArgument() { ?>
+			Ctx:=kmgHttp.NewContextFromHttp(_httpW,_httpReq)
+		<? } ?>
+		<? if api.HasReturnArgument() { ?>
+		    <?=api.GetOutArgsNameListForAssign()?> = s.obj.<?=api.Name?>(<?=api.serverCallArgumentStr() ?> )
+            if Err != nil {
+                return nil, Err
+            }
+		<? }else{ ?>
+		    s.obj.<?=api.Name?>(<?=api.serverCallArgumentStr() ?> )
+		<? } ?>
+		<? if api.IsOutExpendToOneArgument() { ?>
+			return json.Marshal(Response)
+        <? } else { ?>
+			return json.Marshal(struct {
+			    <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
+			        <?=arg.Name?> <?=arg.ObjectTypeStr?>
+			    <? } ?>
+			}{
+                <? for _,arg:=range api.GetOutArgsListWithoutError() { ?>
+                    <?=arg.Name?>:<?=arg.Name?>,
+                <? } ?>
+			})
+		<? } ?>
+
+<?
+}
+?>
