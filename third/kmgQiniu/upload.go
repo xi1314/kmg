@@ -48,7 +48,7 @@ type uploadFileRequest struct {
 //2.检查同名和同内容的文件是否已经存在了,如果存在,且hash相同便不上传(断点续传)
 // TODO 解决一边上传,一边修改的bug.
 func UploadDirMulitThread(ctx *Context, localRoot string, remoteRoot string) (err error) {
-	tm := kmgTask.NewLimitThreadErrorHandleTaskManager(UploadThreadNum, 3)
+	tm := kmgTask.NewLimitThreadErrorHandleTaskManager(ThreadNum, 3)
 	defer tm.Close()
 	requestList := []uploadFileRequest{}
 	remotePathList :=[]string{}

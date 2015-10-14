@@ -6,6 +6,7 @@ import (
 
 	"github.com/bronze1man/kmg/kmgErr"
 	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgTask"
 )
 
 var Download = DownloadDir
@@ -53,16 +54,21 @@ func DownloadDir(ctx *Context, remoteRoot string, localRoot string) (err error) 
 	if len(entries) == 0 {
 		return ErrNoFile
 	}
+	// TODO 多线程提高性能.
+	tm := kmgTask.NewLimitThreadErrorHandleTaskManager(ThreadNum, 3)
+	defer tm.Close()
 	for _, entry := range entries {
+		entry := entry
 		refPath, err := filepath.Rel(remoteRoot, entry.Key)
 		if err != nil {
 			kmgErr.LogErrorWithStack(err)
 			return err
 		}
-		err = DownloadFileWithHash(ctx, entry.Key, filepath.Join(localRoot, refPath), entry.Hash)
-		if err != nil {
+		tm.AddTask(func() (err error) {
+			err = DownloadFileWithHash(ctx, entry.Key, filepath.Join(localRoot, refPath), entry.Hash)
 			return err
-		}
+		})
 	}
+	tm.Wait()
 	return nil
 }

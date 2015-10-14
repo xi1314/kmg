@@ -9,6 +9,7 @@ type ErrorTaskFn func() (err error)
 
 //提供线程数量限制和错误处理(重试+批量报错)的任务管理器
 //适用于并发批量下载或上传
+// 报错重试主要用于 偶尔的网络异常问题,超过重试次数后会panic掉.
 //TODO 测试出错情况,测试关闭情况
 type LimitThreadErrorHandleTaskManager struct {
 	ErrorArr   []error
@@ -52,6 +53,9 @@ Retry:
 		m.errorMutex.Lock()
 		m.ErrorArr = append(m.ErrorArr, err)
 		m.errorMutex.Unlock()
+	}
+	if err!=nil{
+		panic(err)
 	}
 }
 func (m *LimitThreadErrorHandleTaskManager) AddTask(task ErrorTaskFn) {

@@ -1,3 +1,3 @@
 package kmgQiniu
 
-var UploadThreadNum = 5
+var ThreadNum = 5
