@@ -218,6 +218,10 @@ type FileInfo struct {
 	//还有几个字段暂时用不着.
 }
 
+func (fi FileInfo) IsExist() bool{
+	return fi.Hash!=""
+}
+
 func (ctx *Context) ListPrefix(prefix string) (output []FileInfo,err error) {
 	ctx.singleContextCheck()
 	prefix = strings.TrimPrefix(prefix, "/")
@@ -241,6 +245,63 @@ func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
 		panic(err)
 	}
 	return output
+}
+
+// 批量获取文件信息
+// PathList 是远程路径
+// 路径里面开头带 / 和不带 / 效果一致.
+// FileInfo 里面的 Hash是空表示没有找到文件.
+func (ctx *Context) BatchStat(PathList []string) (output []FileInfo,err error){
+	// 这个好像也有1000个的限制
+	// TODO 并发Stat
+	ctx.singleContextCheck()
+	if len(PathList)==0{
+		return nil,nil
+	}
+	output=make([]FileInfo,0,len(PathList))
+	itemList := make([]rs.EntryPath, 0, len(PathList))
+	length := len(PathList)
+	for i := 0; i < length; i += 1000 {
+		end := i + 1000
+		if end > length {
+			end = length
+		}
+		itemList = itemList[0:0]
+		for j := i; j < end; j++ {
+			path := strings.TrimPrefix(PathList[j], "/")
+			itemList = append(itemList, rs.EntryPath{
+				Key:    path,
+				Bucket: ctx.bucket,
+			})
+		}
+		batchRet, err := ctx.client.BatchStat(nil, itemList)
+		//此处返回的错误很奇怪,有大量文件不存在信息,应该是正常情况,此处最简单的解决方案就是假设没有错误
+		if len(batchRet) != len(itemList) {
+			// 这种是真出现错误了.
+			return nil,fmt.Errorf("[BatchStat] len(batchRet)[%d]!=len(entryPathList)[%d] err[%s]",
+				len(batchRet), len(itemList),err)
+		}
+		for i:=range batchRet{
+			ret := batchRet[i]
+			if ret.Error != ""{
+				if ret.Error != "no such file or directory" {
+					output = append(output, FileInfo{
+						Path: itemList[i].Key,
+					})
+					continue
+				}else{
+					return nil,fmt.Errorf("[BatchStat] unexpect err [%s] code [%d]",ret.Error,ret.Code)
+				}
+			}
+			output = append(output,FileInfo{
+				Path: itemList[i].Key,
+				Hash: batchRet[i].Data.Hash,
+				Size: batchRet[i].Data.Fsize,
+				ModTime: time.Unix(batchRet[i].Data.PutTime/1e7, batchRet[i].Data.PutTime%1e7*100),
+			})
+		}
+	}
+	return output,nil
 }
 
 func (ctx *Context) singleContextCheck() {

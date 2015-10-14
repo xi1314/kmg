@@ -8,7 +8,7 @@ import (
 
 func main() {
 	t := time.Now()
-	time.Sleep(time.Second * 3)
 	serviceCmd.ServiceStartSuccess()
+	//serviceCmd.ServiceStartFail()
 	fmt.Println("ServiceStartSuccess", time.Now().Sub(t).String())
 }
