@@ -31,3 +31,9 @@ func MustRpcSshCmd(ip string, cmd ...string) []byte {
 	}
 	return out
 }
+
+// 带压缩的ssh下载
+func MustSshCmdWithCompress(ip string, cmd string) []byte {
+	out := kmgCmd.CmdString("ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -C root@" + ip + " " + cmd).MustCombinedOutputWithErrorPrintln()
+	return out
+}

@@ -16,6 +16,7 @@ import (
 	"github.com/bronze1man/kmg/encoding/kmgJson"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgErr"
+	"net"
 )
 
 //该对象上的方法不应该被并发调用.
@@ -396,6 +397,38 @@ func (c *Context) GetResponseByteList() []byte {
 
 func (c *Context) GetResponseString() string {
 	return c.responseBuffer.String()
+}
+
+func (c *Context) MustGetClientIp() net.IP{
+	if c.req==nil{
+		return nil
+	}
+	if c.req.RemoteAddr==""{
+		return nil
+	}
+	host,_,err:=net.SplitHostPort(c.req.RemoteAddr)
+	if err!=nil{
+		panic(err)
+	}
+	return net.ParseIP(host)
+}
+
+func (c *Context) GetClientIpStringIgnoreError() string{
+	if c.req==nil{
+		return ""
+	}
+	if c.req.RemoteAddr==""{
+		return ""
+	}
+	host,_,err:=net.SplitHostPort(c.req.RemoteAddr)
+	if err!=nil{
+		return ""
+	}
+	ip:= net.ParseIP(host)
+	if ip==nil{
+		return ""
+	}
+	return ip.String()
 }
 
 type ContextLog struct {

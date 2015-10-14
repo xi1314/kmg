@@ -48,6 +48,10 @@ func MustCombinedOutput(cmd string) []byte {
 	return CmdString(cmd).MustCombinedOutput()
 }
 
+func MustCombinedOutputWithErrorPrintln(cmd string) []byte {
+	return CmdString(cmd).MustCombinedOutputWithErrorPrintln()
+}
+
 func MustCombinedOutputAndNotExitStatusCheck(cmd string) []byte {
 	return CmdString(cmd).MustCombinedOutputAndNotExitStatusCheck()
 }
