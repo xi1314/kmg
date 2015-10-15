@@ -313,6 +313,7 @@ func (t *transformer) endNotTplScope() {
 				t.outBuf.WriteString("kmgXss.Urlv(")
 				t.outBuf.WriteString(s)
 				t.outBuf.WriteString(")")
+				t.urlvStatus = urlvStatusValue
 			} else if t.isInScript {
 				t.hasKmgXssPackage = true
 				t.outBuf.WriteString("kmgXss.Jsonv(")

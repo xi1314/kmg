@@ -130,6 +130,8 @@ const sysvScript = `#!/bin/bash
 # Default-Stop:      0 1 6
 ### END INIT INFO
 
+ulimit -n 1048576
+
 cmd={{.GetCommandLineBashString}}
 
 name='{{.Name}}'

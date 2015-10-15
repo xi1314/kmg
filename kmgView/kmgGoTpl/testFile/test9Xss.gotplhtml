@@ -1,0 +1,8 @@
+<?
+package example
+func tplTest8()string{
+?>
+                            <a class="btn btn-xs btn-success url-get" href="javascript:;" data-url='/?n=FastCms.Admin.Document.EditPage&Id=<?= r["Id"] ?>&CatId=<?= r["CatId"]?>' data-original-title="编辑" data-toggle="" data-placement="top">
+
+<?}?>
+
