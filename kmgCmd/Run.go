@@ -1,4 +1,5 @@
 package kmgCmd
+import "os/exec"
 
 /*
 运行命令,并且把命令输入输出和当前的输入输出接起来
@@ -59,4 +60,12 @@ func MustCombinedOutputAndNotExitStatusCheck(cmd string) []byte {
 //相比MustRun 输入的命令会被放到bash中执行,cmd的语法和bash一致.
 func MustRunInBash(cmd string) {
 	CmdBash(cmd).MustRun()
+}
+
+func IsErrorExitStatus(err error) bool{
+	if err==nil{
+		return false
+	}
+	_, ok := err.(*exec.ExitError)
+	return ok
 }

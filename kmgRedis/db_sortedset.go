@@ -1,7 +1,6 @@
 package kmgRedis
 import (
-	"gopkg.in/redis.v2"
-	"strconv"
+	"gopkg.in/redis.v3"
 )
 
 /*
@@ -35,10 +34,10 @@ func MustZAdd(key string, score float64, member string)  {
 读取一条不是sortset的数据,会返回 ErrSortedSetWrongType
 网络错误会返回error
 */
-func GetAllScoreAndMemberFromSortedSet(key string) (outList []redis.Z, err error) {
-	outList, err = gClient.ZRangeWithScores(key, 0, -1).Result()
+func GetAllScoreAndMemberFromSortedSet(key string) (outList []Z, err error) {
+	outList1, err := gClient.ZRangeWithScores(key, 0, -1).Result()
 	if err == nil {
-		return outList, err
+		return ZListFromRedisZ(outList1), err
 	}
 	if isRedisErrorWrongType(err) {
 		return nil, ErrSortedSetWrongType
@@ -51,12 +50,12 @@ func GetAllScoreAndMemberFromSortedSet(key string) (outList []redis.Z, err error
 读取一条不是sortset的数据,会返回 ErrSortedSetWrongType
 网络错误会返回error
 */
-func GetRevAllScoreAndMemberFromSortedSet(key string) (outList []redis.Z, err error) {
+func GetRevAllScoreAndMemberFromSortedSet(key string) (outList []Z, err error) {
 	return ZRevRangeWithScore(key, 0, -1)
 }
 
 func ZRevRange(key string, start int, end int) (sList []string, err error) {
-	sList, err = gClient.ZRevRange(key, strconv.Itoa(start), strconv.Itoa(end)).Result()
+	sList, err = gClient.ZRevRange(key, int64(start), int64(end)).Result()
 	if err == nil {
 		return sList, err
 	}
@@ -66,13 +65,27 @@ func ZRevRange(key string, start int, end int) (sList []string, err error) {
 	return nil, err
 }
 
-func ZRevRangeWithScore(key string, start int, end int) (outList []redis.Z, err error) {
-	outList, err = gClient.ZRevRangeWithScores(key, strconv.Itoa(start), strconv.Itoa(end)).Result()
+type Z struct{
+	Score  float64
+	Member string
+}
+
+func ZRevRangeWithScore(key string, start int, end int) (outList []Z, err error) {
+	outList1, err := gClient.ZRevRangeWithScores(key,int64(start), int64(end)).Result()
 	if err == nil {
-		return outList, err
+		return ZListFromRedisZ(outList1), err
 	}
 	if isRedisErrorWrongType(err) {
 		return nil, ErrSortedSetWrongType
 	}
 	return nil, err
+}
+
+func ZListFromRedisZ(list []redis.Z) []Z{
+	out:=make([]Z,len(list))
+	for i:=range list{
+		out[i].Member = list[i].Member.(string)
+		out[i].Score = list[i].Score
+	}
+	return out
 }

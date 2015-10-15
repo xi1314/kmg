@@ -5,7 +5,7 @@ import (
 
 	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/encoding/kmgYaml"
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 )
 
 // 清空当前db的所有数据,并且设置为传入的数据
@@ -16,7 +16,7 @@ func MustSetDbData(c *redis.Client, data map[string]string) {
 		panic(fmt.Errorf("[MustSetRedisData] redisClient.FlushDb() fail %s %s", err, result))
 	}
 	for key, value := range data {
-		result, err := c.Set(key, value).Result()
+		result, err := c.Set(key, value,0).Result()
 		if err != nil && result != "OK" {
 			panic(fmt.Errorf("[MustSetRedisData] rc.Set(key,value).Result() fail %s %s", err, result))
 		}
@@ -45,14 +45,14 @@ func MustSetDataWithGob(c *redis.Client, key string, data interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	result, err := c.Set(key, string(b)).Result()
+	result, err := c.Set(key, string(b),0).Result()
 	if err != nil && result != "OK" {
 		panic(fmt.Errorf("[MustSetDataWithGob] rc.Set(key,value).Result() fail %s %s", err, result))
 	}
 }
 
 func MustSetData(c *redis.Client, key string, data string) {
-	result, err := c.Set(key, data).Result()
+	result, err := c.Set(key, data,0).Result()
 	if err != nil && result != "OK" {
 		panic(fmt.Errorf("[MustSetData] rc.Set(key,value).Result() fail %s %s", err, result))
 	}

@@ -7,7 +7,12 @@ import (
 
 func tplNavBar(n NavBar) string {
 	var _buf bytes.Buffer
-	_buf.WriteString(`<nav class="navbar navbar-inverse navbar-fixed-top" style="position:inherit;">
+	_buf.WriteString(`<style>
+   body {
+       padding-top: 71px!important;
+   }
+</style>
+<nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">

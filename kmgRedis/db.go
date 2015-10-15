@@ -3,7 +3,7 @@ package kmgRedis
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 	"reflect"
 	"strconv"
 	"strings"
@@ -36,7 +36,7 @@ func InitWithConfig(opt *redis.Options) {
 // 如果出现网络错误,会返回 一个网络错误的err
 // 没有其他错误的可能性了.
 func Insert(key string, value string) (err error) {
-	success, err := gClient.SetNX(key, value).Result()
+	success, err := gClient.SetNX(key, value,0).Result()
 	if err != nil {
 		return
 	}
@@ -85,7 +85,7 @@ func Update(key string, value string) (err error) {
 // 网络错误会返回 error
 // 注意redis类型错误时,也不会报错,只会把这个key设置成正确的value
 func Set(key string, value string) (err error) {
-	return gClient.Set(key, value).Err()
+	return gClient.Set(key, value,0).Err()
 }
 
 func MustSet(key string, value string) {
@@ -355,7 +355,7 @@ func mgetNotExistCheckGobUnmarshal(outList []interface{}, obj reflect.Value) (er
 网络错误会返回error
 */
 func SetEx(key string, dur time.Duration, value string) (err error) {
-	return gClient.SetEx(key, dur, value).Err()
+	return gClient.Set(key, value,dur).Err()
 }
 
 func isRedisErrorWrongType(err error) bool {

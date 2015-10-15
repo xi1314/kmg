@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"os"
-	"path/filepath"
 	"runtime/debug"
 	runtimePprof "runtime/pprof"
 	"strings"
@@ -22,16 +21,7 @@ import (
 // 可以使用PrefixPath提高安全性
 // 如果你不关心安全性 可以使用 / 以便使用golang的默认值. (kmgHttp.ClearHttpDefaultServer() 避免多次注册)
 func RegisterProfile(prefixPath string) {
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/profile"), http.HandlerFunc(pprof.Profile))
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/symbol"), http.HandlerFunc(pprof.Symbol))
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/heap"), http.HandlerFunc(heap))
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/block"), pprof.Handler("block"))
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/goroutine"), pprof.Handler("goroutine"))
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/threadcreate"), pprof.Handler("threadcreate"))
-
-	http.Handle(filepath.Join(prefixPath, "/debug/pprof/"), http.HandlerFunc(pprof.Index))
-	http.Handle(filepath.Join(prefixPath, "/debug/vars"), http.HandlerFunc(ExpvarHandler))
-	http.Handle(filepath.Join(prefixPath, "/debug/gc"), http.HandlerFunc(GcHandler))
+	registerProfile(prefixPath,http.DefaultServeMux)
 }
 
 func StartProfileOnAddr(prefixPath string, profileAddr string) {

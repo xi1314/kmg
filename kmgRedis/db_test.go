@@ -2,7 +2,6 @@ package kmgRedis
 
 import (
 	"github.com/bronze1man/kmg/kmgTest"
-	"gopkg.in/redis.v2"
 	"sort"
 	"testing"
 	"time"
@@ -221,7 +220,7 @@ func TestRedisSortedSet(ot *testing.T) {
 
 	zlist, err := GetAllScoreAndMemberFromSortedSet("test_1")
 	kmgTest.Equal(err, nil)
-	kmgTest.Equal(zlist, []redis.Z{
+	kmgTest.Equal(zlist, []Z{
 		{Score: -1, Member: "abcd"},
 		{Score: 0, Member: "abc"},
 	})
@@ -235,7 +234,7 @@ func TestRedisSortedSet(ot *testing.T) {
 
 	zlist, err = GetRevAllScoreAndMemberFromSortedSet("test_1")
 	kmgTest.Equal(err, nil)
-	kmgTest.Equal(zlist, []redis.Z{
+	kmgTest.Equal(zlist, []Z{
 		{Score: 0, Member: "abc"},
 		{Score: -1, Member: "abcd"},
 	})
@@ -246,7 +245,7 @@ func TestRedisSortedSet(ot *testing.T) {
 
 	zlist, err = ZRevRangeWithScore("test_1", 0, 0)
 	kmgTest.Equal(err, nil)
-	kmgTest.Equal(zlist, []redis.Z{
+	kmgTest.Equal(zlist, []Z{
 		{Score: 0, Member: "abc"},
 	})
 }

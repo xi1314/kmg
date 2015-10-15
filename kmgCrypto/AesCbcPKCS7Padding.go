@@ -12,6 +12,8 @@ var ErrDecryptedDataTooSmall = fmt.Errorf("encrypted data too small")
 
 //key must be 32 bytes, if it is not 32 byte,it will panic
 // 警告: 这个加密没有hash认证
+// 0-16: iv
+// 16-32: data
 func AesCbcPKCS7PaddingEncrypt(in, key []byte) (out []byte) {
 	out = make([]byte, len(in)+aes.BlockSize*2)
 	block, err := aes.NewCipher(key)

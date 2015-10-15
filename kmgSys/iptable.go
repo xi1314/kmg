@@ -16,7 +16,8 @@ func MustSetIptableRule(rule IptableRule) {
 			return
 		}
 	}
-	kmgCmd.MustRun("iptables -t " + rule.Table + " " + rule.Rule)
+	// Another app is currently holding the xtables lock. Perhaps you want to use the -w option?
+	kmgCmd.MustRun("iptables -w -t " + rule.Table + " " + rule.Rule)
 }
 
 func MustGetIptableRuleList() []IptableRule {

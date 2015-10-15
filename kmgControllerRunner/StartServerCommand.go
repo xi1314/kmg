@@ -49,6 +49,7 @@ func StartHttpServer(addr string) {
 	})
 }
 
+//Deprecated
 func StartServer(sReq ServerRequest) {
 	var targetScheme string
 	switch sReq.Type {
@@ -94,4 +95,9 @@ func StartServer(sReq ServerRequest) {
 	default:
 		panic("impossible execute path")
 	}
+}
+
+func StartServerAsync(serverAddress string) (closer func() error) {
+	http.Handle("/", HttpHandler)
+	return kmgHttp.MustGoHttpAsyncListenAndServeWithCloser(serverAddress, nil)
 }
