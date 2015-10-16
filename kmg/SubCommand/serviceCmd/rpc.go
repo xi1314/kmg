@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bronze1man/kmg/errors"
 	"github.com/bronze1man/kmg/kmgCrypto"
+	"github.com/bronze1man/kmg/kmgProcessMutex"
 	"time"
 )
 
@@ -29,8 +30,8 @@ func (sr *ServiceRpc) Send(status StartStatus) {
 //TODO 对于不会发 RPC 的进程，应该可以用一个 flag 来表明不需要等待 RPC 响应
 func waitRpcRespond() chan error {
 	returnChan := make(chan error)
-	lock := &FileMutex{}
-	lock.Lock("kmg_service_lock")
+	lock := &kmgProcessMutex.FileMutex{Name: "kmg_service_lock"}
+	lock.Lock()
 	ListenAndServe_ServiceRpc(rpcAddress, &ServiceRpc{}, rpcPsk)
 	go func() {
 		startStatus := <-statusChannel
@@ -44,7 +45,7 @@ func waitRpcRespond() chan error {
 }
 
 func ServiceStartSuccess() {
-	time.Sleep(time.Millisecond*100)
+	time.Sleep(time.Millisecond * 100)
 	client := NewClient_ServiceRpc("http://"+rpcAddress, rpcPsk)
 	err := client.Send(StartStatusSuccess)
 	if err != nil {
