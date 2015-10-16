@@ -1,6 +1,7 @@
 package kmgRedis
 import (
 	"gopkg.in/redis.v3"
+	"github.com/bronze1man/kmg/kmgStrconv"
 )
 
 /*
@@ -74,6 +75,20 @@ func ZRevRangeWithScore(key string, start int, end int) (outList []Z, err error)
 	outList1, err := gClient.ZRevRangeWithScores(key,int64(start), int64(end)).Result()
 	if err == nil {
 		return ZListFromRedisZ(outList1), err
+	}
+	if isRedisErrorWrongType(err) {
+		return nil, ErrSortedSetWrongType
+	}
+	return nil, err
+}
+
+func ZRevRangeByScore(key string,max float64,min float64) (sList []string,err error){
+	sList, err = gClient.ZRevRangeByScore(key, redis.ZRangeByScore{
+		Min: kmgStrconv.FormatFloat(min),
+		Max: kmgStrconv.FormatFloat(max),
+	} ).Result()
+	if err == nil {
+		return sList, err
 	}
 	if isRedisErrorWrongType(err) {
 		return nil, ErrSortedSetWrongType

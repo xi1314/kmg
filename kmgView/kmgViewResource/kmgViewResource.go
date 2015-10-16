@@ -16,7 +16,7 @@ import (
 type ResourceUploadRequest struct {
 	ImportPathList []string
 	//ResourceList  []string //传入一堆资源目录的列表,然后传到七牛上.
-	Qiniu         *kmgQiniu.Context
+	Qiniu         *kmgQiniu.Context // 如果传入qiniu相关的对象,生成代码时,会向七牛上传资源文件
 	QiniuPrefix   string
 	OutGoFilePath string
 	Name          string //缓存和区分不同实例使用.

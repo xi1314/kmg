@@ -5,6 +5,9 @@ import (
 	"sort"
 	"testing"
 	"time"
+	"github.com/bronze1man/kmg/kmgStrings"
+	"strconv"
+	"fmt"
 )
 
 func init() {
@@ -248,6 +251,17 @@ func TestRedisSortedSet(ot *testing.T) {
 	kmgTest.Equal(zlist, []Z{
 		{Score: 0, Member: "abc"},
 	})
+
+	sList,err = ZRevRangeByScore("test_1",-0.5,-2)
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(sList, []string{"abcd"})
+
+	sList,err = ZRevRangeByScore("test_5",-0.5,-2)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(sList), 0)
+
+	sList,err = ZRevRangeByScore("test_4",-0.5,-2)
+	kmgTest.Equal(err, ErrSortedSetWrongType)
 }
 
 func TestRedisRename(ot *testing.T) {
@@ -346,3 +360,87 @@ func TestIncrByFloat(ot *testing.T){
 
 	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"),1.7e200)
 }
+
+func TestScanCallback(ot *testing.T){
+	MustFlushDbV2()
+	MustInsert("test_1","abc")
+	MustInsert("test_2","abc")
+	MustInsert("testno_3","abc")
+
+	outKey:=[]string{}
+	err := ScanCallback("*",func(key string) error{
+		outKey = append(outKey,key)
+		return nil
+	})
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(len(outKey),3)
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_1"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_2"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"testno_3"))
+
+
+	outKey=[]string{}
+	err = ScanCallback("test_*",func(key string)error{
+		outKey = append(outKey,key)
+		return nil
+	})
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(len(outKey),2)
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_1"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_2"))
+
+	sList,err:=ScanWithOutputLimit("test_*",1)
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(len(sList),1)
+
+	//benchmarkScanCallback()
+}
+
+func benchmarkScanCallback() {
+	N:=1000*100
+	MustFlushDbV2()
+	t:=time.Now()
+	pairList :=make([]KeyValuePair,N)
+	for i:=0;i<N;i++ {
+		pairList[i].Key = "test_"+strconv.Itoa(i)
+		pairList[i].Value = "abc"
+	}
+	MustMSet(pairList)
+	fmt.Println(time.Since(t)) //386.265848ms
+	t = time.Now()
+	num:=0
+	err := ScanCallback("*",func(key string) error{
+		num++
+		return nil
+	}) //169.983354ms
+	fmt.Println(time.Since(t))
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(num,N)
+	t = time.Now()
+	sList,err:=Keys("*") //138.565292ms
+	fmt.Println(time.Since(t))
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(len(sList),N)
+	MustFlushDbV2()
+}
+
+/*
+暂时不能使用这个办法来调试速度,容易爆内存
+func BenchmarkScanCallback(b *testing.B) {
+	b.StopTimer()
+	MustFlushDbV2()
+	fmt.Println(b.N)
+	b.ResetTimer()
+	pairList :=make([]KeyValuePair,b.N)
+	for i:=0;i<b.N;i++ {
+		pairList[i].Key = "test_"+strconv.Itoa(i)
+		pairList[i].Value = "abc"
+	}
+	MustMSet(pairList)
+	num:=0
+	err := ScanCallback("*",func(key string){
+		num++
+	})
+	kmgTest.Equal(err,nil)
+}
+*/

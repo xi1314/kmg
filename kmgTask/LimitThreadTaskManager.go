@@ -17,7 +17,7 @@ var debug_num int32
 //新建管理器
 func NewLimitThreadTaskManager(num_thread int) *LimitThreadTaskManager {
 	tm := &LimitThreadTaskManager{
-		task_chan:  make(chan Task, limit_thread_task_buffer_size),
+		task_chan:  make(chan Task, 2*num_thread), // 这个地方buffer过长了会过度消耗上一级的资源. 暂时取2倍,以便可以做到速度控制.
 		num_thread: num_thread,
 	}
 	tm.run()
@@ -46,6 +46,7 @@ func (t *LimitThreadTaskManager) AddTask(task Task) {
 	t.task_chan <- task
 }
 
+// 此处可能由于加入任务速度太快而阻塞.
 func (t *LimitThreadTaskManager) AddFunc(f func()) {
 	t.AddTask(TaskFunc(f))
 }

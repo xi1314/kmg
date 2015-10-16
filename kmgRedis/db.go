@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/bronze1man/kmg/errors"
 )
 
 var gClient *redis.Client
@@ -106,6 +107,23 @@ func SetGob(key string, obj interface{}) (err error) {
 func MustSetGob(key string, obj interface{}) {
 	err := SetGob(key, obj)
 	if err != nil {
+		panic(err)
+	}
+}
+
+type KeyValuePair struct{
+	Key string
+	Value string
+}
+// 经过实际测试发现一次只能写入1万个,太多会 broken pipe
+func MustMSet(pairList []KeyValuePair) {
+	outPair:=make([]string,len(pairList)*2)
+	for i,pair:=range pairList{
+		outPair[2*i] = pair.Key
+		outPair[2*i+1] = pair.Value
+	}
+	err:=gClient.MSet(outPair...).Err()
+	if err!=nil{
 		panic(err)
 	}
 }
@@ -430,3 +448,48 @@ func IncrByFloat(key string,num float64) (err error){
 	return nil
 }
 
+// 1万个key扫描大概需要花费 10ms时间,如果这个东西性能是瓶颈.请尝试降低这个值.
+const scanSize = 10000
+
+// 扫描redis里面所有的key.
+// 目前按照10000个一次的速度进行出来.
+func ScanCallback(patten string,cb func (key string)error) (err error){
+	var cursor int64
+	var keyList []string
+	for{
+		cursor,keyList,err=gClient.Scan(cursor,patten,scanSize).Result()
+		if err!=nil{
+			return err
+		}
+		for _,key:=range keyList{
+			err = cb(key)
+			if err!=nil{
+				return err
+			}
+		}
+		if cursor==0{
+			return nil
+		}
+	}
+}
+
+var scanWithOutputLimitEOFError = errors.New("scanWithOutputLimitEOFError")
+// 保证只会返回小于等于limit个数据.
+func ScanWithOutputLimit(pattern string,limit int) (sList []string,err error){
+	if limit==0{
+		return nil,nil
+	}
+	sList=make([]string,0,limit)
+	err = ScanCallback(pattern,func(key string)error{
+		sList = append(sList,key)
+		if len(sList)>=limit{
+			return scanWithOutputLimitEOFError
+		}else{
+			return nil
+		}
+	})
+	if err==scanWithOutputLimitEOFError{
+		return sList,nil
+	}
+	return sList,err
+}
