@@ -9,6 +9,7 @@ import (
 
 // 列出所有前缀是xxx的数据,
 // 已处理1000个限制
+// 已看过sdk的文档,此处没有很简单的办法可以进行并发优化.
 func ListPrefix(ctx *Context, prefix string) (entries []rsf.ListItem, err error) {
 	var marker = ""
 	for {

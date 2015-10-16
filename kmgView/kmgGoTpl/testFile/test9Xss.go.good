@@ -1,0 +1,16 @@
+package example
+
+import (
+	"bytes"
+	"github.com/bronze1man/kmg/kmgXss"
+)
+
+func tplTest8() string {
+	var _buf bytes.Buffer
+	_buf.WriteString(`                            <a class="btn btn-xs btn-success url-get" href="javascript:;" data-url='/?n=FastCms.Admin.Document.EditPage&Id=`)
+	_buf.WriteString(kmgXss.Urlv(r["Id"]))
+	_buf.WriteString(`&CatId=`)
+	_buf.WriteString(kmgXss.Urlv(r["CatId"]))
+	_buf.WriteString(`' data-original-title="编辑" data-toggle="" data-placement="top">`)
+	return _buf.String()
+}
