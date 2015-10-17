@@ -79,13 +79,17 @@ type resourceBuildToDirResponse struct {
 	NeedCachePathList []string
 	CssFileName       string
 	JsFileName        string
+	UploadedCssFileName string
+	UploadedJsFileName string
+
+	ImportPacakgeList []string //需要导入的 package 的列表
 }
 
-func resourceBuildToDir(importPkgList []string, tmpDirPath string) (response resourceBuildToDirResponse) {
+func resourceBuildToDir(ImportPackageList []string, tmpDirPath string) (response resourceBuildToDirResponse) {
 	builder := &tBuilder{
 		pkgMap: map[string]*pkg{},
 	}
-	for _, importPath := range importPkgList {
+	for _, importPath := range ImportPackageList {
 		builder.handlePkg(importPath)
 	}
 	for _, pkg := range builder.pkgDepOrder {
@@ -109,6 +113,7 @@ func resourceBuildToDir(importPkgList []string, tmpDirPath string) (response res
 	for _, pkg := range builder.pkgDepOrder {
 		response.NeedCachePathList = append(response.NeedCachePathList, pkg.Dirpath)
 	}
+	response.ImportPacakgeList = ImportPackageList
 	return response
 }
 

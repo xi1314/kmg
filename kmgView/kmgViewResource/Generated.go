@@ -9,6 +9,7 @@ import (
 	"github.com/bronze1man/kmg/kmgXss"
 	"strings"
 	"sync"
+	"reflect"
 )
 
 type Generated struct {
@@ -140,6 +141,7 @@ func (g *Generated) GetContentByName(name string) (b []byte, err error) {
 
 }
 
+
 func (g *Generated) recheckAndReloadCache() {
 	// 加载缓存文件,确定有哪些文件需要检查.
 	cachedInfo := &resourceBuildToDirResponse{}
@@ -148,9 +150,14 @@ func (g *Generated) recheckAndReloadCache() {
 		g.reloadCache()
 		return
 	}
+	// 第一次内存,没有数据时,需要从硬盘读入数据.
 	g.locker.Lock()
 	g.cachedInfo = *cachedInfo
 	g.locker.Unlock()
+	if !reflect.DeepEqual(cachedInfo.ImportPacakgeList ,g.RequestImportList){
+		g.reloadCache()
+		return
+	}
 	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, cachedInfo.NeedCachePathList, g.reloadCache)
 }
 
@@ -163,3 +170,8 @@ func (g *Generated) reloadCache() {
 	g.cachedInfo = response
 	g.locker.Unlock()
 }
+
+/*
+TODO 修复缓存无效原因1:
+	* 用户修改了资源文件的配置,现在资源文件需要访问的package和上一次缓存时需要访问的package不一致.
+ */
