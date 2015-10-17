@@ -16,6 +16,42 @@ type Example struct{}
 
 func (e Example) Demo1(ctx *kmgHttp.Context){
 	ctx.WriteString(kmgBootstrap.NewWrap("kmg bootstrap demo",
+		kmgBootstrap.Menu{
+			Title: "kmg bootstrap demo",
+			NodeList: []kmgBootstrap.MenuNode{
+				{ Name: "主页", Url: "/", },
+				{
+					Name: "测试菜单1",
+					Url: "/?menu=1",
+					ChildList: []kmgBootstrap.MenuNode{
+						{
+							Name: "测试菜单-子菜单1-1",
+							Url: "/?menu=1-1",
+							ChildList: []kmgBootstrap.MenuNode{
+								{
+									Name: "测试菜单-子菜单1-1-1",
+									Url: "/?menu=1-1-1",
+									ChildList: []kmgBootstrap.MenuNode{
+										{
+											Name: "测试菜单-子菜单1-1-1-1",
+											Url: "/?menu=1-1-1-1",
+										},
+									},
+								},
+								{
+									Name: "测试菜单-子菜单1-1-2",
+									Url: "/?menu=1-1-2",
+								},
+							},
+						},
+						{
+							Name: "测试菜单-子菜单1-2",
+							Url: "/?menu=1-2",
+						},
+					},
+				},
+			},
+		},
 		kmgBootstrap.Panel{
 			Title: "Panel",
 			Body: kmgBootstrap.Panel{

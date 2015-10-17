@@ -56,7 +56,7 @@ func (s *generateServer_ServiceRpc) ServeHTTP(w http.ResponseWriter, req *http.R
 			return
 		}
 	}
-	outBuf, err := s.handleApiV1(b1)
+	outBuf, err := s.handleApiV1(b1, w, req)
 	if err != nil {
 		kmgLog.Log("InfoServerError", err.Error(), kmgHttp.NewLogStruct(req))
 		outBuf = append([]byte{1}, err.Error()...) // error
@@ -111,7 +111,7 @@ func (c *Client_ServiceRpc) sendRequest(apiName string, inData interface{}, outD
 		return fmt.Errorf("httpjsonApi protocol error 1 %d", outByte[0])
 	}
 }
-func (s *generateServer_ServiceRpc) handleApiV1(inBuf []byte) (outBuf []byte, err error) {
+func (s *generateServer_ServiceRpc) handleApiV1(inBuf []byte, _httpW http.ResponseWriter, _httpReq *http.Request) (outBuf []byte, err error) {
 	//从此处开始协议正确了,换一种返回方式
 	// 1 byte api name len apiNameLen
 	// apiNameLen byte api name

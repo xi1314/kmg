@@ -314,3 +314,18 @@ func Pre(content string) kmgView.HtmlRenderer {
 func Br(num int) kmgView.HtmlRenderer {
 	return kmgView.Html(strings.Repeat("<br />", num))
 }
+
+type Menu struct{
+	Title string
+	NodeList []MenuNode
+}
+
+func (node Menu) HtmlRender() string{
+	return tplMenu(node)
+}
+
+type MenuNode struct{
+	Name    string
+	Url     string
+	ChildList []MenuNode
+}
