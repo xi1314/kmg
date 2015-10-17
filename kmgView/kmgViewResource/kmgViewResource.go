@@ -79,10 +79,8 @@ type resourceBuildToDirResponse struct {
 	NeedCachePathList []string
 	CssFileName       string
 	JsFileName        string
-	UploadedCssFileName string
-	UploadedJsFileName string
 
-	ImportPacakgeList []string //需要导入的 package 的列表
+	ImportPackageList []string //需要导入的 package 的列表, 此处对这个信息进行缓存验证
 }
 
 func resourceBuildToDir(ImportPackageList []string, tmpDirPath string) (response resourceBuildToDirResponse) {
@@ -113,7 +111,7 @@ func resourceBuildToDir(ImportPackageList []string, tmpDirPath string) (response
 	for _, pkg := range builder.pkgDepOrder {
 		response.NeedCachePathList = append(response.NeedCachePathList, pkg.Dirpath)
 	}
-	response.ImportPacakgeList = ImportPackageList
+	response.ImportPackageList = ImportPackageList
 	return response
 }
 

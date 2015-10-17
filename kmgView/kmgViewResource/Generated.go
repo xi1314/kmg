@@ -154,11 +154,13 @@ func (g *Generated) recheckAndReloadCache() {
 	g.locker.Lock()
 	g.cachedInfo = *cachedInfo
 	g.locker.Unlock()
-	if !reflect.DeepEqual(cachedInfo.ImportPacakgeList ,g.RequestImportList){
+	if !reflect.DeepEqual(cachedInfo.ImportPackageList,g.RequestImportList){
 		g.reloadCache()
 		return
 	}
-	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, cachedInfo.NeedCachePathList, g.reloadCache)
+	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, cachedInfo.NeedCachePathList, func(){
+		g.reloadCache()
+	})
 }
 
 func (g *Generated) reloadCache() {
@@ -169,6 +171,9 @@ func (g *Generated) reloadCache() {
 	g.locker.Lock()
 	g.cachedInfo = response
 	g.locker.Unlock()
+	// 重新加载 NeedCachePathList 缓存.避免同一次变化多次更新缓存. TODO data race?
+	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, response.NeedCachePathList,func(){})
+
 }
 
 /*
