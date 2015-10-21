@@ -18,15 +18,19 @@ type AcctRequest struct {
 type Handler struct {
 	// 有的协议需要明文密码来做各种hash的事情
 	// exist返回false可以踢掉客户端
+	// 同步调用
 	Auth func(username string) (password string, exist bool)
 	// 计费开始,来了一条新连接
 	// 根据协议规定 此处返回给客户端的包,不能发送任何有效信息(比如踢掉客户端,请采用其他办法踢掉客户端)
+	// 异步调用
 	AcctStart func(acctReq AcctRequest)
 	// 计费数据更新
 	// 根据协议规定 此处返回给客户端的包,不能发送任何有效信息(比如踢掉客户端,请采用其他办法踢掉客户端)
+	// 异步调用
 	AcctUpdate func(acctReq AcctRequest)
 	// 计费结束
 	// 根据协议规定 此处返回给客户端的包,不能发送任何有效信息(比如踢掉客户端,请采用其他办法踢掉客户端)
+	// 异步调用
 	AcctStop func(acctReq AcctRequest)
 }
 

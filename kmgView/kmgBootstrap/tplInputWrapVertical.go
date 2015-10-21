@@ -5,7 +5,7 @@ import (
 	"github.com/bronze1man/kmg/kmgXss"
 )
 
-func tplInputString(config InputString) string {
+func tplInputWrapVertical(config InputWrapVertical) string {
 	var _buf bytes.Buffer
 	_buf.WriteString(`<div class="form-group has-feedback">
     <label class="col-sm-2 control-label">`)
@@ -18,18 +18,9 @@ func tplInputString(config InputString) string {
 	_buf.WriteString(`    </label>
 
     <div class="col-sm-8">
-        <input type="text" autocomplete="off" class="form-control"
-            `)
-	if config.ReadOnly {
-		_buf.WriteString(` readonly `)
-	}
-	_buf.WriteString(`               name="`)
-	_buf.WriteString(kmgXss.H(config.Name))
-	_buf.WriteString(`"
-               value="`)
-	_buf.WriteString(kmgXss.H(config.Value))
-	_buf.WriteString(`"/>
-        <span style="font-size:12px;color:red">
+        `)
+	_buf.WriteString(config.Body.HtmlRender())
+	_buf.WriteString(`        <span style="font-size:12px;color:red">
             `)
 	if config.Comment != "" {
 		_buf.WriteString(` 提示: `)

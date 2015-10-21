@@ -2,7 +2,6 @@ package kmgBootstrap
 
 import (
 	"bytes"
-	"github.com/bronze1man/kmg/kmgXss"
 )
 
 func tplNavBar(n NavBar) string {
@@ -32,35 +31,17 @@ func tplNavBar(n NavBar) string {
             <ul class="nav navbar-nav">
                 `)
 	for _, o := range n.OptionList {
-		_buf.WriteString(`                <li `)
-		if o.Name == n.ActiveName {
-			_buf.WriteString(`class="active"`)
-		}
-		_buf.WriteString(` >
-                    <a href="`)
-		_buf.WriteString(kmgXss.H(o.Url))
-		_buf.WriteString(`">`)
-		_buf.WriteString(kmgXss.H(o.Name))
-		_buf.WriteString(`</a>
-                </li>
-                `)
+		_buf.WriteString(`                    `)
+		_buf.WriteString(tplNavBarNode(o, 0))
+		_buf.WriteString(`                `)
 	}
 	_buf.WriteString(`            </ul>
             <ul class="nav navbar-nav navbar-right">
                 `)
 	for _, o := range n.RightOptionList {
-		_buf.WriteString(`                <li `)
-		if o.Name == n.ActiveName {
-			_buf.WriteString(`class="active"`)
-		}
-		_buf.WriteString(` >
-                    <a href="`)
-		_buf.WriteString(kmgXss.H(o.Url))
-		_buf.WriteString(`">`)
-		_buf.WriteString(kmgXss.H(o.Name))
-		_buf.WriteString(`</a>
-                </li>
-                `)
+		_buf.WriteString(`                    `)
+		_buf.WriteString(tplNavBarNode(o, 0))
+		_buf.WriteString(`                `)
 	}
 	_buf.WriteString(`            </ul>
         </div><!-- /.navbar-collapse -->

@@ -5,8 +5,14 @@ func tplButton (button Button) string { ?>
     <? if button.Url == "" { ?>
     href="javascript:void(0);"
     <? } else { ?>
-    href="<?= kmgXss.Urlv(button.Url) ?>"
+    href="<?= kmgXss.H(button.Url) ?>"
     <? } ?>
+<? } ?>
+<? if button.Name!="" { ?>
+    name="<?=button.Name?>"
+<? } ?>
+<? if button.Value!="" { ?>
+    value="<?=button.Value?>"
 <? } ?>
 <? if button.Type == ButtonTypeButton { ?>
     type="submit"

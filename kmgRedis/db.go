@@ -449,7 +449,7 @@ func IncrByFloat(key string,num float64) (err error){
 }
 
 // 1万个key扫描大概需要花费 10ms时间,如果这个东西性能是瓶颈.请尝试降低这个值.
-const scanSize = 10000
+var scanSize = 10000
 
 // 扫描redis里面所有的key.
 // 目前按照10000个一次的速度进行出来.
@@ -457,7 +457,7 @@ func ScanCallback(patten string,cb func (key string)error) (err error){
 	var cursor int64
 	var keyList []string
 	for{
-		cursor,keyList,err=gClient.Scan(cursor,patten,scanSize).Result()
+		cursor,keyList,err=gClient.Scan(cursor,patten,int64(scanSize)).Result()
 		if err!=nil{
 			return err
 		}

@@ -1,0 +1,7 @@
+<? package kmgBootstrap
+func tplTextArea(config TextArea) string {
+?>
+        <textarea autocomplete="off" class="form-control"
+                    <? if config.ReadOnly { ?> readonly <? } ?>
+                name="<?=config.Name?>" cols="30" rows="10" ><?=config.Value?></textarea>
+<? } ?>

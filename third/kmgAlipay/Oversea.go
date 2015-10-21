@@ -69,7 +69,7 @@ func (ot *OverseaTrade) InitForPayCallback(){
 type OverseaTradePayRequest struct {
 	Subject    string
 	Body       string //可选
-	OutTradeNo string
+	OutTradeNo string // 最长64个字节
 	Currency   string
 	//TotalFee 和 RmbFee 二选一,必须选一个
 	TotalFee            float64

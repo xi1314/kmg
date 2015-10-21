@@ -22,16 +22,12 @@ func tplNavBar (n NavBar) string { ?>
         <div class="collapse navbar-collapse" id="kmgBootstrapNavBarMainContent">
             <ul class="nav navbar-nav">
                 <? for _,o := range n.OptionList { ?>
-                <li <? if o.Name == n.ActiveName { ?>class="active"<? } ?> >
-                    <a href="<?= o.Url ?>"><?= o.Name ?></a>
-                </li>
+                    <?=raw(tplNavBarNode(o,0)) ?>
                 <? } ?>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <? for _,o := range n.RightOptionList { ?>
-                <li <? if o.Name == n.ActiveName { ?>class="active"<? } ?> >
-                    <a href="<?= o.Url ?>"><?= o.Name ?></a>
-                </li>
+                    <?=raw(tplNavBarNode(o,0)) ?>
                 <? } ?>
             </ul>
         </div><!-- /.navbar-collapse -->

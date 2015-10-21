@@ -52,6 +52,13 @@ func NewTable(TitleList []string, DataList [][]string) Table {
 	return t
 }
 
+// 显示键值对显示信息的 表格
+func NewNoTitleTable(DataList [][]kmgView.HtmlRenderer) Table {
+	return Table{
+		DataList: DataList,
+	}
+}
+
 // 1.这个函数顺序会变,基本不靠谱.
 // 2.直接从数据库取的数据,字段信息没有翻译.
 func NewTableFromMapList(m []map[string]string) Table {
@@ -84,12 +91,12 @@ func (p HorizontalHtmlRenderList) HtmlRender() string {
 type NavTabList struct {
 	ActiveName  string //选中的名称
 	OptionList  []NavTabOption
-	CustomClass string //自定义样式的类名
+	CustomClass string // 两种样式 nav-pills / nav-tabs，不填将使用 nav-pills
 }
 
 type NavTabOption struct {
-	Name 		string
-	Url  		string
+	Name      string
+	Url       string
 }
 
 func (p NavTabList) HtmlRender() string {
@@ -133,17 +140,6 @@ func (a A) HtmlRender() string {
 		s += ` id="` + kmgXss.H(a.Id) + `" `
 	}
 	return s + `>` + kmgXss.H(a.Title) + `</a>`
-}
-
-type NavBar struct {
-	Title           kmgView.HtmlRenderer //可以是 Log 或者文字
-	ActiveName      string
-	OptionList      []NavTabOption
-	RightOptionList []NavTabOption
-}
-
-func (navBar NavBar) HtmlRender() string {
-	return tplNavBar(navBar)
 }
 
 type TextColor string
@@ -250,6 +246,8 @@ type Button struct {
 	AttributeNode kmgView.HtmlRenderer
 	ClassName     string
 	Id            string
+	Name          string
+	Value         string
 }
 
 func (b Button) HtmlRender() string {
@@ -258,6 +256,9 @@ func (b Button) HtmlRender() string {
 	}
 	if b.Type == "" {
 		b.Type = ButtonTypeButton
+	}
+	if b.Content == nil {
+		panic("kmgBootstrap.Button.Content must not be empty")
 	}
 	return tplButton(b)
 }
@@ -315,17 +316,18 @@ func Br(num int) kmgView.HtmlRenderer {
 	return kmgView.Html(strings.Repeat("<br />", num))
 }
 
-type Menu struct{
-	Title string
-	NodeList []MenuNode
+type NavBarNode struct {
+	Name      string
+	Url       string
+	ChildList []NavBarNode
 }
 
-func (node Menu) HtmlRender() string{
-	return tplMenu(node)
+type NavBar struct {
+	Title           kmgView.HtmlRenderer //可以是 Log 或者文字
+	OptionList      []NavBarNode
+	RightOptionList []NavBarNode
 }
 
-type MenuNode struct{
-	Name    string
-	Url     string
-	ChildList []MenuNode
+func (navBar NavBar) HtmlRender() string {
+	return tplNavBar(navBar)
 }

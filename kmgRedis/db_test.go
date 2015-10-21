@@ -367,6 +367,7 @@ func TestScanCallback(ot *testing.T){
 	MustInsert("test_2","abc")
 	MustInsert("testno_3","abc")
 
+	scanSize = 2
 	outKey:=[]string{}
 	err := ScanCallback("*",func(key string) error{
 		outKey = append(outKey,key)
@@ -378,7 +379,7 @@ func TestScanCallback(ot *testing.T){
 	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_2"))
 	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"testno_3"))
 
-
+	scanSize = 10000
 	outKey=[]string{}
 	err = ScanCallback("test_*",func(key string)error{
 		outKey = append(outKey,key)
@@ -394,6 +395,39 @@ func TestScanCallback(ot *testing.T){
 	kmgTest.Equal(len(sList),1)
 
 	//benchmarkScanCallback()
+}
+
+func TestZScanCallback(ot *testing.T){
+	MustFlushDbV2()
+	MustInsert("test_2","abc")
+	MustZAdd("test_3",0,"abc")
+	outMember:=[]string{}
+	err:=ZScanCallback("test_2",func(member string) error{
+		outMember = append(outMember,member)
+		return nil
+	})
+	kmgTest.Equal(err,ErrSortedSetWrongType)
+	kmgTest.Equal(len(outMember),0)
+
+	outMember=[]string{}
+	err=ZScanCallback("test_3",func(member string) error{
+		outMember = append(outMember,member)
+		return nil
+	})
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(len(outMember),1)
+
+	scanSize = 2
+	MustZAdd("test_3",1,"abc1")
+	MustZAdd("test_3",2,"abc2")
+	outMember=[]string{}
+	err=ZScanCallback("test_3",func(member string) error{
+		outMember = append(outMember,member)
+		return nil
+	})
+	kmgTest.Equal(err,nil)
+	kmgTest.Equal(outMember,[]string{"abc","abc1","abc2"})
+
 }
 
 func benchmarkScanCallback() {

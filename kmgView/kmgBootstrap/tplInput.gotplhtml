@@ -1,0 +1,8 @@
+<? package kmgBootstrap
+func tplInput(config Input) string {
+?>
+        <input type="<?=config.Type?>" autocomplete="off" class="form-control"
+            <? if config.ReadOnly { ?> readonly <? } ?>
+               name="<?=config.Name?>"
+               value="<?=config.Value?>"/>
+<? } ?>

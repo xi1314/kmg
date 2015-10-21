@@ -1,5 +1,5 @@
 <? package kmgBootstrap
-func tplInputString(config InputString) string {
+func tplInputWrapVertical(config InputWrapVertical) string {
 ?>
 <div class="form-group has-feedback">
     <label class="col-sm-2 control-label"><?=config.ShowName?>
@@ -9,10 +9,7 @@ func tplInputString(config InputString) string {
     </label>
 
     <div class="col-sm-8">
-        <input type="text" autocomplete="off" class="form-control"
-            <? if config.ReadOnly { ?> readonly <? } ?>
-               name="<?=config.Name?>"
-               value="<?=config.Value?>"/>
+        <?=raw(config.Body.HtmlRender())?>
         <span style="font-size:12px;color:red">
             <? if config.Comment!="" { ?> 提示: <?=config.Comment?> <? } ?>
         </span>

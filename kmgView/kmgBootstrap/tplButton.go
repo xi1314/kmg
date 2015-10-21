@@ -16,10 +16,20 @@ func tplButton(button Button) string {
     `)
 		} else {
 			_buf.WriteString(`    href="`)
-			_buf.WriteString(kmgXss.H(kmgXss.Urlv(button.Url)))
+			_buf.WriteString(kmgXss.H(kmgXss.H(button.Url)))
 			_buf.WriteString(`"
     `)
 		}
+	}
+	if button.Name != "" {
+		_buf.WriteString(`    name="`)
+		_buf.WriteString(kmgXss.H(button.Name))
+		_buf.WriteString(`"`)
+	}
+	if button.Value != "" {
+		_buf.WriteString(`    value="`)
+		_buf.WriteString(kmgXss.H(button.Value))
+		_buf.WriteString(`"`)
 	}
 	if button.Type == ButtonTypeButton {
 		_buf.WriteString(`    type="submit"`)

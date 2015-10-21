@@ -16,6 +16,7 @@ const (
 
 	FormatMysqlMinute      = "2006-01-02 15:04"
 	FormatMysqlMouthAndDay = "01-02"
+	FormatMysqlYearAndMoney = "2006-01"
 )
 
 var ParseFormatGuessList = []string{

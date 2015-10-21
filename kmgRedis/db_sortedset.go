@@ -55,6 +55,18 @@ func GetRevAllScoreAndMemberFromSortedSet(key string) (outList []Z, err error) {
 	return ZRevRangeWithScore(key, 0, -1)
 }
 
+
+func ZRange(key string,start int,end int) (sList []string,err error){
+	sList, err = gClient.ZRange(key, int64(start), int64(end)).Result()
+	if err == nil {
+		return sList, err
+	}
+	if isRedisErrorWrongType(err) {
+		return nil, ErrSortedSetWrongType
+	}
+	return nil, err
+}
+
 func ZRevRange(key string, start int, end int) (sList []string, err error) {
 	sList, err = gClient.ZRevRange(key, int64(start), int64(end)).Result()
 	if err == nil {
@@ -103,4 +115,26 @@ func ZListFromRedisZ(list []redis.Z) []Z{
 		out[i].Score = list[i].Score
 	}
 	return out
+}
+
+
+func ZScanCallback(key string,cb func (member string)error) (err error){
+	pos:=0
+	for{
+		memberList,err:=ZRange(key,pos,pos+scanSize-1)
+		if err!=nil{
+			return err
+		}
+		for _,member:=range memberList{
+			err = cb(member)
+			if err!=nil{
+				return err
+			}
+		}
+		if len(memberList)<scanSize{
+			// 如果没有数据表示扫描完毕了.
+			return nil
+		}
+		pos+=scanSize // 继续扫描下一组数据.
+	}
 }

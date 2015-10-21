@@ -1,0 +1,13 @@
+<? package kmgBootstrap
+func tplSelect(config Select) string { ?>
+    <select class="form-control" <? if config.ReadOnly { ?> disabled="true" <? } else { ?> name="<?= config.Name ?>" <? } ?> >
+        <? for _, opt := range config.OptionList { ?>
+        <option value="<?= opt.Value ?>" <? if opt.Value == config.Value { ?> selected <? } ?> <? if opt.Disable { ?> disabled style="color:#ccc;background: #fff" <? } ?> >
+        <?= opt.ShowName ?>
+        </option>
+        <? } ?>
+    </select>
+    <? if config.ReadOnly { ?>
+    <input type="hidden" name="<?= config.Name ?>" value="<?= config.Value ?>">
+    <? } ?>
+<? } ?>

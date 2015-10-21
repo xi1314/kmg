@@ -25,7 +25,9 @@ func tplForm(config Form) string {
 	}
 	_buf.WriteString(`        </div>
 
-        <div class="panel-footer">
+    `)
+	if !config.NoSubmit {
+		_buf.WriteString(`        <div class="panel-footer">
             <center>
                 <button type="submit" class="btn btn-primary btn-lg" style="width: 300px;">
                     <span class="fa fa-check"></span>
@@ -33,7 +35,8 @@ func tplForm(config Form) string {
                 </button>
             </center>
         </div>
-
-    </form>`)
+    `)
+	}
+	_buf.WriteString(`    </form>`)
 	return _buf.String()
 }

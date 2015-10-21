@@ -27,7 +27,7 @@ func (p *server) radiusAccess(request *Packet) *Packet {
 	}
 	AuthPassword, exist := p.handler.Auth(username)
 	if !exist {
-		LogError(fmt.Errorf("[kmgRadius.radiusAccess] username [%s] not exist", username))
+		LogError(fmt.Errorf("[kmgRadius.radiusAccess] username [%s] not exist or do not have any transfer", username))
 		npac.Code = CodeAccessReject
 		return npac
 	}
