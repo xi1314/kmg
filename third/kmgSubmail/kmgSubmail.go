@@ -21,6 +21,11 @@ type Mail struct {
 	Title    string
 }
 
+type Massege struct {
+	ProjectId string
+	To        string
+}
+
 type Submail struct {
 	Appid     string
 	Signature string
@@ -30,9 +35,9 @@ var EmailConfig = Submail{}
 
 type SubmailProject string
 
-func SendMail(email Mail) string {
+func SendMailForHtml(email Mail) (err error) {
 	submailUrl := "https://api.submail.cn/mail/send.json"
-	resp, err := http.PostForm(submailUrl, url.Values{
+	return MailBreack(email, url.Values{
 		"appid":     {EmailConfig.Appid},
 		"signature": {EmailConfig.Signature},
 		"to":        {email.To},
@@ -40,33 +45,23 @@ func SendMail(email Mail) string {
 		"subject":   {email.Title},
 		"from":      {email.From},
 		"from_name": {email.FromName},
-	})
-	defer resp.Body.Close()
-	if err != nil {
-		panic(err)
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	kmgLog.Log("Submail", string(body), email)
-	data := kmgJson.MustUnmarshalToMapDeleteBOM(body)
-	if data["status"] == "error" {
-		panic(errors.New(kmgStrconv.InterfaceToString(data["msg"])))
-	}
-	return string(body)
+	}, submailUrl)
 }
 
-func XSendMail(email Mail) (err error) {
+func SendMailForModel(email Mail) (err error) {
 	submailUrl := "https://api.submail.cn/mail/xsend.json"
-	resp, e := http.PostForm(submailUrl, url.Values{
+	return MailBreack(email, url.Values{
 		"appid":     {EmailConfig.Appid},
 		"signature": {EmailConfig.Signature},
 		"to":        {email.To},
 		"project":   {kmgStrconv.InterfaceToString(email.Project)},
 		"links":     {email.Links},
 		"vars":      {email.Vars},
-	})
+	}, submailUrl)
+}
+
+func MailBreack(email Mail, u url.Values, submailUrl string) (err error) {
+	resp, e := http.PostForm(submailUrl, u)
 	if e != nil {
 		return e
 	}
@@ -79,14 +74,65 @@ func XSendMail(email Mail) (err error) {
 	data := kmgJson.MustUnmarshalToMapDeleteBOM(body)
 	if data["status"] == "error" {
 		return errors.New(kmgStrconv.InterfaceToString(data["msg"]))
-
 	}
 	return nil
 }
 
 func MustXSendMail(email Mail) {
-	err := XSendMail(email)
+	err := SendMailForModel(email)
 	if err != nil {
+		defer func() {
+			err := recover()
+			kmgLog.Log("error", err)
+		}()
+		panic(err)
+	}
+}
+
+func MustSendMail(email Mail) {
+	err := SendMailForHtml(email)
+	if err != nil {
+		defer func() {
+			err := recover()
+			kmgLog.Log("error", err)
+		}()
+		panic(err)
+	}
+}
+
+func SendMessage(massage Massege) (err error) {
+	massegeApiUrl := "https://api.submail.cn/message/xsend"
+	resp, e := http.PostForm(massegeApiUrl, url.Values{
+		//		"appid":     {EmailConfig.Appid},
+		//		"signature": {EmailConfig.Signature},
+		"appid":     {"10111"},
+		"signature": {"142a3e0d66c4dda1e918487b1952b26c"},
+		"to":        {massage.To},
+		"project":   {massage.ProjectId},
+	})
+	if e != nil {
+		return e
+	}
+	defer resp.Body.Close()
+	body, e := ioutil.ReadAll(resp.Body)
+	if e != nil {
+		return e
+	}
+	kmgLog.Log("Submail", string(body), massage)
+	data := kmgJson.MustUnmarshalToMapDeleteBOM(body)
+	if data["status"] == "error" {
+		return errors.New(kmgStrconv.InterfaceToString(data["msg"]))
+	}
+	return nil
+}
+
+func MustXsendMessage(massage Massege) {
+	err := SendMessage(massage)
+	if err != nil {
+		defer func() {
+			err := recover()
+			kmgLog.Log("error", err)
+		}()
 		panic(err)
 	}
 }

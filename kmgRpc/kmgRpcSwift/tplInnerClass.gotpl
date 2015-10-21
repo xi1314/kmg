@@ -1,0 +1,23 @@
+<?
+package kmgRpcSwift
+func (config InnerClass)tplInnerClass() string {
+?>
+    <?if config.IsPublic {}else{?>private<?}?> struct <?=config.Name?>{
+        <?for _,field:=range config.FieldList{?>
+            var <?=field.Name?>:<?=field.TypeStr?> = <?=field.TypeStr?>()
+        <? } ?>
+<?if config.IsPublic{?>
+mutating func ToData(inData:JSON){
+<?for _,field:=range config.FieldList{?>
+<? if field.TypeStr == "Int" || field.TypeStr == "NSString"{?>
+self.<?=field.Name?> = inData["Out_0"]["<?=field.Name?>"].<?switch field.TypeStr{ case "Int":?>intValue<?case "NSString":?>stringValue<?default:?>stringValue<?}?>
+<? }else{ ?>
+self.<?=field.Name?>.ToData(inData)
+<? } ?>
+<? } ?>
+}
+<?}?>
+    }
+<?
+}
+?>

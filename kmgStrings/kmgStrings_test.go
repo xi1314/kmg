@@ -25,3 +25,9 @@ func TestFirstLetterToUpper(t *testing.T) {
 	s3 := FirstLetterToUpper("中文")
 	kmgTest.Equal("中文", s3)
 }
+func TestSubStr(t *testing.T) {
+	kmgTest.Equal("abc",SubStr("abcdefg",0,3))
+	kmgTest.Equal("defg",SubStr("abcdefg",3,0))
+	kmgTest.Equal("abcdef",SubStr("abcdefg",0,-1))
+	kmgTest.Equal("",SubStr("abcdefg",0,-10))
+}
