@@ -38,3 +38,7 @@ func TestSubStr(t *testing.T) {
 	kmgTest.Equal("abcdef",SubStr("abcdefg",0,-1))
 	kmgTest.Equal("",SubStr("abcdefg",0,-10))
 }
+func TestStartWith(t *testing.T){
+	kmgTest.Ok(IsStartWith("abc","a"))
+	kmgTest.Ok(!IsStartWith("abc","d"))
+}

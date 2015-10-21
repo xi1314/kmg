@@ -147,3 +147,6 @@ func SubStr(s string, from int, to int) string {
 	}
 	return string(rs[from:to])
 }
+func IsStartWith(s string,start string)bool{
+	return  SubStr(s,0,1) == start
+}

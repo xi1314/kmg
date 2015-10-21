@@ -1,23 +1,25 @@
 package kmgFileToXcode
 import (
 	"github.com/bronze1man/kmg/kmgCmd"
-	"os"
-	"strings"
+	"github.com/bronze1man/kmg/kmgStrings"
+	"github.com/bronze1man/kmg/kmgConfig/defaultEnv"
 )
 func AddFileToXcode(FilePath string,ProjectPath string)[]byte{
-	cmd := kmgCmd.CmdSlice(append([]string{"ruby","AddFileToXcode.rb",FilePath,ProjectPath},os.Args[1:]...))
-    dir:=changeDir()
-	cmd.SetDir(dir + "/src/github.com/bronze1man/kmg/kmgFileToXcode")
-	out := cmd.MustCombinedOutput()
+	dir:=defaultEnv.Env().ProjectPath + "/"
+	if !kmgStrings.IsStartWith(FilePath,"~") && !kmgStrings.IsStartWith(FilePath,"/"){
+		FilePath = dir + FilePath
+	}
+	if !kmgStrings.IsStartWith(ProjectPath,"~") && !kmgStrings.IsStartWith(ProjectPath,"/"){
+		ProjectPath = dir + ProjectPath
+	}
+	cmd := kmgCmd.CmdBash("export LANG=UTF-8;ruby AddFileToXcode.rb "+FilePath+" "+ProjectPath)
+	cmd.SetDir(dir + "src/github.com/bronze1man/kmg/kmgFileToXcode")
+	out := cmd.MustRunAndReturnOutput()
 	return out
 }
-
-func changeDir() string {
-	dir, _ := os.Getwd()
-	tmp := strings.SplitN(dir, "src/", -1)
-	if len(tmp) > 1 {
-		return tmp[0]
-	} else {
-		return dir
+func AddFilesToXcode(FilePaths []string,ProjectPath string){
+	for _,s := range FilePaths{
+		AddFileToXcode(s,ProjectPath)
 	}
 }
+
