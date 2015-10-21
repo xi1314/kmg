@@ -105,6 +105,7 @@ func (repo *Repository) MustIsFileIgnore(path string) bool {
 		MustHiddenRunAndIsSuccess()
 }
 
+// 这个返回自己这个commit的名称,也返回所有父级commit的名称
 func (repo *Repository) MustGetAllParentCommitId(commitId string) []string {
 	output := kmgCmd.CmdSlice([]string{"git", "log", "--format=%H", commitId}).SetDir(repo.gitPath).MustCombinedOutput()
 	outputSlice := []string{}
