@@ -130,3 +130,20 @@ func LineDataToSlice(lineData string) []string {
 	}
 	return out
 }
+func SubStr(s string, from int, to int) string {
+	rs := []rune(s)
+	rl := len(rs)
+	if to == 0 {
+		to = rl
+	}
+	if to < 0 {
+		to = rl + to
+	}
+	if to > rl {
+		to = rl
+	}
+	if to < 0 {
+		to = 0
+	}
+	return string(rs[from:to])
+}

@@ -1,0 +1,31 @@
+<?
+package kmgRpcSwift
+func (config Api)tplApiClient() string {
+?>
+        func <?=config.Name?>(<?=config.getClientFuncInParameter()?>)<? if config.OutTypeString != "void"{?>-><?=config.OutTypeString?><?}?>{
+                var params: Dictionary<String,AnyObject> = Dictionary()
+                <?for _,arg:=range config.InArgsList { ?>
+                    params["<?=arg.Name?>"]=<?=arg.Name?>
+                                <? } ?>
+                <? if config.OutTypeString != "void"{?>
+                var out = <?=config.OutTypeString?>()
+                func <?=config.Name?>Data(outData:JSON){
+                <? if config.OutTypeString == "NSString"{?>
+                        out = outData["Out_0"].stringValue
+                <?}else if config.OutTypeString == "Int" {?>
+                        out = outData["Out-0"].intValue
+                <?}else if config.OutTypeString == "NSDate" {?>
+                        out = outData["Out_0"].stringValue.toDate(format: DateFormat.ISO8601)!
+                <?}else{?>
+                        out.ToData(outData)
+                <?}?>
+                }
+                sendRequest("<?=config.Name?>",params:params,callback:<?=config.Name?>Data )
+                return out
+                <?}else{?>
+                sendRequest("<?=config.Name?>",params:params,callback:{JSON in })
+                <?}?>
+        }
+<?
+}
+?>
