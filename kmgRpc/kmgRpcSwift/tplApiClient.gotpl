@@ -17,7 +17,7 @@ func (config Api)tplApiClient() string {
                 <?}else if config.OutTypeString == "NSDate" {?>
                         out = outData["Out_0"].stringValue.toDate(format: DateFormat.ISO8601)!
                 <?}else{?>
-                        out.ToData(outData)
+                        out.ToData(outData["Out_0"])
                 <?}?>
                 }
                 sendRequest("<?=config.Name?>",params:params,callback:<?=config.Name?>Data )
