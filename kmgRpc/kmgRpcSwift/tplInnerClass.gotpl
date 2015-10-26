@@ -1,5 +1,9 @@
 <?
 package kmgRpcSwift
+import (
+    "strings"
+    "github.com/bronze1man/kmg/kmgStrings"
+)
 func (config InnerClass)tplInnerClass() string {
 ?>
     <?if config.IsPublic {}else{?>private<?}?> struct <?=config.Name?>{
@@ -9,15 +13,22 @@ func (config InnerClass)tplInnerClass() string {
 <?if config.IsPublic{?>
 mutating func ToData(inData:JSON){
 <?for _,field:=range config.FieldList{?>
-<? if field.TypeStr == "Int" || field.TypeStr == "NSString"{?>
-self.<?=field.Name?> = inData["Out_0"]["<?=field.Name?>"].<?switch field.TypeStr{ case "Int":?>intValue<?case "NSString":?>stringValue<?default:?>stringValue<?}?>
-<? }else{ ?>
-self.<?=field.Name?>.ToData(inData)
-<? } ?>
-<? } ?>
-}
-<?}?>
+<?switch field.TypeStr{
+        case "Int":?>self.<?=field.Name?> = inData["<?=field.Name?>"].intValue
+        <?case "NSString":?>self.<?=field.Name?> = inData["<?=field.Name?>"].stringValue
+        <?case "Bool":?>self.<?=field.Name?> = inData["<?=field.Name?>"].boolValue
+        <?case "NSDate":?>self.<?=field.Name?> = inData["<?=field.Name?>"].stringValue.toDate(format: DateFormat.ISO8601)!
+        <?case "[NSString]","[Int]","[Bool]","[NSDate]":?>self.<?=field.Name?> = inData["<?=field.Name?>"].arrayObject as! <?=field.TypeStr?>
+        <?default: if strings.HasPrefix(field.TypeStr,"["){?> inData["Some"].array!.forEach({body in
+        <? oneType := kmgStrings.SubStr(field.TypeStr,1,-1)?>
+        var one:<?=oneType?> = <?=oneType?>()
+        one.ToData(body)
+        self.<?=field.Name?>.append(one)
+        })<?}else{?>.ToData(inData["<?=field.Name?>"])<?}}?>
+    <? } ?>
     }
+<?}?>
+}
 <?
 }
 ?>

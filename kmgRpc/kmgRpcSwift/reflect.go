@@ -139,7 +139,7 @@ func (config *tplConfig) addType(typi kmgGoParser.Type) string {
 		}
 		return s
 	case kmgGoParser.SliceType:
-		return "List<" + config.addType(typ.Elem) + ">"
+		return "[" + config.addType(typ.Elem) + "]"
 	default:
 		panic(fmt.Errorf("TODO %T", typi))
 	}
