@@ -38,6 +38,10 @@ func SetFixNowFromString(s string) {
 	NowTime = NewFixedNower(MustParseAutoInDefault(s))
 }
 
+func SetNowerToDefault(){
+	NowTime = tDefaultNower{}
+}
+
 func (nower tDefaultNower) Now() time.Time {
 	return time.Now().In(DefaultTimeZone)
 }

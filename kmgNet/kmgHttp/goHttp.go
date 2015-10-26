@@ -223,6 +223,7 @@ func printProgress(get int64, total int64, dur time.Duration, lastBytes int) {
 		kmgNet.SizeString(get), kmgNet.SizeString(total), kmgNet.SpeedString(lastBytes, dur))
 }
 
+// 异步开启一个http服务器,这个服务器可以使用返回的closer关闭
 func MustGoHttpAsyncListenAndServeWithCloser(addr string, handler http.Handler) (closer func() error) {
 	srv := &http.Server{Addr: addr, Handler: handler}
 	if addr == "" {
@@ -239,6 +240,34 @@ func MustGoHttpAsyncListenAndServeWithCloser(addr string, handler http.Handler) 
 		}
 	}()
 	return ln.Close
+}
+
+func MustGoHttpsAsyncListenAndServeWithCloser(addr string,tlsConfig *tls.Config,handler http.Handler) (closer func()error){
+	srv := &http.Server{Addr: addr, Handler: handler}
+	/*
+	cert, err := tls.X509KeyPair([]byte(certS), []byte(keyS))
+	if err != nil {
+		return err
+	}
+	srv.TLSConfig = &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"http/1.1"},
+	}
+*/
+	srv.TLSConfig = tlsConfig
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+
+	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, srv.TLSConfig)
+	go func() {
+		err := srv.Serve(tlsListener)
+		if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+			panic(err)
+		}
+	}()
+	return tlsListener.Close
 }
 
 // tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
@@ -258,6 +287,7 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 	tc.SetKeepAlivePeriod(3 * time.Minute)
 	return tc, nil
 }
+
 
 func GoListenAndServeTLSWithCertContent(addr string, certS string, keyS string, handler http.Handler) error {
 	srv := &http.Server{Addr: addr, Handler: handler}

@@ -95,8 +95,8 @@ type NavTabList struct {
 }
 
 type NavTabOption struct {
-	Name      string
-	Url       string
+	Name string
+	Url  string
 }
 
 func (p NavTabList) HtmlRender() string {

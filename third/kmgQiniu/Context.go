@@ -67,8 +67,20 @@ func (ctx *Context) MustDownloadToFile(remoteRoot string, localRoot string) {
 	return
 }
 
+// 下载一个文件, 开头带 / 或不带 / 效果一致
+func (ctx *Context) DownloadOneToFile(remoteRoot string, localRoot string) (err error){
+	ctx.singleContextCheck()
+	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
+	err = DownloadFile(ctx, remoteRoot, localRoot)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //下载到一个Writer里面
 func (ctx *Context) DownloadToWriter(remotePath string, w io.Writer) (err error) {
+	ctx.singleContextCheck()
 	remotePath = strings.TrimPrefix(remotePath, "/")
 	var downloadUrl string
 	if ctx.isPrivate {
@@ -82,6 +94,12 @@ func (ctx *Context) DownloadToWriter(remotePath string, w io.Writer) (err error)
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode==404{
+		return ErrNoFile
+	}
+	if resp.StatusCode!=200{
+		return fmt.Errorf("resp.StatusCode[%d]!=200",resp.StatusCode)
+	}
 	defer resp.Body.Close()
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
@@ -91,12 +109,23 @@ func (ctx *Context) DownloadToWriter(remotePath string, w io.Writer) (err error)
 }
 
 func (ctx *Context) MustDownloadToBytes(remotePath string) (b []byte) {
+	ctx.singleContextCheck()
 	buf := &bytes.Buffer{}
 	err := ctx.DownloadToWriter(remotePath, buf)
 	if err != nil {
 		panic(err)
 	}
 	return buf.Bytes()
+}
+
+func (ctx *Context) DownloadToBytes(remotePath string) (b []byte,err error) {
+	ctx.singleContextCheck()
+	buf := &bytes.Buffer{}
+	err = ctx.DownloadToWriter(remotePath, buf)
+	if err != nil {
+		return nil,err
+	}
+	return buf.Bytes(),nil
 }
 
 //可以上传文件或目录 remoteRoot 开头带 / 或不带 / 效果一致

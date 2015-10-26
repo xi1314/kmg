@@ -194,14 +194,14 @@ func TestRedisList(ot *testing.T) {
 	err = RPush("test_5", "abcd")
 	kmgTest.Equal(err, nil)
 
-	list, err := GetAllValueInList("test_5")
+	list, err := LRangeAll("test_5")
 	kmgTest.Equal(err, nil)
 	kmgTest.Equal(list, []string{"abc", "abcd"})
 
-	_, err = GetAllValueInList("test_4")
+	_, err = LRangeAll("test_4")
 	kmgTest.Equal(err, ErrListWrongType)
 
-	list, err = GetAllValueInList("test_6")
+	list, err = LRangeAll("test_6")
 	kmgTest.Equal(err, nil)
 	kmgTest.Equal(len(list), 0)
 }
