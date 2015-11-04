@@ -29,6 +29,7 @@ func DownloadFileWithHash(ctx *Context, remotePath string, localPath string, has
 }
 
 // @deprecated
+// TODO 这个会多建一个空目录,这个算安全隐患.
 func DownloadFile(ctx *Context, remotePath string, localPath string) (err error) {
 	err = kmgFile.MkdirForFile(localPath)
 	if err != nil {

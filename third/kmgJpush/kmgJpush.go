@@ -48,10 +48,12 @@ func (c *Client) PushToOne(alias string, content string) (err error) {
 	au.SetAlias([]string{alias})
 	nb.SetAudience(au)
 
-	notice := jpush.NewNoticeSimple()
+	//Android配置
+	notice := jpush.NewNoticeAndroid()
 	notice.Alert = content
 	nb.SetNotice(notice)
 
+	//iOS配置
 	iosNotice := jpush.NewNoticeIos()
 	iosNotice.Sound = "default"
 	iosNotice.Badge = "1"
@@ -81,10 +83,12 @@ func (c *Client) PushToAll(content string) (err error) {
 	nb.SetPlatform(jpush.AllPlatform())
 	nb.SetAudience(jpush.AllAudience())
 
-	notice := jpush.NewNoticeSimple()
+	// Android配置
+	notice := jpush.NewNoticeAndroid()
 	notice.Alert = content
 	nb.SetNotice(notice)
 
+	// iOS配置
 	iosNotice := jpush.NewNoticeIos()
 	iosNotice.Sound = "default"
 	iosNotice.Badge = "1"

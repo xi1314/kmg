@@ -3,12 +3,13 @@ package kmgRedis
 import (
 	"fmt"
 	"github.com/bronze1man/kmg/encoding/kmgGob"
+	"github.com/bronze1man/kmg/errors"
 	"gopkg.in/redis.v3"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/bronze1man/kmg/errors"
+	"github.com/bronze1man/kmg/typeTransform"
 )
 
 var gClient *redis.Client
@@ -37,7 +38,7 @@ func InitWithConfig(opt *redis.Options) {
 // 如果出现网络错误,会返回 一个网络错误的err
 // 没有其他错误的可能性了.
 func Insert(key string, value string) (err error) {
-	success, err := gClient.SetNX(key, value,0).Result()
+	success, err := gClient.SetNX(key, value, 0).Result()
 	if err != nil {
 		return
 	}
@@ -86,7 +87,7 @@ func Update(key string, value string) (err error) {
 // 网络错误会返回 error
 // 注意redis类型错误时,也不会报错,只会把这个key设置成正确的value
 func Set(key string, value string) (err error) {
-	return gClient.Set(key, value,0).Err()
+	return gClient.Set(key, value, 0).Err()
 }
 
 func MustSet(key string, value string) {
@@ -111,19 +112,20 @@ func MustSetGob(key string, obj interface{}) {
 	}
 }
 
-type KeyValuePair struct{
-	Key string
+type KeyValuePair struct {
+	Key   string
 	Value string
 }
+
 // 经过实际测试发现一次只能写入1万个,太多会 broken pipe
 func MustMSet(pairList []KeyValuePair) {
-	outPair:=make([]string,len(pairList)*2)
-	for i,pair:=range pairList{
+	outPair := make([]string, len(pairList)*2)
+	for i, pair := range pairList {
 		outPair[2*i] = pair.Key
 		outPair[2*i+1] = pair.Value
 	}
-	err:=gClient.MSet(outPair...).Err()
-	if err!=nil{
+	err := gClient.MSet(outPair...).Err()
+	if err != nil {
 		panic(err)
 	}
 }
@@ -135,11 +137,11 @@ func MustMSet(pairList []KeyValuePair) {
 // 网络错误也会返回 error
 func Get(key string) (value string, err error) {
 	value, err = gClient.Get(key).Result()
-	if err==nil{
-		return value,nil
+	if err == nil {
+		return value, nil
 	}
-	if isRedisErrorWrongType(err){
-		return "",ErrStringWrongType
+	if isRedisErrorWrongType(err) {
+		return "", ErrStringWrongType
 	}
 	if err == redis.Nil {
 		return "", ErrKeyNotExist
@@ -160,16 +162,16 @@ func MustGet(key string) (value string) {
 // 无法转换成int,会panic
 // key不存在,返回0
 // 网络错误会panic
-func MustGetIntIgnoreNotExist(key string) (valueI int){
-	value,err := Get(key)
-	if err==ErrKeyNotExist{
+func MustGetIntIgnoreNotExist(key string) (valueI int) {
+	value, err := Get(key)
+	if err == ErrKeyNotExist {
 		return 0
 	}
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
-	valueI,err = strconv.Atoi(value)
-	if err!=nil{
+	valueI, err = strconv.Atoi(value)
+	if err != nil {
 		panic(err)
 	}
 	return valueI
@@ -180,16 +182,16 @@ func MustGetIntIgnoreNotExist(key string) (valueI int){
 // 无法转换成float,会panic
 // key不存在,返回0
 // 网络错误会panic
-func MustGetFloatIgnoreNotExist(key string) (float64){
-	value,err := Get(key)
-	if err==ErrKeyNotExist{
+func MustGetFloatIgnoreNotExist(key string) float64 {
+	value, err := Get(key)
+	if err == ErrKeyNotExist {
 		return 0
 	}
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
-	valueF,err := strconv.ParseFloat(value,64)
-	if err!=nil{
+	valueF, err := strconv.ParseFloat(value, 64)
+	if err != nil {
 		panic(err)
 	}
 	return valueF
@@ -281,6 +283,14 @@ func RPush(key string, value string) (err error) {
 	return err
 }
 
+func RPushGob(key string, value interface{}) (err error) {
+	b, err := kmgGob.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return RPush(key, string(b))
+}
+
 /*
 返回一个redis数组里面所有的值.
 查询的key存在,并且类型正确,返回列表里面的数据
@@ -288,7 +298,7 @@ func RPush(key string, value string) (err error) {
 查询的key类型错误,返回 ErrListWrongType
 网络错误会返回error
 */
-func GetAllValueInList(key string) (out []string, err error) {
+func LRangeAll(key string) (out []string, err error) {
 	out, err = gClient.LRange(key, 0, -1).Result()
 	if err == nil {
 		return out, nil
@@ -297,6 +307,16 @@ func GetAllValueInList(key string) (out []string, err error) {
 		return nil, ErrListWrongType
 	}
 	return nil, err
+}
+
+func LRangeAllGob(key string, list interface{}) (err error) {
+	sList, err := LRangeAll(key)
+	iList := []interface{}{}
+	typeTransform.MustTransform(&sList,&iList)
+	if err != nil {
+		return err
+	}
+	return ListGobUnmarshalNotExistCheck(iList, reflect.ValueOf(list))
 }
 
 /*
@@ -338,13 +358,13 @@ func MGetNotExistCheckGob(keyList []string, obj interface{}) (err error) {
 	if err != nil {
 		return err
 	}
-	return mgetNotExistCheckGobUnmarshal(outList, reflect.ValueOf(obj))
+	return ListGobUnmarshalNotExistCheck(outList, reflect.ValueOf(obj))
 }
 
-func mgetNotExistCheckGobUnmarshal(outList []interface{}, obj reflect.Value) (err error) {
+func ListGobUnmarshalNotExistCheck(outList []interface{}, obj reflect.Value) (err error) {
 	switch obj.Kind() {
 	case reflect.Ptr:
-		return mgetNotExistCheckGobUnmarshal(outList, obj.Elem())
+		return ListGobUnmarshalNotExistCheck(outList, obj.Elem())
 	case reflect.Slice:
 		newSlice := reflect.MakeSlice(obj.Type(), len(outList), len(outList))
 		elemType := obj.Type().Elem()
@@ -373,7 +393,7 @@ func mgetNotExistCheckGobUnmarshal(outList []interface{}, obj reflect.Value) (er
 网络错误会返回error
 */
 func SetEx(key string, dur time.Duration, value string) (err error) {
-	return gClient.Set(key, value,dur).Err()
+	return gClient.Set(key, value, dur).Err()
 }
 
 func isRedisErrorWrongType(err error) bool {
@@ -411,14 +431,14 @@ key不存在,会先把这个key变成0,然后再进行增加
 key不能被解析成整数,会返回 ErrValueNotIntFormatOrOutOfRange
 value不是string类型,会返回 ErrStringWrongType
 网络错误会返回error
- */
-func IncrBy(key string,num int64) (err error){
-	err=gClient.IncrBy(key,num).Err()
-	if err!=nil{
-		if isRedisErrorWrongType(err){
+*/
+func IncrBy(key string, num int64) (err error) {
+	err = gClient.IncrBy(key, num).Err()
+	if err != nil {
+		if isRedisErrorWrongType(err) {
 			return ErrStringWrongType
 		}
-		if strings.Contains(err.Error(),"ERR value is not an integer or out of range"){
+		if strings.Contains(err.Error(), "ERR value is not an integer or out of range") {
 			return ErrValueNotIntFormatOrOutOfRange
 		}
 		return
@@ -433,14 +453,14 @@ key不存在,会先把这个key变成0,然后再进行增加
 key不能被解析成整数,会返回 ErrValueNotFloatFormatOrOutOfRange
 value不是string类型,会返回 ErrStringWrongType
 网络错误会返回error
- */
-func IncrByFloat(key string,num float64) (err error){
-	err=gClient.IncrByFloat(key,num).Err()
-	if err!=nil{
-		if isRedisErrorWrongType(err){
+*/
+func IncrByFloat(key string, num float64) (err error) {
+	err = gClient.IncrByFloat(key, num).Err()
+	if err != nil {
+		if isRedisErrorWrongType(err) {
 			return ErrStringWrongType
 		}
-		if strings.Contains(err.Error(),"ERR value is not a valid float"){
+		if strings.Contains(err.Error(), "ERR value is not a valid float") {
 			return ErrValueNotFloatFormat
 		}
 		return
@@ -453,43 +473,44 @@ var scanSize = 10000
 
 // 扫描redis里面所有的key.
 // 目前按照10000个一次的速度进行出来.
-func ScanCallback(patten string,cb func (key string)error) (err error){
+func ScanCallback(patten string, cb func(key string) error) (err error) {
 	var cursor int64
 	var keyList []string
-	for{
-		cursor,keyList,err=gClient.Scan(cursor,patten,int64(scanSize)).Result()
-		if err!=nil{
+	for {
+		cursor, keyList, err = gClient.Scan(cursor, patten, int64(scanSize)).Result()
+		if err != nil {
 			return err
 		}
-		for _,key:=range keyList{
+		for _, key := range keyList {
 			err = cb(key)
-			if err!=nil{
+			if err != nil {
 				return err
 			}
 		}
-		if cursor==0{
+		if cursor == 0 {
 			return nil
 		}
 	}
 }
 
 var scanWithOutputLimitEOFError = errors.New("scanWithOutputLimitEOFError")
+
 // 保证只会返回小于等于limit个数据.
-func ScanWithOutputLimit(pattern string,limit int) (sList []string,err error){
-	if limit==0{
-		return nil,nil
+func ScanWithOutputLimit(pattern string, limit int) (sList []string, err error) {
+	if limit == 0 {
+		return nil, nil
 	}
-	sList=make([]string,0,limit)
-	err = ScanCallback(pattern,func(key string)error{
-		sList = append(sList,key)
-		if len(sList)>=limit{
+	sList = make([]string, 0, limit)
+	err = ScanCallback(pattern, func(key string) error {
+		sList = append(sList, key)
+		if len(sList) >= limit {
 			return scanWithOutputLimitEOFError
-		}else{
+		} else {
 			return nil
 		}
 	})
-	if err==scanWithOutputLimitEOFError{
-		return sList,nil
+	if err == scanWithOutputLimitEOFError {
+		return sList, nil
 	}
-	return sList,err
+	return sList, err
 }

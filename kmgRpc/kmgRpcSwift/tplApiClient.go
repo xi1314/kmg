@@ -53,7 +53,7 @@ func (config Api) tplApiClient() string {
                 `)
 		} else {
 			_buf.WriteString(`
-                        out.ToData(outData)
+                        out.ToData(outData["Out_0"])
                 `)
 		}
 		_buf.WriteString(`
