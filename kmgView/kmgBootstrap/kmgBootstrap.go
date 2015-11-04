@@ -147,7 +147,7 @@ type TextColor string
 const (
 	TextMuted   TextColor = "text-muted"
 	TextPrimary TextColor = "text-primary"
-	TextSuccess TextColor = "text-success"
+	TextSuccess TextColor = "text-success" // 绿色
 	TextInfo    TextColor = "text-info"
 	TextWarning TextColor = "text-warning"
 	TextDanger  TextColor = "text-danger"
@@ -162,6 +162,10 @@ const (
 	BgWarning TextColor = "bg-warning"
 	BgDanger  TextColor = "bg-danger"
 )
+
+func IconGreenCircle() kmgView.HtmlRenderer{
+	return Icon{IconColor: TextSuccess,IconName: "circle"}
+}
 
 type Icon struct {
 	IconName      string

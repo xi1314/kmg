@@ -169,39 +169,84 @@ func (sdk *AliyunSDK) runSingleAction(instanceId, actionName string, expectStatu
 //分配公网IP
 //重启机器
 func (sdk *AliyunSDK) CreateInstance() (ip string) {
-	param := &url.Values{}
-	param.Set("Action", "CreateInstance")
-	param.Set("SecurityGroupId", sdk.SecurityGroupId)
-	param.Set("RegionId", sdk.Region)
-	param.Set("ImageId", sdk.ImageName)
-	param.Set("InstanceType", sdk.FlavorName)
-	param.Set("InstanceName", sdk.InstanceName)
-	param.Set("InstanceChargeType", string(sdk.InstancePaidType))
-	if sdk.InstancePaidType == AliyunPaidTypePre {
-		param.Set("Period", "1")
+	return sdk.MakeInstanceAvailable(sdk.AllocateNewInstance())
+}
+
+func (sdk *AliyunSDK) AllocateNewInstance() (id string) {
+	prefix := "[AliyunSDK AllocateNewInstance]"
+	f := func() string {
+		defer func() {
+			r := recover()
+			if r != nil {
+				fmt.Println(prefix, "failed")
+			}
+		}()
+		param := &url.Values{}
+		param.Set("Action", "CreateInstance")
+		param.Set("SecurityGroupId", sdk.SecurityGroupId)
+		param.Set("RegionId", sdk.Region)
+		param.Set("ImageId", sdk.ImageName)
+		param.Set("InstanceType", sdk.FlavorName)
+		param.Set("InstanceName", sdk.InstanceName)
+		param.Set("InstanceChargeType", string(sdk.InstancePaidType))
+		if sdk.InstancePaidType == AliyunPaidTypePre {
+			param.Set("Period", "1")
+		}
+		param.Set("InternetChargeType", "PayByTraffic")
+		param.Set("InternetMaxBandwidthIn", "200")
+		param.Set("InternetMaxBandwidthOut", "100")
+		if sdk.InstancePassword == "" {
+			panic("Empty password of instance don't allow!")
+		}
+		param.Set("Password", sdk.InstancePassword)
+		resp := sdk.MustCall(param)
+		return resp.InstanceId
 	}
-	param.Set("InternetChargeType", "PayByTraffic")
-	param.Set("InternetMaxBandwidthIn", "200")
-	param.Set("InternetMaxBandwidthOut", "100")
-	if sdk.InstancePassword == "" {
-		panic("Empty password of instance don't allow!")
+	for i := 0; i < 12; i++ {
+		id = f()
+		if id != "" {
+			break
+		} else {
+			fmt.Println(prefix, "retry", i)
+			time.Sleep(time.Second * 10)
+		}
 	}
-	param.Set("Password", sdk.InstancePassword)
-	resp := sdk.MustCall(param)
-	sdk.StartInstance(resp.InstanceId)
-	ip = sdk.AllocatePublicIpAddress(resp.InstanceId)
-	sdk.rebootInstance(resp.InstanceId)
+	return id
+}
+
+func (sdk *AliyunSDK) MakeInstanceAvailable(id string) (ip string) {
+	prefix := "[AliyunSDK MakeInstanceAvailable]"
+	f := func() string {
+		defer func() {
+			r := recover()
+			if r != nil {
+				fmt.Println(prefix, "failed")
+			}
+		}()
+		ip := sdk.AllocatePublicIpAddress(id)
+		sdk.rebootInstance(id)
+		return ip
+	}
+	for i := 0; i < 12; i++ {
+		ip = f()
+		if ip != "" {
+			break
+		} else {
+			fmt.Println(prefix, "retry", i)
+			time.Sleep(time.Second * 10)
+		}
+	}
 	return ip
 }
 
-func (sdk *AliyunSDK) GetInstanceStatus(instanceId string) AliyunInstanceStatus {
+func (sdk *AliyunSDK) IsInstanceRunning(id string) bool {
 	all := sdk.getAllInstance()
 	for _, i := range all {
-		if i.InstanceId == instanceId {
-			return i.Status
+		if i.InstanceId == id {
+			return i.Status == AliyunInstanceStatusRunning
 		}
 	}
-	return ""
+	return false
 }
 
 func (sdk *AliyunSDK) WaitUntil(instanceId string, status AliyunInstanceStatus) {
@@ -219,26 +264,22 @@ func (sdk *AliyunSDK) WaitUntil(instanceId string, status AliyunInstanceStatus) 
 		}
 		time.Sleep(time.Second)
 	}
-	//	for {
-	//		if sdk.GetInstanceStatus(instanceId) == status {
-	//			break
-	//		}
-	//		time.Sleep(time.Second)
-	//	}
 }
 
 func (sdk *AliyunSDK) StartInstance(instanceId string) {
-	sdk.runSingleAction(instanceId, "StartInstance", AliyunInstanceStatusRunning)
+	if !sdk.IsInstanceRunning(instanceId) {
+		sdk.runSingleAction(instanceId, "StartInstance", AliyunInstanceStatusRunning)
+	}
 }
 
 func (sdk *AliyunSDK) StopInstance(instanceId string) {
-	if sdk.GetInstanceStatus(instanceId) == AliyunInstanceStatusRunning {
+	if sdk.IsInstanceRunning(instanceId) {
 		sdk.runSingleAction(instanceId, "StopInstance", AliyunInstanceStatusStopped)
 	}
 }
 
 func (sdk *AliyunSDK) rebootInstance(instanceId string) {
-	//不用阿里云API自带的重启接口，异步重启比较难做
+	//不用阿里云API自带的重启接口，那个是异步的
 	sdk.StopInstance(instanceId)
 	sdk.StartInstance(instanceId)
 }

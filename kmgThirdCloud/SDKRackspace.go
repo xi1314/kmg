@@ -2,6 +2,7 @@ package kmgThirdCloud
 
 import (
 	"fmt"
+	"github.com/bronze1man/kmg/kmgSsh"
 	"github.com/rackspace/gophercloud"
 	OpenStackImages "github.com/rackspace/gophercloud/openstack/compute/v2/images"
 	OpenStackServers "github.com/rackspace/gophercloud/openstack/compute/v2/servers"
@@ -63,21 +64,14 @@ func NewRackspaceSDK(username, apiKey, SSHKeyName string) *RackspaceSDK {
 }
 
 func (sdk *RackspaceSDK) CreateInstance() (ip string) {
-	opt := servers.CreateOpts{
-		Name:       sdk.InstanceName,
-		ImageName:  sdk.ImageName,
-		FlavorName: sdk.FlavorName,
-		KeyPair:    sdk.SSHKeyName,
-	}
-	result := servers.Create(sdk.p, opt)
-	one, err := result.Extract()
-	handleErr(err)
+	id := sdk.AllocateNewInstance()
+	instance := &OpenStackServers.Server{}
 	for {
-		instance, err := servers.Get(sdk.p, one.ID).Extract()
+		var err error
+		instance, err = servers.Get(sdk.p, id).Extract()
 		handleErr(err)
 		fmt.Println(logPrefixRackspace, instance.ID, instance.AccessIPv4, instance.Status)
 		if instance.Status == string(RackspaceInstanceStatusACTIVE) {
-			one = instance
 			break
 		}
 		if instance.Status == string(RackspaceInstanceStatusBUILD) {
@@ -87,7 +81,73 @@ func (sdk *RackspaceSDK) CreateInstance() (ip string) {
 			panic("Rackspace CreateInstance got ERROR/UNKNOWN " + instance.AccessIPv4 + " " + instance.ID)
 		}
 	}
-	return one.AccessIPv4
+	return instance.AccessIPv4
+}
+
+func (sdk *RackspaceSDK) AllocateNewInstance() (id string) {
+	prefix := "[RackspaceSDK AllocateNewInstance]"
+	f := func() string {
+		opt := servers.CreateOpts{
+			Name:       sdk.InstanceName,
+			ImageName:  sdk.ImageName,
+			FlavorName: sdk.FlavorName,
+			KeyPair:    sdk.SSHKeyName,
+		}
+		result := servers.Create(sdk.p, opt)
+		one, err := result.Extract()
+		if err != nil {
+			fmt.Println(prefix, err)
+			return ""
+		}
+		return one.ID
+	}
+	for i := 0; i < 12; i++ {
+		id = f()
+		if id != "" {
+			break
+		} else {
+			fmt.Println(prefix, "retry", i)
+			time.Sleep(time.Second * 10)
+		}
+	}
+	return id
+}
+
+//TODO 未做 retry
+func (sdk *RackspaceSDK) MakeInstanceAvailable(id string) (ip string) {
+	ins := sdk.getInstance(id)
+	prefix := "[RackspaceSDK AllocateNewInstance]"
+	for i := 0; i < 40; i++ {
+		err := servers.WaitForStatus(sdk.p, id, string(RackspaceInstanceStatusACTIVE), 120)
+		if err != nil {
+			fmt.Println(prefix, err)
+			time.Sleep(time.Second * 3)
+			continue
+		}
+		isReachable, _ := kmgSsh.AvailableCheck(&kmgSsh.RemoteServer{
+			Address: ins.AccessIPv4,
+		})
+		if isReachable {
+			return ins.AccessIPv4
+		} else {
+			time.Sleep(time.Second * 3)
+		}
+	}
+	sdk.DeleteInstanceById(id)
+	return sdk.CreateInstance() //肯定有一次能成功
+}
+
+func (sdk *RackspaceSDK) getInstance(id string) (s *OpenStackServers.Server) {
+	for i := 0; i < 12; i++ {
+		var err error
+		s, err = servers.Get(sdk.p, id).Extract()
+		if err != nil {
+			fmt.Println("RackspaceSDK getInstance", err)
+			time.Sleep(time.Second)
+			continue
+		}
+	}
+	return s
 }
 
 func (sdk *RackspaceSDK) RenameInstanceByIp(name, ip string) {

@@ -5,7 +5,7 @@ func tplButton (button Button) string { ?>
     <? if button.Url == "" { ?>
     href="javascript:void(0);"
     <? } else { ?>
-    href="<?= kmgXss.H(button.Url) ?>"
+    href="<?= button.Url ?>"
     <? } ?>
 <? } ?>
 <? if button.Name!="" { ?>
