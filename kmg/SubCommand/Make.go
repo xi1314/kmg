@@ -20,7 +20,7 @@ func makeCmd() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
 	kmgConsole.ExitOnErr(err)
 	if kmgc.Make == "" {
-		kmgConsole.ExitOnStdErr(errors.New("Please defined a Make command in .kmg.yml file to use kmg make"))
+		kmgConsole.ExitOnStderr(errors.New("Please defined a Make command in .kmg.yml file to use kmg make"))
 		return
 	}
 	if len(os.Args) >= 2 && kmgc.MakeSubCommandMap != nil {

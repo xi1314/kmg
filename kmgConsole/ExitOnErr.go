@@ -15,7 +15,7 @@ func ExitOnErr(err error) {
 }
 
 //仅限于命令使用
-func ExitOnStdErr(err error) {
+func ExitOnStderr(err error) {
 	if err == nil {
 		return
 	}
