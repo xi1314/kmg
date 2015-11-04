@@ -34,12 +34,17 @@ func waitRpcRespond() chan error {
 	lock.Lock()
 	ListenAndServe_ServiceRpc(rpcAddress, &ServiceRpc{}, rpcPsk)
 	go func() {
-		startStatus := <-statusChannel
-		lock.UnLock()
-		if startStatus == StartStatusSuccess {
-			returnChan <- nil
+		select {
+		case startStatus := <-statusChannel:
+			lock.UnLock()
+			if startStatus == StartStatusSuccess {
+				returnChan <- nil
+			}
+			returnChan <- errors.New("StartFail")
+		case <-time.After(time.Minute * 2):
+			lock.UnLock()
+			returnChan <- errors.New("Rpc timeout")
 		}
-		returnChan <- errors.New("StartFail")
 	}()
 	return returnChan
 }
@@ -49,10 +54,11 @@ func ServiceStartSuccess() {
 	client := NewClient_ServiceRpc("http://"+rpcAddress, rpcPsk)
 	err := client.Send(StartStatusSuccess)
 	if err != nil {
-		fmt.Println("src/github.com/bronze1man/kmg/kmg/SubCommand/serviceCmd/rpc.go ServiceStartSuccess", err)
+		fmt.Println("[Warning kmg service] please use kmg service start/restart", err)
 	}
 }
 
+//暂时没什么用
 func ServiceStartFail() {
 	time.Sleep(time.Second)
 	client := NewClient_ServiceRpc("http://"+rpcAddress, rpcPsk)

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"errors"
 	"fmt"
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
@@ -19,7 +20,7 @@ func makeCmd() {
 	kmgc, err := kmgConfig.LoadEnvFromWd()
 	kmgConsole.ExitOnErr(err)
 	if kmgc.Make == "" {
-		kmgConsole.ExitOnStderr("Please defined a Make command in .kmg.yml file to use kmg make")
+		kmgConsole.ExitOnStdErr(errors.New("Please defined a Make command in .kmg.yml file to use kmg make"))
 		return
 	}
 	if len(os.Args) >= 2 && kmgc.MakeSubCommandMap != nil {
@@ -50,7 +51,7 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 		kmgFile.MustSymlink(filepath.Base(thisLogFilePath), lastLogPath)
 	}
 	//TODO 大部分命令是 kmg gorun xxx 在这个地方可以直接调用gorun解决问题,这样可以少开一个进程加快了一些速度
-	// 问题: 上诉做法不靠谱,会导致last.log没有用处.
+	// 问题: 上述做法不靠谱,会导致last.log没有用处.
 	//if len(args) >= 2 && args[0] == "kmg" && strings.EqualFold(args[1], "gorun") {
 	//	os.Args = append(args[1:], os.Args[1:]...)
 	//	goCmd.GoRunCmd()
@@ -62,9 +63,20 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 	//	RunAndTeeOutputToFile(thisLogFilePath)
 	// TODO bash转义
 	bashCmd := strings.Join(append(args, os.Args[1:]...), " ")
-	err := kmgCmd.CmdBash(bashCmd + " 2>&1 | tee -i " + thisLogFilePath + " ; test ${PIPESTATUS[0]} -eq 0").SetDir(kmgc.ProjectPath).StdioRun()
-	if err != nil {
-		err = fmt.Errorf("kmg make: %s", err)
-		kmgConsole.ExitOnErr(err)
+	bashCmdStr:=bashCmd + " 2>&1 | tee -i " + thisLogFilePath + " ; test ${PIPESTATUS[0]} -eq 0"
+	if kmgPlatform.IsWindows(){
+		err := kmgCmd.CmdString(bashCmdStr).SetDir(kmgc.ProjectPath).StdioRun()
+		if err != nil {
+			err = fmt.Errorf("kmg make: %s", err)
+			kmgConsole.ExitOnErr(err)
+		}
+		return
+	}else {
+		err := kmgCmd.CmdBash(bashCmdStr).SetDir(kmgc.ProjectPath).StdioRun()
+		if err != nil {
+			err = fmt.Errorf("kmg make: %s", err)
+			kmgConsole.ExitOnErr(err)
+		}
+		return
 	}
 }

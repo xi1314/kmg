@@ -71,17 +71,17 @@ func (context *Env) Init() {
 		context.GOPATH = []string{context.ProjectPath}
 	}
 }
-func (context *Env) PathInProject(relPath string) string {
-	return filepath.Join(context.ProjectPath, relPath)
+func (context *Env) PathInProject(relativePath string) string {
+	return filepath.Join(context.ProjectPath, relativePath)
 }
-func (context *Env) PathInConfig(relPath string) string {
-	return filepath.Join(context.ConfigPath, relPath)
+func (context *Env) PathInConfig(relativePath string) string {
+	return filepath.Join(context.ConfigPath, relativePath)
 }
-func (context *Env) PathInTmp(relPath string) string {
-	return filepath.Join(context.TmpPath, relPath)
+func (context *Env) PathInTmp(relativePath string) string {
+	return filepath.Join(context.TmpPath, relativePath)
 }
-func (context *Env) PathInData(relPath string) string {
-	return filepath.Join(context.DataPath, relPath)
+func (context *Env) PathInData(relativePath string) string {
+	return filepath.Join(context.DataPath, relativePath)
 }
 func (context *Env) MustGetPathFromImportPath(importPath string) string {
 	for _, gopath := range context.GOPATH {

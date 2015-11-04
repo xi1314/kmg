@@ -65,6 +65,7 @@ func installGolangWithUrlMap(urlMap map[string]string) {
 	if p.Compatible(kmgPlatform.WindowsAmd64) {
 		contentB, err := kmgHttp.UrlGetContent(urlMap["windows_amd64"])
 		kmgConsole.ExitOnErr(err)
+		kmgFile.MustDelete(`c:\go`)
 		err = kmgCompress.ZipUncompressFromBytesToDir(contentB, `c:\go`, "go")
 		kmgConsole.ExitOnErr(err)
 		err = kmgFile.CopyFile(`c:\go\bin\go.exe`, `c:\windows\system32\go.exe`)

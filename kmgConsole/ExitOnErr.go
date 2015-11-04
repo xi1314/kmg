@@ -15,7 +15,10 @@ func ExitOnErr(err error) {
 }
 
 //仅限于命令使用
-func ExitOnStderr(err string) {
-	fmt.Println(err)
+func ExitOnStdErr(err error) {
+	if err == nil {
+		return
+	}
+	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
 }

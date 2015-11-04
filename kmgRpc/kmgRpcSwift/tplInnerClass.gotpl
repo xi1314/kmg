@@ -9,8 +9,13 @@ func (config InnerClass)tplInnerClass() string {
 <?if config.IsPublic{?>
 mutating func ToData(inData:JSON){
 <?for _,field:=range config.FieldList{?>
-<? if field.TypeStr == "Int" || field.TypeStr == "NSString"{?>
-self.<?=field.Name?> = inData["Out_0"]["<?=field.Name?>"].<?switch field.TypeStr{ case "Int":?>intValue<?case "NSString":?>stringValue<?default:?>stringValue<?}?>
+<? if field.TypeStr == "Int" || field.TypeStr == "NSString" || field.TypeStr == "Bool" || field.TypeStr == "NSDate"{?>
+self.<?=field.Name?> = inData["Out_0"]["<?=field.Name?>"].<?switch field.TypeStr{
+                case "Int":?>intValue
+                <?case "NSString":?>stringValue
+                <?case "Bool":?>boolValue
+                <?case "NSDate":?>stringValue.toDate(format: DateFormat.ISO8601)!
+                <?default:?>stringValue<?}?>
 <? }else{ ?>
 self.<?=field.Name?>.ToData(inData)
 <? } ?>

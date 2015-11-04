@@ -22,7 +22,10 @@ func AddCommandList() {
 		Name:   "setAndRestart",
 		Desc:   "install the service,and restart the service,uninstall and stop if need",
 		Runner: setAndRestartCmd,
-	}).AddCommand(kmgConsole.Command{
+	}).AddCommandWithName(
+		"setAndRestartV1",
+		setAndRestartCmdV1,
+	).AddCommand(kmgConsole.Command{
 		Name:   "install",
 		Desc:   "install the service",
 		Runner: installCmd,
@@ -63,26 +66,43 @@ type installRequest struct {
 
 func setAndRestartCmd() {
 	s, err := parseInstallRequest()
-	kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnStdErr(err)
 	err = Install(s)
 	if err != nil {
 		if err != ErrServiceExist {
-			kmgConsole.ExitOnErr(err)
+			kmgConsole.ExitOnStdErr(err)
 		}
 		err = Uninstall(s.Name)
-		kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnStdErr(err)
 		err = Install(s)
-		kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnStdErr(err)
 	}
 	err = Restart(s.Name)
-	kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnStdErr(err)
+}
+
+func setAndRestartCmdV1() {
+	s, err := parseInstallRequest()
+	kmgConsole.ExitOnStdErr(err)
+	err = Install(s)
+	if err != nil {
+		if err != ErrServiceExist {
+			kmgConsole.ExitOnStdErr(err)
+		}
+		err = Uninstall(s.Name)
+		kmgConsole.ExitOnStdErr(err)
+		err = Install(s)
+		kmgConsole.ExitOnStdErr(err)
+	}
+	err = RestartV1(s.Name)
+	kmgConsole.ExitOnStdErr(err)
 }
 
 func installCmd() {
 	s, err := parseInstallRequest()
-	kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnStdErr(err)
 	err = Install(s)
-	kmgConsole.ExitOnErr(err)
+	kmgConsole.ExitOnStdErr(err)
 }
 
 func parseInstallRequest() (s *Service, err error) {
@@ -107,6 +127,6 @@ func newNameCmd(fn func(name string) error) func() {
 		}
 		name := os.Args[1]
 		err := fn(name)
-		kmgConsole.ExitOnErr(err)
+		kmgConsole.ExitOnStdErr(err)
 	}
 }

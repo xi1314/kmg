@@ -41,3 +41,7 @@ func IsLinux() bool {
 func IsDarwin() bool {
 	return runtime.GOOS == "darwin"
 }
+
+func IsWindows() bool{
+	return runtime.GOOS=="windows"
+}

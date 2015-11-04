@@ -8,10 +8,13 @@ import (
 	"github.com/bronze1man/kmg/kmg/SubCommand/serviceCmd"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
+	"github.com/bronze1man/kmg/kmgSys"
 )
 
+// curl http://kmgtools.qiniudn.com/v1/installKmg.bash?v=$RANDOM | bash
 // kmg make upload
 func main() {
+	kmgSys.RecoverPath()
 	kmgHttp.AddCommandList()
 	SubCommand.AddCommandList()
 	InstallCmd.AddCommandList()

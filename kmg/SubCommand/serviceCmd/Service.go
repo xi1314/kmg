@@ -119,6 +119,10 @@ func Restart(name string) (err error) {
 	return <-c
 }
 
+func RestartV1(name string) (err error) {
+	return kmgCmd.CmdSlice([]string{"service", name, "restart"}).Run()
+}
+
 const sysvScript = `#!/bin/bash
 # For RedHat and cousins:
 # chkconfig: - 99 01

@@ -89,6 +89,10 @@ func goRunPackageName(goPath string, pathOrPkg string) {
 	goRunInstallSimple(goPath, pathOrPkg)
 	//run
 	outPath := filepath.Join(goPath, "bin", filepath.Base(pathOrPkg))
+	p := kmgPlatform.GetCompiledPlatform()
+	if p.Compatible(kmgPlatform.WindowsAmd64) {
+		outPath += ".exe"
+	}
 	if !kmgFile.MustFileExist(outPath){
 		kmgConsole.ExitOnErr(fmt.Errorf("please make sure you are kmg gorun a main package. (binary file not exist. %s)",outPath))
 	}

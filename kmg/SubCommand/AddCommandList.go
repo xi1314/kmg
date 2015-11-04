@@ -12,4 +12,5 @@ func AddCommandList() {
 		Runner: makeCmd,
 	})
 	kmgConsole.AddCommandWithName("NewPassword", NewPassword)
+	kmgConsole.AddCommandWithName("HttpsCertCsr",httpsCertCsrCLI)
 }
