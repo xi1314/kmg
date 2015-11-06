@@ -10,7 +10,7 @@ kmgViewResource web前端资源管理工具
     * js文件会按照package里面的文件的名称进行排序,然后按照此顺序合并到一个js文件里面.
 * package里面可以放置 css文件
     * css文件会按照package里面的文件的名称进行排序,然后按照此顺序合并到一个css文件里面.
-* package里面可以放置 图片,字体和swf文件
+* package里面可以放置 图片,字体,html文件和swf文件
     * 图片和swf会生成到网站的一个资源根目录下
     * 图片和swf的文件路径会本忽略掉,只保留文件名称.
     * 使用 getBootstrapViewResource().GetUrlPrefix() 获取本次打包的资源根目录.

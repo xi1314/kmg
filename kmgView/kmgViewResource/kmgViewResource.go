@@ -22,7 +22,7 @@ type ResourceUploadRequest struct {
 	Name          string //缓存和区分不同实例使用.
 }
 
-var allowResourceExt = []string{".otf", ".eot", ".svg", ".ttf", ".woff", ".woff2", ".jpg", ".jpeg", ".png", ".gif", ".ico"}
+var allowResourceExt = []string{".otf", ".eot", ".svg", ".ttf", ".woff", ".woff2", ".jpg", ".jpeg", ".png", ".gif", ".ico", ".html"}
 
 func ResourceBuild(req *ResourceUploadRequest) {
 	if req.Name == "" {
