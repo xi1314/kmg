@@ -16,7 +16,7 @@ func tplButton(button Button) string {
     `)
 		} else {
 			_buf.WriteString(`    href="`)
-			_buf.WriteString(kmgXss.H(kmgXss.H(button.Url)))
+			_buf.WriteString(kmgXss.H(button.Url))
 			_buf.WriteString(`"
     `)
 		}

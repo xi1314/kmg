@@ -22,3 +22,9 @@ func ExitOnStderr(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
 }
+
+func ExitOnStderrString(err string){
+	fmt.Fprintln(os.Stderr, err)
+	os.Exit(1)
+}
+

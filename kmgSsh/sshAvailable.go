@@ -30,7 +30,7 @@ func AvailableCheck(remote *RemoteServer) (isReachable, havePermission bool) {
 		}
 		retry++
 		fmt.Println("[kmgSsh AvailableCheck]", remote.Address, "retry", retry)
-		if retry == 12 {
+		if retry == 24 {
 			return false, false
 		}
 	}

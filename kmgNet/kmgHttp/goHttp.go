@@ -308,3 +308,9 @@ func GoListenAndServeTLSWithCertContent(addr string, certS string, keyS string, 
 	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, srv.TLSConfig)
 	return srv.Serve(tlsListener)
 }
+
+// 去掉cert和key,复制粘帖带来的各种格式错误
+func FormatHttpsCertOrKey(inS string) string{
+	inS= strings.TrimSpace(inS)
+	return inS
+}

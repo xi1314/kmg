@@ -194,6 +194,7 @@ func (a *Uint32AVP) ValueAsString() string {
 }
 
 func avpPassword(p *Packet, typ AVPType, data []byte) (avp AVP, err error) {
+	fmt.Printf("%#v\n",data)
 	if len(data) < 16 {
 		return nil, fmt.Errorf("[avpPassword] len(data)[%d]<16", len(data))
 	}
@@ -201,24 +202,31 @@ func avpPassword(p *Packet, typ AVPType, data []byte) (avp AVP, err error) {
 		return nil, fmt.Errorf("[avpPassword] len(data)[%d]>128", len(data))
 	}
 	//Decode password. XOR against md5(p.server.secret+Authenticator)
-	secAuth := append([]byte(nil), []byte(p.Secret)...)
-	secAuth = append(secAuth, p.Authenticator[:]...)
 	m := crypto.Hash(crypto.MD5).New()
-	m.Write(secAuth)
+	m.Write(p.Secret)
+	m.Write(p.Authenticator[:])
 	md := m.Sum(nil)
 	pass := append([]byte(nil), data...)
-	if len(pass) == 16 {
-		for i := 0; i < len(pass); i++ {
-			pass[i] = pass[i] ^ md[i]
-		}
-		pass = bytes.TrimRight(pass, string([]rune{0}))
-		avp := &PasswordAVP{
-			Value: string(pass),
-		}
-		avp.SetPacket(p)
-		return avp, nil
+	blockNum:=len(pass)/16
+	if len(pass)%16!=0{
+		return nil,fmt.Errorf("[avpPassword] blockNum[%d]%%16!=0",blockNum)
 	}
-	return nil, fmt.Errorf("[avpPassword] not implemented for password > 16")
+	outputPass:=make([]byte,len(pass))
+	for i:=0;i<blockNum;i++{
+		for j := 0; j < 16; j++ {
+			outputPass[i*16+j] = pass[i*16+j] ^ md[j]
+		}
+		m := crypto.Hash(crypto.MD5).New()
+		m.Write(p.Secret)
+		m.Write(pass[i*16:i*16+16])
+		md = m.Sum(nil)
+	}
+	outputPass = bytes.TrimRight(outputPass, string([]rune{0}))
+	avpP := &PasswordAVP{
+		Value: string(outputPass),
+	}
+	avpP.SetPacket(p)
+	return avpP, nil
 }
 
 type PasswordAVP struct {
@@ -251,20 +259,31 @@ func (a *PasswordAVP) ValueAsString() string {
 
 //you need set packet before encode
 func (a *PasswordAVP) Encode() (b []byte, err error) {
-	secAuth := append([]byte(nil), []byte(a.packet.Secret)...)
-	secAuth = append(secAuth, a.packet.Authenticator[:]...)
 	m := crypto.Hash(crypto.MD5).New()
-	m.Write(secAuth)
+	m.Write(a.packet.Secret)
+	m.Write(a.packet.Authenticator[:])
 	md := m.Sum(nil)
-	if len(a.Value) > 16 {
-		return nil, fmt.Errorf("[PasswordAVP.Encode] not implemented for password > 16")
+	if len(a.Value) > 128 {
+		return nil, fmt.Errorf("[PasswordAVP.Encode] len(data)[%d]>128", len(a.Value))
 	}
-	pass := make([]byte, 16)
+	inPassLen := len(a.Value)/16*16
+	if len(a.Value)%16!=0{
+		inPassLen += 16
+	}
+	pass := make([]byte, inPassLen)
+	outPass:=make([]byte,inPassLen)
 	copy(pass, a.Value)
-	for i := 0; i < len(pass); i++ {
-		pass[i] = pass[i] ^ md[i]
+	blockNum:= inPassLen /16
+	for i:=0;i<blockNum;i++{
+		for j := 0; j < 16; j++ {
+			outPass[i*16+j] = pass[i*16+j] ^ md[j]
+		}
+		m := crypto.Hash(crypto.MD5).New()
+		m.Write(a.packet.Secret)
+		m.Write(outPass[i*16:i*16+16])
+		md = m.Sum(nil)
 	}
-	return encodeWithByteSlice(AVPTypeUserPassword, pass)
+	return encodeWithByteSlice(AVPTypeUserPassword, outPass)
 }
 
 // t should from a uint32 type like AcctStatusTypeEnum
