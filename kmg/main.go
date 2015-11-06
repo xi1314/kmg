@@ -14,7 +14,7 @@ import (
 // curl http://kmgtools.qiniudn.com/v1/installKmg.bash?v=$RANDOM | bash
 // kmg make upload
 func main() {
-	kmgSys.RecoverPath()
+	kmgSys.RecoverPath() // 解决android的gradle的PATH问题.
 	kmgHttp.AddCommandList()
 	SubCommand.AddCommandList()
 	InstallCmd.AddCommandList()

@@ -10,11 +10,11 @@ func RecoverPath(){
 	pathenv:=os.Getenv("PATH")
 	pathList:=strings.Split(pathenv, ":")
 	change:=false
-	if kmgStrings.IsInSlice(pathList,"/usr/local/bin"){
+	if !kmgStrings.IsInSlice(pathList,"/usr/local/bin"){
 		change = true
 		pathenv+=":/usr/local/bin"
 	}
-	if kmgStrings.IsInSlice(pathList,"/bin"){
+	if !kmgStrings.IsInSlice(pathList,"/bin"){
 		change = true
 		pathenv+=":/bin"
 	}
