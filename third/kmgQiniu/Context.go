@@ -68,7 +68,7 @@ func (ctx *Context) MustDownloadToFile(remoteRoot string, localRoot string) {
 }
 
 // 下载一个文件, 开头带 / 或不带 / 效果一致
-func (ctx *Context) DownloadOneToFile(remoteRoot string, localRoot string) (err error){
+func (ctx *Context) DownloadOneToFile(remoteRoot string, localRoot string) (err error) {
 	ctx.singleContextCheck()
 	remoteRoot = strings.TrimPrefix(remoteRoot, "/")
 	err = DownloadFile(ctx, remoteRoot, localRoot)
@@ -94,11 +94,11 @@ func (ctx *Context) DownloadToWriter(remotePath string, w io.Writer) (err error)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode==404{
+	if resp.StatusCode == 404 {
 		return ErrNoFile
 	}
-	if resp.StatusCode!=200{
-		return fmt.Errorf("resp.StatusCode[%d]!=200",resp.StatusCode)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("resp.StatusCode[%d]!=200", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	_, err = io.Copy(w, resp.Body)
@@ -118,14 +118,14 @@ func (ctx *Context) MustDownloadToBytes(remotePath string) (b []byte) {
 	return buf.Bytes()
 }
 
-func (ctx *Context) DownloadToBytes(remotePath string) (b []byte,err error) {
+func (ctx *Context) DownloadToBytes(remotePath string) (b []byte, err error) {
 	ctx.singleContextCheck()
 	buf := &bytes.Buffer{}
 	err = ctx.DownloadToWriter(remotePath, buf)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return buf.Bytes(),nil
+	return buf.Bytes(), nil
 }
 
 //可以上传文件或目录 remoteRoot 开头带 / 或不带 / 效果一致
@@ -247,16 +247,16 @@ type FileInfo struct {
 	//还有几个字段暂时用不着.
 }
 
-func (fi FileInfo) IsExist() bool{
-	return fi.Hash!=""
+func (fi FileInfo) IsExist() bool {
+	return fi.Hash != ""
 }
 
-func (ctx *Context) ListPrefix(prefix string) (output []FileInfo,err error) {
+func (ctx *Context) ListPrefix(prefix string) (output []FileInfo, err error) {
 	ctx.singleContextCheck()
 	prefix = strings.TrimPrefix(prefix, "/")
 	entries, err := ListPrefix(ctx, prefix)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	output = make([]FileInfo, len(entries))
 	for i := range entries {
@@ -265,12 +265,13 @@ func (ctx *Context) ListPrefix(prefix string) (output []FileInfo,err error) {
 		output[i].Size = entries[i].Fsize
 		output[i].ModTime = time.Unix(entries[i].PutTime/1e7, entries[i].PutTime%1e7*100)
 	}
-	return output,nil
+	return output, nil
 }
+
 // 返回的path前面不带 /
 func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
-	output,err:=ctx.ListPrefix(prefix)
-	if err!=nil {
+	output, err := ctx.ListPrefix(prefix)
+	if err != nil {
 		panic(err)
 	}
 	return output
@@ -280,14 +281,14 @@ func (ctx *Context) MustListPrefix(prefix string) (output []FileInfo) {
 // PathList 是远程路径
 // 路径里面开头带 / 和不带 / 效果一致.
 // FileInfo 里面的 Hash是空表示没有找到文件.
-func (ctx *Context) BatchStat(PathList []string) (output []FileInfo,err error){
+func (ctx *Context) BatchStat(PathList []string) (output []FileInfo, err error) {
 	// 这个好像也有1000个的限制
 	// TODO 并发Stat
 	ctx.singleContextCheck()
-	if len(PathList)==0{
-		return nil,nil
+	if len(PathList) == 0 {
+		return nil, nil
 	}
-	output=make([]FileInfo,0,len(PathList))
+	output = make([]FileInfo, 0, len(PathList))
 	itemList := make([]rs.EntryPath, 0, len(PathList))
 	length := len(PathList)
 	for i := 0; i < length; i += 1000 {
@@ -307,30 +308,30 @@ func (ctx *Context) BatchStat(PathList []string) (output []FileInfo,err error){
 		//此处返回的错误很奇怪,有大量文件不存在信息,应该是正常情况,此处最简单的解决方案就是假设没有错误
 		if len(batchRet) != len(itemList) {
 			// 这种是真出现错误了.
-			return nil,fmt.Errorf("[BatchStat] len(batchRet)[%d]!=len(entryPathList)[%d] err[%s]",
-				len(batchRet), len(itemList),err)
+			return nil, fmt.Errorf("[BatchStat] len(batchRet)[%d]!=len(entryPathList)[%d] err[%s]",
+				len(batchRet), len(itemList), err)
 		}
-		for i:=range batchRet{
+		for i := range batchRet {
 			ret := batchRet[i]
-			if ret.Error != ""{
+			if ret.Error != "" {
 				if ret.Error != "no such file or directory" {
 					output = append(output, FileInfo{
 						Path: itemList[i].Key,
 					})
 					continue
-				}else{
-					return nil,fmt.Errorf("[BatchStat] unexpect err [%s] code [%d]",ret.Error,ret.Code)
+				} else {
+					return nil, fmt.Errorf("[BatchStat] unexpect err [%s] code [%d]", ret.Error, ret.Code)
 				}
 			}
-			output = append(output,FileInfo{
-				Path: itemList[i].Key,
-				Hash: batchRet[i].Data.Hash,
-				Size: batchRet[i].Data.Fsize,
+			output = append(output, FileInfo{
+				Path:    itemList[i].Key,
+				Hash:    batchRet[i].Data.Hash,
+				Size:    batchRet[i].Data.Fsize,
 				ModTime: time.Unix(batchRet[i].Data.PutTime/1e7, batchRet[i].Data.PutTime%1e7*100),
 			})
 		}
 	}
-	return output,nil
+	return output, nil
 }
 
 func (ctx *Context) singleContextCheck() {

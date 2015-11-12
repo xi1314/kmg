@@ -5,8 +5,10 @@ import (
 	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgRand"
+	"github.com/bronze1man/kmg/kmgSys"
 	"strconv"
 	"strings"
+	"os"
 )
 
 type RemoteServer struct {
@@ -49,7 +51,9 @@ func SshCertCopyLocalToRemote(remote *RemoteServer) {
 		kmgCmd.MustRunInBash("ssh-copy-id " + remote.String())
 		return
 	}
-	runCmdWithPassword(
+	//p := filepath.Join(kmgSys.GetCurrentUserHomeDir(), ".ssh", "id_rsa.pub")
+	RunCmdWithPassword(
+		//strings.Join([]string{"ssh-copy-id", "-i", p, remote.String()}, " "),
 		"ssh-copy-id "+remote.String(),
 		remote.Password,
 	)
@@ -70,7 +74,7 @@ func SshCertCopyCertToRemote(cert string, remoteList []RemoteServer) {
 	}
 }
 
-func runCmdWithPassword(cmd, password string) {
+func RunCmdWithPassword(cmd, password string) {
 	cmdTpl := `#!/usr/bin/expect -f
 spawn %s
 expect "assword:"
@@ -81,5 +85,6 @@ interact`
 	tmpPath := "/tmp/" + tmpName
 	kmgFile.MustAppendFile(tmpPath, []byte(cmd))
 	defer kmgFile.MustDelete(tmpPath)
+	os.Setenv("HOME", kmgSys.GetCurrentUserHomeDir())
 	kmgCmd.CmdSlice([]string{tmpPath}).MustStdioRun()
 }

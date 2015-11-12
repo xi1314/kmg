@@ -2,13 +2,13 @@ package kmgRpcSwift
 
 import (
 	"github.com/bronze1man/kmg/kmgCache"
+	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgFileToXcode"
 	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
 	"path/filepath"
 	"strings"
-	"github.com/bronze1man/kmg/kmgFileToXcode"
-	"github.com/bronze1man/kmg/kmgCmd"
 )
 
 type GenerateRequest struct {
@@ -31,28 +31,28 @@ func MustGenerateCode(req *GenerateRequest) {
 	outBs := tplGenerateCode(config)
 	outB := kmgFormat.RemoteEmptyLine([]byte(outBs))
 	kmgFile.MustWriteFileWithMkdir(req.OutFilePath, outB)
-	if req.NeedSource{
+	if req.NeedSource {
 		//生成xxx-Bridging-Header.h NSData+Compression.h NSData+Compression.m
 		BridgingHeaderContent := `
 //  请将该文件放到根目录的项目名文件下
 #import "NSData+Compression.h"
 	`
-		path := strings.Split(req.OutFilePath,"/")
-		parPath := strings.Join(path[:(len(path)-1)],"/") + "/"
-		BridgingHeaderPath := parPath + req.OutProjectName+"-Bridging-Header.h"
+		path := strings.Split(req.OutFilePath, "/")
+		parPath := strings.Join(path[:(len(path)-1)], "/") + "/"
+		BridgingHeaderPath := parPath + req.OutProjectName + "-Bridging-Header.h"
 		NSDataCompressionMethodPath := parPath + "NSData+Compression.m"
 		NSDataCompressionHeadPath := parPath + "NSData+Compression.h"
 		InfoListPath := parPath + "Info.plist"
-		path = strings.Split(req.XcodeprojPath,"/")
-		projectPath := strings.Join(path[:(len(path)-1)],"/") + "/"
-		podFilePath := projectPath+"Podfile"
+		path = strings.Split(req.XcodeprojPath, "/")
+		projectPath := strings.Join(path[:(len(path)-1)], "/") + "/"
+		podFilePath := projectPath + "Podfile"
 		xcodeprojPath := req.XcodeprojPath
 		kmgFile.MustWriteFileWithMkdir(BridgingHeaderPath, []byte(BridgingHeaderContent))
 		kmgFile.MustWriteFileWithMkdir(NSDataCompressionMethodPath, []byte(NSDataCompressionMethod()))
 		kmgFile.MustWriteFileWithMkdir(NSDataCompressionHeadPath, []byte(NSDataCompressionHead()))
 		kmgFile.MustWriteFileWithMkdir(InfoListPath, []byte(InfoList()))
 		kmgFile.MustWriteFileWithMkdir(podFilePath, []byte(Podfile(req.OutProjectName)))
-		kmgFileToXcode.AddFilesToXcode([]string{req.OutFilePath,BridgingHeaderPath,NSDataCompressionMethodPath,NSDataCompressionHeadPath},xcodeprojPath)
+		kmgFileToXcode.AddFilesToXcode([]string{req.OutFilePath, BridgingHeaderPath, NSDataCompressionMethodPath, NSDataCompressionHeadPath}, xcodeprojPath)
 		cmd := kmgCmd.CmdBash("export LANG=UTF-8;pod install")
 		cmd.SetDir(projectPath)
 		cmd.MustRun()

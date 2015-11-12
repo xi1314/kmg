@@ -74,9 +74,9 @@ func IsAllAphphabet(s string) bool {
 }
 
 //是否s里面全部都是数值(只有那10个,0-9) 空字符串也是true
-func IsAllNum(s string)bool{
-	for _,rune:=range s{
-		if !(rune>='0' && rune<='9'){
+func IsAllNum(s string) bool {
+	for _, rune := range s {
+		if !(rune >= '0' && rune <= '9') {
 			return false
 		}
 	}
@@ -147,6 +147,6 @@ func SubStr(s string, from int, to int) string {
 	}
 	return string(rs[from:to])
 }
-func IsStartWith(s string,start string)bool{
-	return  SubStr(s,0,1) == start
+func IsStartWith(s string, start string) bool {
+	return SubStr(s, 0, 1) == start
 }

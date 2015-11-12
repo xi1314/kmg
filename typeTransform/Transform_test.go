@@ -8,7 +8,6 @@ import (
 )
 
 func TestManager(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	Int := 0
 	ArrMapStringInt := []map[string]int{}
 	type T1 struct {
@@ -96,8 +95,8 @@ func TestManager(ot *testing.T) {
 	}
 	for i, testCase := range testCaseTable {
 		err := Transform(testCase.in, testCase.out)
-		t.EqualMsg(err, nil, "fail at %d", i)
-		t.EqualMsg(reflect.ValueOf(testCase.out).Elem().Interface(), testCase.exp, "fail at %d", i)
+		kmgTest.Equal(err, nil, "fail at %d", i)
+		kmgTest.Equal(reflect.ValueOf(testCase.out).Elem().Interface(), testCase.exp, "fail at %d", i)
 	}
 
 }

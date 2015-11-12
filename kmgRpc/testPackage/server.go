@@ -2,9 +2,9 @@ package testPackage
 
 import (
 	"errors"
+	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgTime"
 	"time"
-	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 )
 
 type Demo struct {
@@ -66,6 +66,6 @@ func (s *Demo) DemoTime2(t time.Time) (out time.Time) {
 	return t.In(kmgTime.DefaultTimeZone).Add(time.Hour + time.Millisecond)
 }
 
-func (s *Demo) DemoClientIp(httpCtx *kmgHttp.Context) (ip string){
+func (s *Demo) DemoClientIp(httpCtx *kmgHttp.Context) (ip string) {
 	return httpCtx.MustGetClientIp().String()
 }

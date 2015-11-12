@@ -266,6 +266,10 @@ func Br(num int) kmgView.HtmlRenderer {
 	return kmgView.Html(strings.Repeat("<br />", num))
 }
 
+func Hr(num int) kmgView.HtmlRenderer {
+	return kmgView.Html(strings.Repeat("<hr />", num))
+}
+
 type NavBarNode struct {
 	Name      string
 	Url       string

@@ -54,7 +54,7 @@ Retry:
 		m.ErrorArr = append(m.ErrorArr, err)
 		m.errorMutex.Unlock()
 	}
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 }

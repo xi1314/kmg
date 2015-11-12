@@ -1,5 +1,6 @@
 package kmgRpcSwift
-func NSDataCompressionHead()string{
+
+func NSDataCompressionHead() string {
 	return `
 //  请将该文件放到根目录的项目名文件下
 //  NSData+Compression.h
@@ -240,8 +241,8 @@ func NSDataCompressionMethod() string {
 @end
 	`
 }
-func InfoList()string{
-    return `
+func InfoList() string {
+	return `
     <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -296,11 +297,11 @@ func InfoList()string{
 </plist>
     `
 }
-func Podfile(projectName string)string{
-    return`
+func Podfile(projectName string) string {
+	return `
 #请将该文件放到ios项目根目录，并执行pod install，之后通过xworkspace打开
-target '`+ projectName +
-    `' do
+target '` + projectName +
+		`' do
 source 'https://github.com/CocoaPods/Specs.git'
 #platform :ios, '8.0'
 use_frameworks!

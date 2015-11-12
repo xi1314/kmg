@@ -37,7 +37,7 @@ func EncryptV3(key *[32]byte, data []byte) (output []byte) {
 func DecryptV3(key *[32]byte, data []byte) (output []byte, err error) {
 	//先解密
 	if len(data) < 20 {
-		return nil, errors.New("[kmgCipher.CompressAndEncryptBytesDecode] input data too small")
+		return nil, errors.New("[kmgCrypto.DecryptV3] input data too small")
 	}
 	aseKey := key[:]
 	Iv := data[:16]
@@ -50,7 +50,7 @@ func DecryptV3(key *[32]byte, data []byte) (output []byte, err error) {
 	ctr.XORKeyStream(output, data[16:])
 	beforeCbcSize := len(data) - 16 - 4
 	if !bytes.Equal(magicCode4, output[beforeCbcSize:beforeCbcSize+4]) {
-		return nil, errors.New("[kmgCipher.CompressAndEncryptBytesDecode] magicCode not match")
+		return nil, errors.New("[kmgCrypto.DecryptV3] magicCode not match")
 	}
 	output = output[:beforeCbcSize]
 	//后解压缩

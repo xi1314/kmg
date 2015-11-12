@@ -25,155 +25,151 @@ type T2 struct {
 }
 
 func TestPtrType(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	var data **string
 	data = new(*string)
 	m, err := NewContext(data)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 
 	err = m.SaveByPath(Path{"ptr", "ptr"}, "")
-	t.Equal(err, nil)
-	t.Ok(data != nil)
-	t.Ok(*data != nil)
-	t.Equal(**data, "")
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(data != nil)
+	kmgTest.Ok(*data != nil)
+	kmgTest.Equal(**data, "")
 }
 
 func TestStringType(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	var data *string
 	data = new(string)
 	m, err := NewContext(data)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 
 	err = m.SaveByPath(Path{"ptr"}, "123")
-	t.Equal(err, nil)
-	t.Ok(data != nil)
-	t.Equal(*data, "123")
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(data != nil)
+	kmgTest.Equal(*data, "123")
 }
 
 func TestStructType(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	data := &struct {
 		A string
 	}{}
 	m, err := NewContext(data)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 
 	err = m.SaveByPath(Path{"ptr", "A"}, "123")
-	t.Equal(err, nil)
-	t.Ok(data != nil)
-	t.Equal(data.A, "123")
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(data != nil)
+	kmgTest.Equal(data.A, "123")
 }
 
 func TestType(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	data := &T{}
 	m, err := NewContext(data)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 
 	err = m.SaveByPath(Path{"ptr", "String1"}, "B")
-	t.Equal(err, nil)
-	t.Equal(data.String1, "B")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.String1, "B")
 
 	m.SaveByPath(Path{"ptr", "Map1", "A"}, "1123")
 	_, ok := data.Map1["A"]
-	t.Equal(ok, true)
-	t.Equal(data.Map1["A"], "1123")
+	kmgTest.Equal(ok, true)
+	kmgTest.Equal(data.Map1["A"], "1123")
 
 	err = m.SaveByPath(Path{"ptr", "Map1", "A"}, "1124")
-	t.Equal(err, nil)
-	t.Equal(data.Map1["A"], "1124")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Map1["A"], "1124")
 
 	err = m.DeleteByPath(Path{"ptr", "Map1", "A"})
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	_, ok = data.Map1["A"]
-	t.Equal(ok, false)
+	kmgTest.Equal(ok, false)
 
 	err = m.SaveByPath(Path{"ptr", "Map2", "B", "ptr"}, "1")
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	rpString, ok := data.Map2["B"]
-	t.Equal(ok, true)
-	t.Equal(*rpString, "1")
+	kmgTest.Equal(ok, true)
+	kmgTest.Equal(*rpString, "1")
 
 	err = m.SaveByPath(Path{"ptr", "Map2", "B", "ptr"}, "2")
-	t.Equal(err, nil)
-	t.Equal(*rpString, "2")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(*rpString, "2")
 
 	err = m.DeleteByPath(Path{"ptr", "Map2", "B", "ptr"})
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	_, ok = data.Map2["B"]
-	t.Equal(ok, true)
-	t.Equal(data.Map2["B"], nil)
+	kmgTest.Equal(ok, true)
+	kmgTest.Equal(data.Map2["B"], nil)
 
 	err = m.DeleteByPath(Path{"ptr", "Map2", "B"})
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	_, ok = data.Map2["B"]
-	t.Equal(ok, false)
+	kmgTest.Equal(ok, false)
 
 	err = m.SaveByPath(Path{"ptr", "Map3", "C", "A"}, "1")
-	t.Equal(err, nil)
-	t.Equal(data.Map3["C"].A, "1")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Map3["C"].A, "1")
 
 	err = m.DeleteByPath(Path{"ptr", "Map3", "C"})
-	t.Equal(err, nil)
-	t.Ok(data.Map3 != nil)
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(data.Map3 != nil)
 	_, ok = data.Map3["C"]
-	t.Equal(ok, false)
+	kmgTest.Equal(ok, false)
 
 	err = m.SaveByPath(Path{"ptr", "Map4", "D", "F"}, "1234")
-	t.Equal(err, nil)
-	t.Equal(data.Map4["D"]["F"], "1234")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Map4["D"]["F"], "1234")
 
 	err = m.SaveByPath(Path{"ptr", "Map4", "D", "H"}, "12345")
-	t.Equal(err, nil)
-	t.Equal(data.Map4["D"]["H"], "12345")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Map4["D"]["H"], "12345")
 
 	err = m.SaveByPath(Path{"ptr", "Map4", "D", "H"}, "12346")
-	t.Equal(err, nil)
-	t.Equal(data.Map4["D"]["H"], "12346")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Map4["D"]["H"], "12346")
 
 	err = m.DeleteByPath(Path{"ptr", "Map4", "D", "F"})
-	t.Equal(err, nil)
-	t.Ok(data.Map4["D"] != nil)
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(data.Map4["D"] != nil)
 	_, ok = data.Map4["D"]["F"]
-	t.Equal(ok, false)
+	kmgTest.Equal(ok, false)
 
 	_, ok = data.Map4["D"]["H"]
-	t.Equal(ok, true)
+	kmgTest.Equal(ok, true)
 
 	err = m.SaveByPath(Path{"ptr", "Map5", "D", ""}, "1234")
-	t.Equal(err, nil)
-	t.Equal(len(data.Map5["D"]), 1)
-	t.Equal(data.Map5["D"][0], "1234")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(data.Map5["D"]), 1)
+	kmgTest.Equal(data.Map5["D"][0], "1234")
 
 	err = m.DeleteByPath(Path{"ptr", "Map5", "D", "0"})
-	t.Equal(err, nil)
-	t.Equal(len(data.Map5["D"]), 0)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(data.Map5["D"]), 0)
 
 	err = m.SaveByPath(Path{"ptr", "Slice1", ""}, "1234")
-	t.Equal(err, nil)
-	t.Equal(len(data.Slice1), 1)
-	t.Equal(data.Slice1[0], "1234")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(data.Slice1), 1)
+	kmgTest.Equal(data.Slice1[0], "1234")
 
 	err = m.SaveByPath(Path{"ptr", "Slice1", ""}, "12345")
-	t.Equal(err, nil)
-	t.Equal(data.Slice1[1], "12345")
-	t.Equal(len(data.Slice1), 2)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Slice1[1], "12345")
+	kmgTest.Equal(len(data.Slice1), 2)
 
 	err = m.DeleteByPath(Path{"ptr", "Slice1", "0"})
-	t.Equal(err, nil)
-	t.Equal(len(data.Slice1), 1)
-	t.Equal(data.Slice1[0], "12345")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(data.Slice1), 1)
+	kmgTest.Equal(data.Slice1[0], "12345")
 
 	err = m.SaveByPath(Path{"ptr", "Ptr1", "ptr"}, "12345")
-	t.Equal(err, nil)
-	t.Equal(*data.Ptr1, "12345")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(*data.Ptr1, "12345")
 
 	err = m.SaveByPath(Path{"ptr", "Ptr2", "ptr"}, "")
-	t.Equal(err, nil)
-	t.Equal(data.Ptr2.A, "")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Ptr2.A, "")
 
 	err = m.SaveByPath(Path{"ptr", "Array1", "1"}, "12345")
-	t.Equal(err, nil)
-	t.Equal(data.Array1[1], "12345")
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(data.Array1[1], "12345")
 }

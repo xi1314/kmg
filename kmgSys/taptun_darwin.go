@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 	"unsafe"
+	"github.com/bronze1man/kmg/kmgNet"
 )
 
 // Interface is a TUN/TAP interface.
@@ -39,6 +40,10 @@ func NewTunNoName() (ifce TunTapInterface, err error) {
 	for i := 0; i < 255; i++ {
 		fd, err := utunOpenHelper(i)
 		if err != nil {
+			if kmgNet.IsResourceBusy(err){
+				// 换一个tun的id号试试?
+				continue
+			}
 			return nil, err
 		}
 		utunname := [20]byte{}

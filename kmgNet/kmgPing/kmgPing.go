@@ -4,6 +4,7 @@ import (
 	"github.com/tatsushid/go-fastping"
 	"net"
 	"time"
+	"github.com/bronze1man/kmg/kmgLog"
 )
 
 type EchoStatus string
@@ -17,6 +18,15 @@ type Echo struct {
 	Rtt     time.Duration
 	Status  EchoStatus
 	Address string
+}
+
+// 丢包返回1,不丢包返回0
+func (e Echo) GetLostRateFloat()float64{
+	if e.Status==EchoStatusSuccess{
+		return 0
+	}else{
+		return 1
+	}
 }
 
 var MaxRtt time.Duration = time.Duration(1e9)
@@ -43,6 +53,9 @@ func Ping(address string) Echo {
 	}
 	err = p.Run()
 	handleErr(err)
+	if echo.Rtt==0 && echo.Status==EchoStatusSuccess{
+		kmgLog.Log("error","[kmgPing.Ping] echo.Rtt==0 && echo.Status==EchoStatusSuccess",address)
+	}
 	return echo
 }
 

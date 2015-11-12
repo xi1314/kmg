@@ -5,14 +5,14 @@ import (
 
 	"github.com/bronze1man/kmg/kmgGoSource/kmgGoParser"
 	"github.com/bronze1man/kmg/kmgStrings"
-	"strconv"
 	"log"
+	"strconv"
 )
 
 func reflectToTplConfig(req *GenerateRequest) *tplConfig {
 	config := &tplConfig{
-		ClassName:      req.OutClassName,
-		innerClassMap:  map[string]*InnerClass{},
+		ClassName:     req.OutClassName,
+		innerClassMap: map[string]*InnerClass{},
 	}
 	if req.ApiNameFilterCb == nil {
 		req.ApiNameFilterCb = func(name string) bool {

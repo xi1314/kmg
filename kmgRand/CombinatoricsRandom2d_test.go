@@ -1,8 +1,12 @@
 package kmgRand
+import (
+	"testing"
+	"github.com/bronze1man/kmg/kmgTest"
+)
 
 //"fmt"
 
-func (t *Tester) TestCombinatoricsRandom2d() {
+func TestCombinatoricsRandom2d(t *testing.T) {
 	r := NewInt64SeedKmgRand(0)
 	for testcaseId, testcase := range []struct {
 		randomer    *CombinatoricsRandom2d
@@ -105,11 +109,11 @@ func (t *Tester) TestCombinatoricsRandom2d() {
 			randomer := testcase.randomer
 			err := randomer.Random(r)
 			if !testcase.retHasSolve {
-				t.Ok(err != nil)
+				kmgTest.Ok(err != nil)
 				continue
 			}
-			t.Equal(err, nil)
-			t.Equal(len(randomer.Output), testcase.retLen)
+			kmgTest.Equal(err, nil)
+			kmgTest.Equal(len(randomer.Output), testcase.retLen)
 			ANumList := make([]int, len(randomer.ANumList))
 			BNumList := make([]int, len(randomer.BNumList))
 			for _, row := range randomer.Output {
@@ -118,10 +122,10 @@ func (t *Tester) TestCombinatoricsRandom2d() {
 			}
 			//fmt.Println(randomer.Output)
 			if testcase.retANumList != nil {
-				t.Equal(ANumList, testcase.retANumList)
+				kmgTest.Equal(ANumList, testcase.retANumList)
 			}
 			if testcase.retBNumList != nil {
-				t.EqualMsg(BNumList, testcase.retBNumList, "BNumList not correct testcaseId: %d", testcaseId)
+				kmgTest.Equal(BNumList, testcase.retBNumList, "BNumList not correct testcaseId: %d", testcaseId)
 			}
 		}
 	}

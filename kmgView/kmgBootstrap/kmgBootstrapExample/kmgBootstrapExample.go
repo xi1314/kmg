@@ -81,6 +81,68 @@ func (e Example) Demo1(ctx *kmgHttp.Context) {
 			},
 		},
 		kmgBootstrap.Panel{
+			Title: "DropDown",
+			Body: kmgView.HtmlRendererList{
+				kmgView.String("使用 DropDown"),
+				kmgBootstrap.DropDown{
+					Title: kmgBootstrap.Button{
+						Size:    kmgBootstrap.ButtonSizeSmall,
+						Color:   kmgBootstrap.ButtonColorSuccess,
+						Content: kmgView.HtmlRendererList{
+							kmgView.String("更多"),
+							kmgBootstrap.Blank(1),
+							kmgBootstrap.NewCaret(),
+						},
+					},
+					OptionList: []kmgBootstrap.NavBarNode{
+						{
+							Name: "Say",
+							Url:  "/",
+							ChildList: []kmgBootstrap.NavBarNode{
+								{
+									Name: "你好",
+								},
+								{
+									Name: "Hello",
+								},
+								{
+									Name: "もしもし",
+								},
+								{
+									Name: "Ciao",
+								},
+							},
+						},
+						{
+							Name: "Do",
+							ChildList: []kmgBootstrap.NavBarNode{
+								{
+									Name: "Walk",
+								},
+								{
+									Name: "Sleep",
+								},
+							},
+						},
+					},
+				},
+				kmgView.String("将操作集中起来,节省空间"),
+				kmgBootstrap.Br(1),
+				kmgView.String("还可以使用快捷方法 kmgBootstrap.NewMoreButton,获得默认样式"),
+				kmgBootstrap.NewMoreButton([]kmgBootstrap.NavBarNode{
+					{
+						Name: "新增",
+					},
+					{
+						Name: "删除",
+					},
+					{
+						Name: "编辑",
+					},
+				}),
+			},
+		},
+		kmgBootstrap.Panel{
 			Title: "Icon",
 			Body: kmgBootstrap.Icon{
 				IconName:      "exchange",

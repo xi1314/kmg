@@ -242,18 +242,18 @@ func MustGoHttpAsyncListenAndServeWithCloser(addr string, handler http.Handler) 
 	return ln.Close
 }
 
-func MustGoHttpsAsyncListenAndServeWithCloser(addr string,tlsConfig *tls.Config,handler http.Handler) (closer func()error){
+func MustGoHttpsAsyncListenAndServeWithCloser(addr string, tlsConfig *tls.Config, handler http.Handler) (closer func() error) {
 	srv := &http.Server{Addr: addr, Handler: handler}
 	/*
-	cert, err := tls.X509KeyPair([]byte(certS), []byte(keyS))
-	if err != nil {
-		return err
-	}
-	srv.TLSConfig = &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"http/1.1"},
-	}
-*/
+		cert, err := tls.X509KeyPair([]byte(certS), []byte(keyS))
+		if err != nil {
+			return err
+		}
+		srv.TLSConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			NextProtos:   []string{"http/1.1"},
+		}
+	*/
 	srv.TLSConfig = tlsConfig
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -288,7 +288,6 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 	return tc, nil
 }
 
-
 func GoListenAndServeTLSWithCertContent(addr string, certS string, keyS string, handler http.Handler) error {
 	srv := &http.Server{Addr: addr, Handler: handler}
 	cert, err := tls.X509KeyPair([]byte(certS), []byte(keyS))
@@ -310,7 +309,7 @@ func GoListenAndServeTLSWithCertContent(addr string, certS string, keyS string, 
 }
 
 // 去掉cert和key,复制粘帖带来的各种格式错误
-func FormatHttpsCertOrKey(inS string) string{
-	inS= strings.TrimSpace(inS)
+func FormatHttpsCertOrKey(inS string) string {
+	inS = strings.TrimSpace(inS)
 	return inS
 }

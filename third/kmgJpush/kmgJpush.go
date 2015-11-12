@@ -12,6 +12,7 @@ type Client struct {
 	IsIosProduct bool
 	name         string
 	Platform     SystemPlatform
+	IsActive     bool
 }
 
 type NewClientRequest struct {
@@ -42,6 +43,10 @@ func NewClient(req NewClientRequest) *Client {
 var NotFoundUser error = errors.New("[kmgJpush] user not exist")
 
 func (c *Client) PushToOne(alias string, content string) (err error) {
+	if c.IsActive == false{
+		kmgLog.Log("jpush", "Jpush Client is not active,please checkout your configure",c.name,alias,content,c.IsIosProduct,c.IsActive)
+		return
+	}
 	nb := jpush.NewNoticeBuilder()
 	nb.SetPlatform(jpush.AllPlatform())
 	au := &jpush.Audience{}
@@ -79,6 +84,10 @@ func (c *Client) PushToOne(alias string, content string) (err error) {
 }
 
 func (c *Client) PushToAll(content string) (err error) {
+	if c.IsActive == false{
+		kmgLog.Log("jpush", "Jpush Client is not active,please checkout your configure",c.name,content,c.IsIosProduct,c.IsActive)
+		return
+	}
 	nb := jpush.NewNoticeBuilder()
 	nb.SetPlatform(jpush.AllPlatform())
 	nb.SetAudience(jpush.AllAudience())

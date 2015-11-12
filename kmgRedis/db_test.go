@@ -1,13 +1,13 @@
 package kmgRedis
 
 import (
+	"fmt"
+	"github.com/bronze1man/kmg/kmgStrings"
 	"github.com/bronze1man/kmg/kmgTest"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
-	"github.com/bronze1man/kmg/kmgStrings"
-	"strconv"
-	"fmt"
 )
 
 func init() {
@@ -113,7 +113,7 @@ func TestRedisKvdb(ot *testing.T) {
 	kmgTest.Equal(exist, false)
 }
 
-func TestGet(ot *testing.T){
+func TestGet(ot *testing.T) {
 	MustFlushDbV2()
 	MustInsert("test_1", "abc")
 
@@ -124,26 +124,26 @@ func TestGet(ot *testing.T){
 	_, err = Get("test_2")
 	kmgTest.Equal(err, ErrKeyNotExist)
 
-	MustZAdd("test_2",0,"abc")
-	_,err = Get("test_2")
+	MustZAdd("test_2", 0, "abc")
+	_, err = Get("test_2")
 	kmgTest.Equal(err, ErrStringWrongType)
 }
 
-func TestSet(ot *testing.T){
+func TestSet(ot *testing.T) {
 	MustFlushDbV2()
 	MustInsert("test_1", "abc")
 
-	err := Set("test_1","abcd")
+	err := Set("test_1", "abcd")
 	kmgTest.Equal(err, nil)
 
-	err = Set("test_2","abcde")
+	err = Set("test_2", "abcde")
 	kmgTest.Equal(err, nil)
 
-	MustZAdd("test_3",0,"abc")
-	err = Set("test_3","abcdefg")
+	MustZAdd("test_3", 0, "abc")
+	err = Set("test_3", "abcdefg")
 	kmgTest.Equal(err, nil)
 
-	kmgTest.Equal(MustGet("test_3"),"abcdefg")
+	kmgTest.Equal(MustGet("test_3"), "abcdefg")
 }
 
 func TestMGetSlice(ot *testing.T) {
@@ -219,7 +219,7 @@ func TestRedisSortedSet(ot *testing.T) {
 	err = ZAdd("test_1", -1, "abcd")
 	kmgTest.Equal(err, nil)
 
-	MustZAdd("test_1",-1,"abcd")
+	MustZAdd("test_1", -1, "abcd")
 
 	zlist, err := GetAllScoreAndMemberFromSortedSet("test_1")
 	kmgTest.Equal(err, nil)
@@ -252,16 +252,26 @@ func TestRedisSortedSet(ot *testing.T) {
 		{Score: 0, Member: "abc"},
 	})
 
-	sList,err = ZRevRangeByScore("test_1",-0.5,-2)
-	kmgTest.Equal(err,nil)
+	sList, err = ZRevRangeByScore("test_1",-2, -0.5)
+	kmgTest.Equal(err, nil)
 	kmgTest.Equal(sList, []string{"abcd"})
 
-	sList,err = ZRevRangeByScore("test_5",-0.5,-2)
+	sList, err = ZRevRangeByScore("test_5",-2, -0.5)
 	kmgTest.Equal(err, nil)
 	kmgTest.Equal(len(sList), 0)
 
-	sList,err = ZRevRangeByScore("test_4",-0.5,-2)
+	sList, err = ZRevRangeByScore("test_4", -2,-0.5)
 	kmgTest.Equal(err, ErrSortedSetWrongType)
+
+	kmgTest.Equal(MustZScore("test_1","abcd"),float64(-1))
+	_,err=ZScore("test_1","abcdasd")
+	kmgTest.Equal(err,ErrKeyNotExist)
+
+	_,err = ZScore("test_5","abc")
+	kmgTest.Equal(err,ErrKeyNotExist)
+
+	_,err = ZScore("test_4","abc")
+	kmgTest.Equal(err,ErrSortedSetWrongType)
 }
 
 func TestRedisRename(ot *testing.T) {
@@ -286,175 +296,175 @@ func TestRedisRename(ot *testing.T) {
 	kmgTest.Equal(err, ErrKeyExist)
 }
 
-func TestMustGetIntDefault0(ot *testing.T){
+func TestMustGetIntDefault0(ot *testing.T) {
 	MustFlushDbV2()
 	MustInsert("test_1", "abc")
 	MustInsert("test_2", "2")
 
-	kmgTest.AssertPanic(func(){
+	kmgTest.AssertPanic(func() {
 		MustGetIntIgnoreNotExist("test_1")
 	})
-	outI:=MustGetIntIgnoreNotExist("test_2")
-	kmgTest.Equal(outI,2)
+	outI := MustGetIntIgnoreNotExist("test_2")
+	kmgTest.Equal(outI, 2)
 
-	outI=MustGetIntIgnoreNotExist("test_3")
-	kmgTest.Equal(outI,0)
+	outI = MustGetIntIgnoreNotExist("test_3")
+	kmgTest.Equal(outI, 0)
 }
 
-func TestMustGetFloatDefault0(ot *testing.T){
+func TestMustGetFloatDefault0(ot *testing.T) {
 	MustFlushDbV2()
 	MustInsert("test_1", "abc")
 	MustInsert("test_2", "2.1")
 
-	kmgTest.AssertPanic(func(){
+	kmgTest.AssertPanic(func() {
 		MustGetFloatIgnoreNotExist("test_1")
 	})
-	outI:=MustGetFloatIgnoreNotExist("test_2")
-	kmgTest.Equal(outI,2.1)
+	outI := MustGetFloatIgnoreNotExist("test_2")
+	kmgTest.Equal(outI, 2.1)
 
-	outI=MustGetFloatIgnoreNotExist("test_3")
-	kmgTest.Equal(outI,0.0)
+	outI = MustGetFloatIgnoreNotExist("test_3")
+	kmgTest.Equal(outI, 0.0)
 }
 
-func TestIncrBy(ot *testing.T){
+func TestIncrBy(ot *testing.T) {
 	MustFlushDbV2()
-	MustInsert("test_2","abc")
-	MustZAdd("test_3",0,"abc")
+	MustInsert("test_2", "abc")
+	MustZAdd("test_3", 0, "abc")
 
-	err:=IncrBy("test_1",2)
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(MustGetIntIgnoreNotExist("test_1"),2)
+	err := IncrBy("test_1", 2)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(MustGetIntIgnoreNotExist("test_1"), 2)
 
-	err = IncrBy("test_2",3)
-	kmgTest.Equal(err,ErrValueNotIntFormatOrOutOfRange)
+	err = IncrBy("test_2", 3)
+	kmgTest.Equal(err, ErrValueNotIntFormatOrOutOfRange)
 
-	err = IncrBy("test_3",4)
-	kmgTest.Equal(err,ErrStringWrongType)
+	err = IncrBy("test_3", 4)
+	kmgTest.Equal(err, ErrStringWrongType)
 
-	err=IncrBy("test_1",5)
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(MustGetIntIgnoreNotExist("test_1"),7)
+	err = IncrBy("test_1", 5)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(MustGetIntIgnoreNotExist("test_1"), 7)
 }
 
-func TestIncrByFloat(ot *testing.T){
+func TestIncrByFloat(ot *testing.T) {
 	MustFlushDbV2()
-	MustInsert("test_2","abc")
-	MustZAdd("test_3",0,"abc")
+	MustInsert("test_2", "abc")
+	MustZAdd("test_3", 0, "abc")
 
-	err:=IncrByFloat("test_1",2.1)
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"),2.1)
+	err := IncrByFloat("test_1", 2.1)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"), 2.1)
 
-	err = IncrByFloat("test_2",3)
-	kmgTest.Equal(err,ErrValueNotFloatFormat)
+	err = IncrByFloat("test_2", 3)
+	kmgTest.Equal(err, ErrValueNotFloatFormat)
 
-	err = IncrByFloat("test_3",4)
-	kmgTest.Equal(err,ErrStringWrongType)
+	err = IncrByFloat("test_3", 4)
+	kmgTest.Equal(err, ErrStringWrongType)
 
-	err=IncrByFloat("test_1",5.1)
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"),7.2)
+	err = IncrByFloat("test_1", 5.1)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"), 7.2)
 
-	err=IncrByFloat("test_1",1.7e200)
-	kmgTest.Equal(err,nil)
+	err = IncrByFloat("test_1", 1.7e200)
+	kmgTest.Equal(err, nil)
 
-	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"),1.7e200)
+	kmgTest.Equal(MustGetFloatIgnoreNotExist("test_1"), 1.7e200)
 }
 
-func TestScanCallback(ot *testing.T){
+func TestScanCallback(ot *testing.T) {
 	MustFlushDbV2()
-	MustInsert("test_1","abc")
-	MustInsert("test_2","abc")
-	MustInsert("testno_3","abc")
+	MustInsert("test_1", "abc")
+	MustInsert("test_2", "abc")
+	MustInsert("testno_3", "abc")
 
 	scanSize = 2
-	outKey:=[]string{}
-	err := ScanCallback("*",func(key string) error{
-		outKey = append(outKey,key)
+	outKey := []string{}
+	err := ScanCallback("*", func(key string) error {
+		outKey = append(outKey, key)
 		return nil
 	})
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(len(outKey),3)
-	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_1"))
-	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_2"))
-	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"testno_3"))
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(outKey), 3)
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey, "test_1"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey, "test_2"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey, "testno_3"))
 
 	scanSize = 10000
-	outKey=[]string{}
-	err = ScanCallback("test_*",func(key string)error{
-		outKey = append(outKey,key)
+	outKey = []string{}
+	err = ScanCallback("test_*", func(key string) error {
+		outKey = append(outKey, key)
 		return nil
 	})
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(len(outKey),2)
-	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_1"))
-	kmgTest.Ok(kmgStrings.IsInSlice(outKey,"test_2"))
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(outKey), 2)
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey, "test_1"))
+	kmgTest.Ok(kmgStrings.IsInSlice(outKey, "test_2"))
 
-	sList,err:=ScanWithOutputLimit("test_*",1)
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(len(sList),1)
+	sList, err := ScanWithOutputLimit("test_*", 1)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(sList), 1)
 
 	//benchmarkScanCallback()
 }
 
-func TestZScanCallback(ot *testing.T){
+func TestZScanCallback(ot *testing.T) {
 	MustFlushDbV2()
-	MustInsert("test_2","abc")
-	MustZAdd("test_3",0,"abc")
-	outMember:=[]string{}
-	err:=ZScanCallback("test_2",func(member string) error{
-		outMember = append(outMember,member)
+	MustInsert("test_2", "abc")
+	MustZAdd("test_3", 0, "abc")
+	outMember := []string{}
+	err := ZScanCallback("test_2", func(member string) error {
+		outMember = append(outMember, member)
 		return nil
 	})
-	kmgTest.Equal(err,ErrSortedSetWrongType)
-	kmgTest.Equal(len(outMember),0)
+	kmgTest.Equal(err, ErrSortedSetWrongType)
+	kmgTest.Equal(len(outMember), 0)
 
-	outMember=[]string{}
-	err=ZScanCallback("test_3",func(member string) error{
-		outMember = append(outMember,member)
+	outMember = []string{}
+	err = ZScanCallback("test_3", func(member string) error {
+		outMember = append(outMember, member)
 		return nil
 	})
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(len(outMember),1)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(outMember), 1)
 
 	scanSize = 2
-	MustZAdd("test_3",1,"abc1")
-	MustZAdd("test_3",2,"abc2")
-	outMember=[]string{}
-	err=ZScanCallback("test_3",func(member string) error{
-		outMember = append(outMember,member)
+	MustZAdd("test_3", 1, "abc1")
+	MustZAdd("test_3", 2, "abc2")
+	outMember = []string{}
+	err = ZScanCallback("test_3", func(member string) error {
+		outMember = append(outMember, member)
 		return nil
 	})
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(outMember,[]string{"abc","abc1","abc2"})
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(outMember, []string{"abc", "abc1", "abc2"})
 
 }
 
 func benchmarkScanCallback() {
-	N:=1000*100
+	N := 1000 * 100
 	MustFlushDbV2()
-	t:=time.Now()
-	pairList :=make([]KeyValuePair,N)
-	for i:=0;i<N;i++ {
-		pairList[i].Key = "test_"+strconv.Itoa(i)
+	t := time.Now()
+	pairList := make([]KeyValuePair, N)
+	for i := 0; i < N; i++ {
+		pairList[i].Key = "test_" + strconv.Itoa(i)
 		pairList[i].Value = "abc"
 	}
 	MustMSet(pairList)
 	fmt.Println(time.Since(t)) //386.265848ms
 	t = time.Now()
-	num:=0
-	err := ScanCallback("*",func(key string) error{
+	num := 0
+	err := ScanCallback("*", func(key string) error {
 		num++
 		return nil
 	}) //169.983354ms
 	fmt.Println(time.Since(t))
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(num,N)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(num, N)
 	t = time.Now()
-	sList,err:=Keys("*") //138.565292ms
+	sList, err := Keys("*") //138.565292ms
 	fmt.Println(time.Since(t))
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(len(sList),N)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(len(sList), N)
 	MustFlushDbV2()
 }
 

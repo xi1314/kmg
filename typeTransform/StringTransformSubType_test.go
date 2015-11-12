@@ -11,7 +11,6 @@ type StringTranT1 struct {
 type StringTranT2 string
 
 func TestStringTransformSubType(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	in := &StringTranT1{
 		T2: "6",
 	}
@@ -20,6 +19,6 @@ func TestStringTransformSubType(ot *testing.T) {
 			"6": "Fire",
 		},
 	})
-	t.Equal(err, nil)
-	t.Equal(in.T2, StringTranT2("Fire"))
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(in.T2, StringTranT2("Fire"))
 }

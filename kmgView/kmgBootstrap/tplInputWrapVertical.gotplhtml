@@ -8,11 +8,14 @@ func tplInputWrapVertical(config InputWrapVertical) string {
         <? } ?>
     </label>
 
-    <div class="col-sm-8">
+    <div class="col-sm-8 <? if config.AppendTpl != nil { ?> form-inline <? } ?>">
         <?=raw(config.Body.HtmlRender())?>
         <span style="font-size:12px;color:red">
             <? if config.Comment!="" { ?> 提示: <?=config.Comment?> <? } ?>
         </span>
+        <? if config.AppendTpl != nil { ?>
+            <?=raw(config.AppendTpl.HtmlRender())?>
+        <? } ?>
     </div>
 </div>
 <? } ?>

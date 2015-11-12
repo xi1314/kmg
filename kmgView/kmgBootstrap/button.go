@@ -1,4 +1,5 @@
 package kmgBootstrap
+
 import "github.com/bronze1man/kmg/kmgView"
 
 type ButtonSize string
@@ -55,3 +56,16 @@ func (b Button) HtmlRender() string {
 	return tplButton(b)
 }
 
+// 一个发起Get请求的按钮
+// url: 点击后的跳转连接
+// title: get上面的字
+// 在当前页面打开连接.
+func NewGetButton(url string, title string) Button {
+	return Button{
+		Type:    ButtonTypeA,
+		Url:     url,
+		Content: kmgView.String(title),
+		Size:    ButtonSizeExtraSmall,
+		Color:   ButtonColorInfo,
+	}
+}

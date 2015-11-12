@@ -1,6 +1,10 @@
 package levelFinder
+import (
+	"testing"
+	"github.com/bronze1man/kmg/kmgTest"
+)
 
-func (t *Tester) TestSearchLevelFromProvider() {
+func TestSearchLevelFromProvider(t *testing.T) {
 	ExpTable := NewArrayLevelProvider(4)
 	ExpTable.SetExpByLevel(1, 0)
 	ExpTable.SetExpByLevel(2, 12)
@@ -21,17 +25,17 @@ func (t *Tester) TestSearchLevelFromProvider() {
 		{57, 4},
 		{58, 4},
 	} {
-		t.EqualMsg(searchLevelFromProvider(ExpTable, c.exp), c.lv, "Level at exp:%d", c.exp)
+		kmgTest.Equal(searchLevelFromProvider(ExpTable, c.exp), c.lv, "Level at exp:%d", c.exp)
 	}
 	ExpTable = NewArrayLevelProvider(1)
-	t.Equal(searchLevelFromProvider(ExpTable, 0), 1)
-	t.Equal(searchLevelFromProvider(ExpTable, 2), 1)
+	kmgTest.Equal(searchLevelFromProvider(ExpTable, 0), 1)
+	kmgTest.Equal(searchLevelFromProvider(ExpTable, 2), 1)
 
 	ExpTable = NewArrayLevelProvider(2)
 	ExpTable.SetExpByLevel(2, 100)
-	t.Equal(searchLevelFromProvider(ExpTable, 0), 1)
-	t.Equal(searchLevelFromProvider(ExpTable, 99), 1)
-	t.Equal(searchLevelFromProvider(ExpTable, 100), 2)
+	kmgTest.Equal(searchLevelFromProvider(ExpTable, 0), 1)
+	kmgTest.Equal(searchLevelFromProvider(ExpTable, 99), 1)
+	kmgTest.Equal(searchLevelFromProvider(ExpTable, 100), 2)
 }
 
 type getLevelByExpTestCase struct {
@@ -43,7 +47,7 @@ type getLevelByExpTestCase struct {
 	isMaxLevel bool
 }
 
-func (t *Tester) TestLevelFinder() {
+func TestLevelFinder(t *testing.T) {
 	ExpTable := NewArrayLevelProvider(4)
 	ExpTable.SetExpByLevel(1, 0)
 	ExpTable.SetExpByLevel(2, 12)
@@ -52,11 +56,11 @@ func (t *Tester) TestLevelFinder() {
 	checkTestTable := func(levelTestTable []getLevelByExpTestCase) {
 		for _, c := range levelTestTable {
 			result := GetLevelByExp(ExpTable, c.exp)
-			t.EqualMsg(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
-			t.EqualMsg(result.Level, c.lv, "Level at exp:%d", c.exp)
-			t.EqualMsg(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
-			t.EqualMsg(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
-			t.EqualMsg(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
+			kmgTest.Equal(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
+			kmgTest.Equal(result.Level, c.lv, "Level at exp:%d", c.exp)
+			kmgTest.Equal(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
+			kmgTest.Equal(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
+			kmgTest.Equal(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
 		}
 	}
 

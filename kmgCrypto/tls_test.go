@@ -62,10 +62,9 @@ func (*mockConn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 func TestCreateCert(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	config, err := CreateTlsConfig()
-	t.Equal(err, nil)
-	t.Ok(config != nil)
+	kmgTest.Equal(err, nil)
+	kmgTest.Ok(config != nil)
 
 	_ = tls.NewListener(&mockListener{}, config)
 }

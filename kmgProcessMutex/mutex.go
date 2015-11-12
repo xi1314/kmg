@@ -1,6 +1,5 @@
 // +build linux darwin
 
-
 package kmgProcessMutex
 
 import (

@@ -1,0 +1,13 @@
+<? package kmgBootstrap
+func tplDropDown (d DropDown) string { ?>
+<div style="display: inline-block" class="dropdown">
+    <span id="d-<?=d.id?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <?=raw(d.Title.HtmlRender())?>
+    </span>
+    <ul class="dropdown-menu" aria-labelledby="d-<?=d.id?>">
+        <? for _,o := range d.OptionList { ?>
+        <?=raw(tplNavBarNode(o,1)) ?>
+        <? } ?>
+    </ul>
+</div>
+<? } ?>

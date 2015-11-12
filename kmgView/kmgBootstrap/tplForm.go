@@ -29,7 +29,7 @@ func tplForm(config Form) string {
 	if !config.NoSubmit {
 		_buf.WriteString(`        <div class="panel-footer">
             <center>
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 300px;">
+                <button type="submit" class="btn btn-primary" style="width: 170px;">
                     <span class="fa fa-check"></span>
                     提交
                 </button>

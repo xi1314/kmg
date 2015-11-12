@@ -17,9 +17,9 @@ func GetCurrentUserHomeDir() string {
 // 经过多次尝试,发现这个值只能设置到 1048576
 const MaxMaxFileNum = 1048576
 
-func MustSetCurrentMaxFileNum(limit uint64){
+func MustSetCurrentMaxFileNum(limit uint64) {
 	err := SetCurrentMaxFileNum(limit)
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 }

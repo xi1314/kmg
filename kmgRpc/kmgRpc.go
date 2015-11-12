@@ -104,21 +104,21 @@ func (api Api) IsOutExpendToOneArgument() bool {
 		api.OutArgsList[1].ObjectTypeStr == "error"
 }
 
-func (api Api) GetClientInArgsList() []ArgumentNameTypePair{
+func (api Api) GetClientInArgsList() []ArgumentNameTypePair {
 	// 删去特殊输入参数 Ctx *http.Context
-	out:=[]ArgumentNameTypePair{}
-	for _,pair:=range api.InArgsList{
-		if pair.ObjectTypeStr == "*kmgHttp.Context"{
+	out := []ArgumentNameTypePair{}
+	for _, pair := range api.InArgsList {
+		if pair.ObjectTypeStr == "*kmgHttp.Context" {
 			continue
 		}
-		out = append(out,pair)
+		out = append(out, pair)
 	}
 	return out
 }
 
-func (api Api) HasHttpContextArgument() bool{
-	for _,pair:=range api.InArgsList{
-		if pair.ObjectTypeStr == "*kmgHttp.Context"{
+func (api Api) HasHttpContextArgument() bool {
+	for _, pair := range api.InArgsList {
+		if pair.ObjectTypeStr == "*kmgHttp.Context" {
 			return true
 		}
 	}
@@ -126,13 +126,13 @@ func (api Api) HasHttpContextArgument() bool{
 }
 
 // 服务器端,函数调用的那个括号里面的东西
-func (api Api) serverCallArgumentStr() string{
-	out:=""
-	for _,pair:=range api.InArgsList{
-		if pair.ObjectTypeStr == "*kmgHttp.Context"{
-			out+="Ctx,"
-		}else{
-			out+="reqData."+pair.Name+","
+func (api Api) serverCallArgumentStr() string {
+	out := ""
+	for _, pair := range api.InArgsList {
+		if pair.ObjectTypeStr == "*kmgHttp.Context" {
+			out += "Ctx,"
+		} else {
+			out += "reqData." + pair.Name + ","
 		}
 	}
 	return out

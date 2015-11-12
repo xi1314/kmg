@@ -7,9 +7,9 @@ import (
 	"github.com/bronze1man/kmg/kmgFile"
 	"github.com/bronze1man/kmg/kmgNet/kmgHttp"
 	"github.com/bronze1man/kmg/kmgXss"
+	"reflect"
 	"strings"
 	"sync"
-	"reflect"
 )
 
 type Generated struct {
@@ -23,7 +23,7 @@ type Generated struct {
 
 	locker     sync.Mutex
 	cachedInfo resourceBuildToDirResponse
-	initOnce sync.Once
+	initOnce   sync.Once
 }
 
 type htmlTplData struct {
@@ -90,32 +90,32 @@ func (g *Generated) GetUrlPrefix() string {
 	}
 }
 
-func (g *Generated) GetJsUrl()string{
+func (g *Generated) GetJsUrl() string {
 	if kmgConfig.HasDefaultEnv() {
 		g.recheckAndReloadCache()
 		g.locker.Lock()
 		cachedInfo := g.cachedInfo
 		g.locker.Unlock()
-		return "/kmgViewResource." + g.Name+"/"+cachedInfo.JsFileName
+		return "/kmgViewResource." + g.Name + "/" + cachedInfo.JsFileName
 	} else {
-		return "/kmgViewResource." + g.Name+ "/" + g.GeneratedJsFileName
+		return "/kmgViewResource." + g.Name + "/" + g.GeneratedJsFileName
 	}
 }
-func (g *Generated) GetCssUrl()string{
+func (g *Generated) GetCssUrl() string {
 	if kmgConfig.HasDefaultEnv() {
 		g.recheckAndReloadCache()
 		g.locker.Lock()
 		cachedInfo := g.cachedInfo
 		g.locker.Unlock()
-		return "/kmgViewResource." + g.Name+"/"+cachedInfo.CssFileName
+		return "/kmgViewResource." + g.Name + "/" + cachedInfo.CssFileName
 	} else {
-		return "/kmgViewResource." + g.Name+ "/" + g.GeneratedCssFileName
+		return "/kmgViewResource." + g.Name + "/" + g.GeneratedCssFileName
 	}
 }
 
 // 这个初始化会在第一次使用的时候,自动进行,如果嫌自动初始化太慢,可以手动初始化.
 func (g *Generated) Init() {
-	g.initOnce.Do(func(){
+	g.initOnce.Do(func() {
 		if kmgConfig.HasDefaultEnv() {
 			g.recheckAndReloadCache()
 			kmgHttp.MustAddFileToHttpPathToDefaultServer("/kmgViewResource."+g.Name+"/",
@@ -141,7 +141,6 @@ func (g *Generated) GetContentByName(name string) (b []byte, err error) {
 
 }
 
-
 func (g *Generated) recheckAndReloadCache() {
 	// 加载缓存文件,确定有哪些文件需要检查.
 	cachedInfo := &resourceBuildToDirResponse{}
@@ -154,17 +153,18 @@ func (g *Generated) recheckAndReloadCache() {
 	g.locker.Lock()
 	g.cachedInfo = *cachedInfo
 	g.locker.Unlock()
-	if !reflect.DeepEqual(cachedInfo.ImportPackageList,g.RequestImportList){
+	if !reflect.DeepEqual(cachedInfo.ImportPackageList, g.RequestImportList) {
 		g.reloadCache()
 		return
 	}
-	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, cachedInfo.NeedCachePathList, func(){
+	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, cachedInfo.NeedCachePathList, func() {
 		g.reloadCache()
 	})
 }
 
 func (g *Generated) reloadCache() {
 	debugBuildPath := kmgConfig.DefaultEnv().PathInProject("tmp/kmgViewResource_debug/" + g.Name)
+	kmgFile.MustDelete(debugBuildPath)
 	response := resourceBuildToDir(g.RequestImportList, debugBuildPath)
 	response.NeedCachePathList = append(response.NeedCachePathList, debugBuildPath)
 	kmgJson.MustWriteFileIndent(kmgConfig.DefaultEnv().PathInProject("tmp/kmgViewResource_meta/"+g.Name), response)
@@ -172,11 +172,11 @@ func (g *Generated) reloadCache() {
 	g.cachedInfo = response
 	g.locker.Unlock()
 	// 重新加载 NeedCachePathList 缓存.避免同一次变化多次更新缓存. TODO data race?
-	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, response.NeedCachePathList,func(){})
+	kmgCache.MustMd5FileChangeCache("kmgViewResource_"+g.Name, response.NeedCachePathList, func() {})
 
 }
 
 /*
 TODO 修复缓存无效原因1:
 	* 用户修改了资源文件的配置,现在资源文件需要访问的package和上一次缓存时需要访问的package不一致.
- */
+*/

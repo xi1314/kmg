@@ -3,6 +3,7 @@ package kmgTime
 import (
 	"fmt"
 	"time"
+	"math"
 )
 
 const (
@@ -110,4 +111,13 @@ func IsSameDay(t1 time.Time, t2 time.Time, loc *time.Location) bool {
 //规则到秒,去掉毫秒什么的
 func ModBySecond(t1 time.Time) time.Time {
 	return t1.Round(time.Second)
+}
+
+func GetUnixFloat(t1 time.Time) float64{
+	return (float64(t1.Nanosecond())/1e9)+float64(t1.Unix())
+}
+
+func FromUnixFloat(f float64) time.Time{
+	s,ns:=math.Modf(f)
+	return time.Unix(int64(s),int64(ns*1e9)).In(DefaultTimeZone)
 }

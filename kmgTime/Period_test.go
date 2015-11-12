@@ -8,7 +8,6 @@ import (
 )
 
 func TestGetPeriodFromSortedList(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	SortedList := []Period{
 		{
 			Start: MustFromMysqlFormat("2001-01-01 00:00:00"),
@@ -34,7 +33,7 @@ func TestGetPeriodFromSortedList(ot *testing.T) {
 		{MustFromMysqlFormat("2001-01-01 04:30:00"), 0, false},
 	} {
 		i, ok := GetPeriodFromSortedList(testcase.t, SortedList)
-		t.Equal(i, testcase.i)
-		t.Equal(ok, testcase.ok)
+		kmgTest.Equal(i, testcase.i)
+		kmgTest.Equal(ok, testcase.ok)
 	}
 }

@@ -1,12 +1,13 @@
 package kmgNet
+
 import (
-"github.com/bronze1man/kmg/kmgCmd"
-"strings"
+	"github.com/bronze1man/kmg/kmgCmd"
 	"github.com/bronze1man/kmg/kmgPlatform"
+	"strings"
 )
 
-func GetDefaultGateway() string{
-	if !kmgPlatform.IsDarwin(){
+func GetDefaultGateway() string {
+	if !kmgPlatform.IsDarwin() {
 		panic("not support platform")
 	}
 	output := kmgCmd.MustCombinedOutput("netstat -nr")
@@ -18,9 +19,9 @@ func GetDefaultGateway() string{
 	return ""
 }
 
-func SetDnsServerAddr(ip string){
-	if !kmgPlatform.IsDarwin(){
+func SetDnsServerAddr(ip string) {
+	if !kmgPlatform.IsDarwin() {
 		panic("not support platform")
 	}
-	kmgCmd.MustRun("networksetup -setdnsservers Wi-Fi "+ip)
+	kmgCmd.MustRun("networksetup -setdnsservers Wi-Fi " + ip)
 }

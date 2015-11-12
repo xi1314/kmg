@@ -5,6 +5,10 @@ import (
 	"time"
 
 	"github.com/bronze1man/kmg/kmgTime"
+	"github.com/bronze1man/kmg/kmgView/kmgBootstrap"
+	"github.com/bronze1man/kmg/kmgView"
+	"fmt"
+	"github.com/bronze1man/kmg/kmgStrconv"
 )
 
 type TimeFloatPair struct {
@@ -16,6 +20,7 @@ func CreateLineFromTimeFloatPair(inputList []TimeFloatPair) *Chart {
 	line := newChartBaseConfig()
 	line.Option.XAxis.Type = "time"
 	line.Option.YAxis.Type = "value"
+	line.Height = "200px"
 	line.Option.Series = []series{
 		series{
 			Type:          "line",
@@ -56,6 +61,23 @@ func CreateLineFromTimeFloatPair(inputList []TimeFloatPair) *Chart {
         option.series[0].data = list;
 	`
 	return line
+}
+
+func NewChartFromTimeFloatPairWithTitle(title string,inputList []TimeFloatPair) kmgBootstrap.Panel{
+	var body kmgView.HtmlRenderer
+	if len(inputList)>1{
+		body = CreateLineFromTimeFloatPair(inputList)
+	}else{
+		out:=fmt.Sprintf("共 %d 条数据\n",len(inputList))
+		for _,pair:=range inputList{
+			out+=kmgTime.DefaultFormat(pair.X)+" : "+kmgStrconv.FormatFloat(pair.Y)+" \n"
+		}
+		body = kmgBootstrap.Pre(out)
+	}
+	return kmgBootstrap.Panel{
+		Title: title+" 共 "+kmgStrconv.FormatInt(len(inputList)) +" 条数据",
+		Body: body,
+	}
 }
 
 type TimeFloatPairSortByDESC []TimeFloatPair
@@ -151,6 +173,51 @@ func AvgTimeFloatPair(input []TimeFloatPair, Density time.Duration) []TimeFloatP
 	}
 	// 直接忽略掉最后几条数据
 	return output
+}
+
+func AvgTimeFloatPairToOneFloat(input []TimeFloatPair) float64{
+	if len(input)==0{
+		panic("[AvgTimeFloatPairToOneFloat] no data")
+	}
+	total:=0.0
+	for _,record:=range input{
+		total+=record.Y
+	}
+	return total/float64(len(input))
+}
+
+// 整点时间分析,
+// 用于做累计型数据抽样. 比如每秒数据转成每10分钟数据.(保证重复执行会得到完全一致的数据.)
+// 允许数据中间出现空缺.出现如果整个数据段数据都出现空缺,这个时间段在抽样后的数据里面没有数据.
+// 最后一截数据直接忽略.
+func AvgTimeFloatPairOnRoundTime(input []TimeFloatPair, dur time.Duration) (outList []TimeFloatPair){
+	if len(input)==0{
+		return nil
+	}
+	nextAvgTime := input[0].X.Truncate(dur).Add(dur)
+	num:=0
+	total:=0.0
+	outList=[]TimeFloatPair{}
+	for _,pair:=range input{
+		if pair.X.Before(nextAvgTime){
+			num++
+			total+=pair.Y
+			continue
+		}else{
+			avg:=total/float64(num)
+			outList = append(outList,TimeFloatPair{
+				X: nextAvgTime,
+				Y: avg,
+			})
+			num = 0
+			total = 0
+			nextAvgTime = pair.X.Truncate(dur).Add(dur)
+
+			num++
+			total+=pair.Y
+		}
+	}
+	return outList
 }
 
 //累计时间分析

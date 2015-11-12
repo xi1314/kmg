@@ -21,7 +21,7 @@ import (
 // 可以使用PrefixPath提高安全性
 // 如果你不关心安全性 可以使用 / 以便使用golang的默认值. (kmgHttp.ClearHttpDefaultServer() 避免多次注册)
 func RegisterProfile(prefixPath string) {
-	registerProfile(prefixPath,http.DefaultServeMux)
+	registerProfile(prefixPath, http.DefaultServeMux)
 }
 
 func StartProfileOnAddr(prefixPath string, profileAddr string) {

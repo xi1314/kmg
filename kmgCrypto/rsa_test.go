@@ -16,9 +16,8 @@ import (
 )
 
 func TestRsaPublicDecryptPKCS1v15(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	priv, err := rsa.GenerateKey(rand.Reader, 256)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	for _, datas := range []string{
 		"\000",
 		"\000\000",
@@ -26,15 +25,14 @@ func TestRsaPublicDecryptPKCS1v15(ot *testing.T) {
 	} {
 		data := []byte(datas)
 		enc, err := RsaPrivateEncryptPKCS1v15(priv, data)
-		t.Equal(err, nil)
+		kmgTest.Equal(err, nil)
 		dout, err := RsaPublicDecryptPKCS1v15(&priv.PublicKey, enc)
-		t.Equal(err, nil)
-		t.Equal(dout, data)
+		kmgTest.Equal(err, nil)
+		kmgTest.Equal(dout, data)
 	}
 }
 
 func TestRsaOpensslVerify(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	var err error
 	privateKey := []byte(`-----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQDA4E8H2qksOnCSoBkq+HH3Dcu0/iWt3iNcpC/BCg0F8tnMhF1Q
@@ -61,11 +59,11 @@ I/dbswSq65XFcIwIDAQAB
 	msg := []byte("this is a test!")
 	rsaKey, err := RsaParseOpensslPrivateKey(privateKey)
 	s, err := RsaOpensslSign(rsaKey, crypto.SHA1, msg)
-	t.Equal(err, nil)
-	t.Equal(s, signed)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(s, signed)
 
 	rsapk, err := RsaParseOpensslPublicKey(publicKey)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	err = RsaOpensslVerify(rsapk, crypto.SHA1, msg, signed)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 }

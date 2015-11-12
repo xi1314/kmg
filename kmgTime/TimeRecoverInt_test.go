@@ -8,7 +8,6 @@ import (
 )
 
 func TestTimeRecoverInt(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	getTri := func() *TimeRecoverInt {
 		return &TimeRecoverInt{
 			Num:             1,
@@ -19,13 +18,13 @@ func TestTimeRecoverInt(ot *testing.T) {
 	}
 	tri := getTri()
 	tri.Full(MustFromMysqlFormat("2001-01-01 01:02:01"))
-	t.Equal(tri.Num, 10)
+	kmgTest.Equal(tri.Num, 10)
 
 	tri = getTri()
 	tri.Sync(MustFromMysqlFormat("2001-01-01 02:01:01"))
-	t.Equal(tri.Num, 2)
+	kmgTest.Equal(tri.Num, 2)
 
 	tri = getTri()
 	tri.Sync(MustFromMysqlFormat("2001-01-01 13:01:01"))
-	t.Equal(tri.Num, 10)
+	kmgTest.Equal(tri.Num, 10)
 }

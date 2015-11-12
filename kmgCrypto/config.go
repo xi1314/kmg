@@ -22,13 +22,6 @@ func GetPskFromDefaultPsk(length int, name string) []byte {
 	return psk[:length]
 }
 
-func Get32PskFromDefaultPsk(name string) *[32]byte {
-	psk := sha512.Sum512(append(DefaultPsk[:], []byte(name)...))
-	pskOut := [32]byte{}
-	copy(pskOut[:], psk[:32])
-	return &pskOut
-}
-
 func Get32PskFromString(s string) *[32]byte {
 	psk := sha512.Sum512([]byte(s))
 	pskOut := [32]byte{}

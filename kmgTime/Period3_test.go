@@ -10,7 +10,6 @@ import (
 type ScratchItemList3 [][]int
 
 func TestPeriodList(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	itemList := ScratchItemList3{
 		[]int{1, 2},
 		[]int{2, 3},
@@ -32,9 +31,9 @@ func TestPeriodList(ot *testing.T) {
 	}
 	periodList.Sort()
 	i, exist := periodList.SelectFromTime(MustFromMysqlFormat("2001-01-01 23:00:00"))
-	t.Equal(exist, true)
-	t.Equal(itemList[i], []int{1, 2})
+	kmgTest.Equal(exist, true)
+	kmgTest.Equal(itemList[i], []int{1, 2})
 	i, exist = periodList.SelectFromTime(MustFromMysqlFormat("2001-01-03 23:00:00"))
-	t.Equal(exist, true)
-	t.Equal(itemList[i], []int{3, 4})
+	kmgTest.Equal(exist, true)
+	kmgTest.Equal(itemList[i], []int{3, 4})
 }

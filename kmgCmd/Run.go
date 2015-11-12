@@ -1,4 +1,5 @@
 package kmgCmd
+
 import "os/exec"
 
 /*
@@ -62,8 +63,8 @@ func MustRunInBash(cmd string) {
 	CmdBash(cmd).MustRun()
 }
 
-func IsErrorExitStatus(err error) bool{
-	if err==nil{
+func IsErrorExitStatus(err error) bool {
+	if err == nil {
 		return false
 	}
 	_, ok := err.(*exec.ExitError)

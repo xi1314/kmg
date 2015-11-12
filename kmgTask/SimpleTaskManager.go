@@ -41,7 +41,7 @@ func (t *SimpleTaskManager) Close() {
 	t.Wait()
 }
 
-func NewSimpleTaskManager() *SimpleTaskManager{
+func NewSimpleTaskManager() *SimpleTaskManager {
 	return &SimpleTaskManager{}
 }
 

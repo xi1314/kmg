@@ -63,15 +63,15 @@ func runCommand(kmgc *kmgConfig.Env, args []string) {
 	//	RunAndTeeOutputToFile(thisLogFilePath)
 	// TODO bash转义
 	bashCmd := strings.Join(append(args, os.Args[1:]...), " ")
-	bashCmdStr:=bashCmd + " 2>&1 | tee -i " + thisLogFilePath + " ; test ${PIPESTATUS[0]} -eq 0"
-	if kmgPlatform.IsWindows(){
+	bashCmdStr := bashCmd + " 2>&1 | tee -i " + thisLogFilePath + " ; test ${PIPESTATUS[0]} -eq 0"
+	if kmgPlatform.IsWindows() {
 		err := kmgCmd.CmdString(bashCmdStr).SetDir(kmgc.ProjectPath).StdioRun()
 		if err != nil {
 			err = fmt.Errorf("kmg make: %s", err)
 			kmgConsole.ExitOnErr(err)
 		}
 		return
-	}else {
+	} else {
 		err := kmgCmd.CmdBash(bashCmdStr).SetDir(kmgc.ProjectPath).StdioRun()
 		if err != nil {
 			err = fmt.Errorf("kmg make: %s", err)

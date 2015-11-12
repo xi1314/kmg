@@ -7,7 +7,6 @@ import (
 )
 
 func Test1(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	//加密数据,可以正确解密测试
 	for _, origin := range [][]byte{
 		[]byte(""),
@@ -26,16 +25,16 @@ func Test1(ot *testing.T) {
 		[]byte("12345678901234567"),
 	} {
 		ob, err := Encrypt([]byte("1"), origin)
-		t.Equal(err, nil)
+		kmgTest.Equal(err, nil)
 		ret, err := Decrypt([]byte("1"), ob)
-		t.Equal(err, nil)
-		t.Equal(ret, origin)
+		kmgTest.Equal(err, nil)
+		kmgTest.Equal(ret, origin)
 
 		sob, err := EncryptString("1", origin)
-		t.Equal(err, nil)
+		kmgTest.Equal(err, nil)
 		sret, err := DecryptString("1", sob)
-		t.Equal(err, nil)
-		t.Equal(sret, origin)
+		kmgTest.Equal(err, nil)
+		kmgTest.Equal(sret, origin)
 	}
 	//任意数据传入解密不会挂掉,并且会报错
 	for _, origin := range [][]byte{
@@ -55,6 +54,6 @@ func Test1(ot *testing.T) {
 		[]byte("12345678901234567"),
 	} {
 		_, err := Decrypt([]byte("1"), origin)
-		t.Ok(err != nil)
+		kmgTest.Ok(err != nil)
 	}
 }

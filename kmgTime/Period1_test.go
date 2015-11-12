@@ -29,7 +29,6 @@ func (p ScratchPeriod1) GetPeriod() Period {
 	return p.Period
 }
 func TestGetPeriodFromGenericSortedList(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	periodList1 := ScratchPeriodList1{
 		{
 			Period:   Period{Start: MustFromMysqlFormat("2001-01-00 23:30:00"), End: MustFromMysqlFormat("2001-01-01 23:30:00")},
@@ -46,9 +45,9 @@ func TestGetPeriodFromGenericSortedList(ot *testing.T) {
 	}
 	sort.Sort(periodList1)
 	i, err := GetPeriodFromGenericSortedList(MustFromMysqlFormat("2001-01-01 23:00:00"), periodList1)
-	t.Equal(err, nil)
-	t.Equal(periodList1[i].ItemList, []int{1, 2})
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(periodList1[i].ItemList, []int{1, 2})
 	i, err = GetPeriodFromGenericSortedList(MustFromMysqlFormat("2001-01-03 23:00:00"), periodList1)
-	t.Equal(err, nil)
-	t.Equal(periodList1[i].ItemList, []int{3, 4})
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(periodList1[i].ItemList, []int{3, 4})
 }

@@ -1,10 +1,10 @@
 package gitCmd
 
 import (
+	"flag"
+	"fmt"
 	"github.com/bronze1man/kmg/kmgConsole"
 	"github.com/bronze1man/kmg/third/kmgGit"
-	"fmt"
-	"flag"
 )
 
 // fake     //伪造submodule
@@ -23,20 +23,20 @@ func init() {
 		Runner: func() { kmgGit.DefaultRepository().MustFakeSubmoduleUpdate() },
 	})
 	kmgConsole.AddAction(kmgConsole.Command{
-		Name:   "GitSmallestChange",
+		Name: "GitSmallestChange",
 		Runner: func() {
-			Local:=""
-			Target:=""
-			flag.StringVar(&Local,"local","","localcommit id (sha256 commit id or branch name or HEAD)")
-			flag.StringVar(&Target,"target","","targetCommit id (sha256 commit id or branch name or HEAD)")
+			Local := ""
+			Target := ""
+			flag.StringVar(&Local, "local", "", "localcommit id (sha256 commit id or branch name or HEAD)")
+			flag.StringVar(&Target, "target", "", "targetCommit id (sha256 commit id or branch name or HEAD)")
 			flag.Parse()
-			if Local=="" || Target==""{
+			if Local == "" || Target == "" {
 				flag.Usage()
 				return
 			}
-			result:=kmgGit.DefaultRepository().MustSmallestChange(Local,Target)
-			fmt.Println( result )
-			fmt.Println("#see diff: git diff --stat "+Local+" "+result)
+			result := kmgGit.DefaultRepository().MustSmallestChange(Local, Target)
+			fmt.Println(result)
+			fmt.Println("#see diff: git diff --stat " + Local + " " + result)
 		},
 	})
 }

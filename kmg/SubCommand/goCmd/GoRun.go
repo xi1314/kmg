@@ -93,8 +93,8 @@ func goRunPackageName(goPath string, pathOrPkg string) {
 	if p.Compatible(kmgPlatform.WindowsAmd64) {
 		outPath += ".exe"
 	}
-	if !kmgFile.MustFileExist(outPath){
-		kmgConsole.ExitOnErr(fmt.Errorf("please make sure you are kmg gorun a main package. (binary file not exist. %s)",outPath))
+	if !kmgFile.MustFileExist(outPath) {
+		kmgConsole.ExitOnErr(fmt.Errorf("please make sure you are kmg gorun a main package. (binary file not exist. %s)", outPath))
 	}
 	runCmdSliceWithGoPath(goPath, append([]string{outPath}, os.Args[2:]...))
 }

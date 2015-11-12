@@ -1,8 +1,10 @@
 package kmgGit
+
 import (
-	"github.com/bronze1man/kmg/kmgCmd"
 	"bytes"
+	"github.com/bronze1man/kmg/kmgCmd"
 )
+
 /*
 // 返回最小变化的提交的名字
 // 找到当前文件和commitId里面变化最小的版本
@@ -15,18 +17,18 @@ import (
  kmg GitSmallestChange -local=current -target=master
  git checkout xx //返回的那个分支地址
 */
-func (repo *Repository) MustSmallestChange(localCommit string,targetCommit string) string{
-	commitList:=repo.MustGetAllParentCommitId(targetCommit)
-	minNum:=2<<31
-	minCommit:=""
-	lineBreak:=[]byte("\n")
-	for _,commitName:=range commitList{
-		output:=kmgCmd.MustCombinedOutput("git diff "+localCommit +" "+commitName)
-		num:=bytes.Count(output,lineBreak)
-		if minNum>num{
+func (repo *Repository) MustSmallestChange(localCommit string, targetCommit string) string {
+	commitList := repo.MustGetAllParentCommitId(targetCommit)
+	minNum := 2 << 31
+	minCommit := ""
+	lineBreak := []byte("\n")
+	for _, commitName := range commitList {
+		output := kmgCmd.MustCombinedOutput("git diff " + localCommit + " " + commitName)
+		num := bytes.Count(output, lineBreak)
+		if minNum > num {
 			minNum = num
 			minCommit = commitName
-			if num==0{
+			if num == 0 {
 				break
 			}
 		}

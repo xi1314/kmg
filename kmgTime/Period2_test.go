@@ -25,7 +25,6 @@ type ScratchPeriod2 struct {
 }
 
 func TestPeriodListInterface(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	periodList := ScratchPeriodList2{
 		{
 			Period:   Period{Start: MustFromMysqlFormat("2001-01-00 23:30:00"), End: MustFromMysqlFormat("2001-01-01 23:30:00")},
@@ -42,9 +41,9 @@ func TestPeriodListInterface(ot *testing.T) {
 	}
 	PeriodListSort(periodList)
 	i, exist := SelectPeriodFromSortedPeriodList(MustFromMysqlFormat("2001-01-01 23:00:00"), periodList)
-	t.Equal(exist, true)
-	t.Equal(periodList[i].ItemList, []int{1, 2})
+	kmgTest.Equal(exist, true)
+	kmgTest.Equal(periodList[i].ItemList, []int{1, 2})
 	i, exist = SelectPeriodFromSortedPeriodList(MustFromMysqlFormat("2001-01-03 23:00:00"), periodList)
-	t.Equal(exist, true)
-	t.Equal(periodList[i].ItemList, []int{3, 4})
+	kmgTest.Equal(exist, true)
+	kmgTest.Equal(periodList[i].ItemList, []int{3, 4})
 }

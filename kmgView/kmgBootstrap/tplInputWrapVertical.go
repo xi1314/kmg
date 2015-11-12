@@ -17,7 +17,11 @@ func tplInputWrapVertical(config InputWrapVertical) string {
 	}
 	_buf.WriteString(`    </label>
 
-    <div class="col-sm-8">
+    <div class="col-sm-8 `)
+	if config.AppendTpl != nil {
+		_buf.WriteString(` form-inline `)
+	}
+	_buf.WriteString(`">
         `)
 	_buf.WriteString(config.Body.HtmlRender())
 	_buf.WriteString(`        <span style="font-size:12px;color:red">
@@ -28,7 +32,13 @@ func tplInputWrapVertical(config InputWrapVertical) string {
 		_buf.WriteString(` `)
 	}
 	_buf.WriteString(`        </span>
-    </div>
+        `)
+	if config.AppendTpl != nil {
+		_buf.WriteString(`            `)
+		_buf.WriteString(config.AppendTpl.HtmlRender())
+		_buf.WriteString(`        `)
+	}
+	_buf.WriteString(`    </div>
 </div>`)
 	return _buf.String()
 }

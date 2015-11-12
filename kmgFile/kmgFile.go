@@ -135,6 +135,14 @@ func MustAppendFile(path string, content []byte) {
 	}
 }
 
+func MustAppendFileAddLineEnd(path string, content []byte){
+	content = append(content,byte('\n'))
+	err := AppendFile(path, content)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // 文件或者目录是否存在
 func FileExist(path string) (exist bool, err error) {
 	_, err = os.Stat(path)

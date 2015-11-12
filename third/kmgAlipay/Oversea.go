@@ -49,14 +49,14 @@ func (ot *OverseaTrade) Init() {
 }
 
 // 请在进程初始化的时候进行Init.不要做懒加载.避免掉单.
-func (ot *OverseaTrade) InitForPayCallback(){
-	if ot.SelfSchemeAndHost==""{
+func (ot *OverseaTrade) InitForPayCallback() {
+	if ot.SelfSchemeAndHost == "" {
 		panic("支付回调必须填写当前网站scheme和host 如: http://127.0.0.1")
 	}
-	if ot.PayReturnPageCallback==nil{
+	if ot.PayReturnPageCallback == nil {
 		panic("支付回调必须处理同步回调.")
 	}
-	if ot.PayFinishCallback==nil && ot.PayCallback==nil{
+	if ot.PayFinishCallback == nil && ot.PayCallback == nil {
 		panic("支付成功必须处理,必须加入支付成功回调.")
 	}
 	kmgControllerRunner.RegisterController(ot)
@@ -142,17 +142,17 @@ func (ot *OverseaTrade) NotifyAction(ctx *kmgHttp.Context) {
 	ot.mustNotifyActionV2(ctx, ot.payCallbackProceess)
 }
 
-func (ot *OverseaTrade) payCallbackProceess(info OverseaTradeTransaction){
-	if ot.PayCallback!=nil{
+func (ot *OverseaTrade) payCallbackProceess(info OverseaTradeTransaction) {
+	if ot.PayCallback != nil {
 		err := ot.PayCallback(info)
-		if err!=nil{
+		if err != nil {
 			panic(err)
 		}
 	}
-	if info.TradeStatus==OverseaTradeStatusFinish && ot.PayFinishCallback!=nil{
+	if info.TradeStatus == OverseaTradeStatusFinish && ot.PayFinishCallback != nil {
 		ot.PayFinishCallback(info)
 	}
-	if info.TradeStatus==OverseaTradeStatusClose && ot.PayCloseCallback!=nil{
+	if info.TradeStatus == OverseaTradeStatusClose && ot.PayCloseCallback != nil {
 		ot.PayCloseCallback(info)
 	}
 }
@@ -206,15 +206,15 @@ func (ot *OverseaTrade) MustReturnPage(ctx *kmgHttp.Context) (info OverseaTradeT
 // 调用前请清除您自己的参数.
 // @deprecated 请使用 OverseaTrade.PayFinishCallback 和 OverseaTrade.PayCloseCallback
 func (ot *OverseaTrade) MustNotifyAction(ctx *kmgHttp.Context, f func(info OverseaTradeTransaction) (err error)) {
-	ot.mustNotifyActionV2(ctx,func(info OverseaTradeTransaction){
+	ot.mustNotifyActionV2(ctx, func(info OverseaTradeTransaction) {
 		err := f(info)
-		if err!=nil{
+		if err != nil {
 			panic(err)
 		}
 	})
 }
 
-func (ot *OverseaTrade) mustNotifyActionV2(ctx *kmgHttp.Context,f func(info OverseaTradeTransaction)){
+func (ot *OverseaTrade) mustNotifyActionV2(ctx *kmgHttp.Context, f func(info OverseaTradeTransaction)) {
 	kmgLog.Log("Alipay", "Oversea PayNotifyAction", ctx.GetInMap())
 	var err error
 	ctx.MustPost()
@@ -329,6 +329,7 @@ func (ot *OverseaTrade) MustSingleTransactionQuery(outTradeId string) *OverseaTr
 
 // 给调用者mock用
 type SingleTransactionQueryer func(outTradeId string) (tran *OverseaTradeTransaction, err error)
+
 // 单条交易查询接口
 func (ot *OverseaTrade) SingleTransactionQuery(outTradeId string) (tran *OverseaTradeTransaction, err error) {
 	query := map[string]string{

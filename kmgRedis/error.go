@@ -14,4 +14,3 @@ var ErrStringWrongType = errors.New("WRONGTYPE Operation against a key holding t
 var ErrRenameSameName = errors.New("ERR source and destination objects are the same")
 var ErrValueNotIntFormatOrOutOfRange = errors.New("ERR value is not an integer or out of range")
 var ErrValueNotFloatFormat = errors.New("ERR value is not a valid float")
-

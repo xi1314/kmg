@@ -172,7 +172,6 @@ func (c *Cmd) MustCombinedOutput() (b []byte) {
 	return b
 }
 
-
 //允许命令,返回命令的内容,不回显任何东西,
 // 出现错误就回显输出结果,没有错误,什么也不显示.
 func (c *Cmd) MustCombinedOutputWithErrorPrintln() (b []byte) {

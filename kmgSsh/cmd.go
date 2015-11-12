@@ -18,7 +18,7 @@ func MustRpcSshCmd(ip string, cmd ...string) []byte {
 	}
 	cmdCombine := strings.Join(cmd, "&&")
 	out, err := kmgCmd.CmdString("ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no root@" + ip + " " + cmdCombine).RunAndReturnOutput()
-	logPath := "log/rpcSshCmd-" + ip
+	logPath := "/tmp/rpcSshCmd-" + ip
 	kmgFile.MustAppendFile(logPath, []byte(strings.Join([]string{cmdCombine, kmgTime.DefaultFormat(time.Now())}, "\n")))
 	kmgFile.MustAppendFile(logPath, out)
 	if err != nil {

@@ -10,19 +10,21 @@ import (
 
 // 清空当前db的所有数据,并且设置为传入的数据
 // 这个函数主要用于测试
+// @deprecated
 func MustSetDbData(c *redis.Client, data map[string]string) {
 	result, err := c.FlushDb().Result()
 	if err != nil && result != "OK" {
 		panic(fmt.Errorf("[MustSetRedisData] redisClient.FlushDb() fail %s %s", err, result))
 	}
 	for key, value := range data {
-		result, err := c.Set(key, value,0).Result()
+		result, err := c.Set(key, value, 0).Result()
 		if err != nil && result != "OK" {
 			panic(fmt.Errorf("[MustSetRedisData] rc.Set(key,value).Result() fail %s %s", err, result))
 		}
 	}
 }
 
+// @deprecated
 func MustSetDbDataYaml(c *redis.Client, yaml string) {
 	data := map[string]string{}
 	err := kmgYaml.Unmarshal([]byte(yaml), &data)
@@ -33,6 +35,7 @@ func MustSetDbDataYaml(c *redis.Client, yaml string) {
 	return
 }
 
+// @deprecated
 func MustFlushDb(c *redis.Client) {
 	result, err := c.FlushDb().Result()
 	if err != nil && result != "OK" {
@@ -45,19 +48,21 @@ func MustSetDataWithGob(c *redis.Client, key string, data interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	result, err := c.Set(key, string(b),0).Result()
+	result, err := c.Set(key, string(b), 0).Result()
 	if err != nil && result != "OK" {
 		panic(fmt.Errorf("[MustSetDataWithGob] rc.Set(key,value).Result() fail %s %s", err, result))
 	}
 }
 
+// @deprecated
 func MustSetData(c *redis.Client, key string, data string) {
-	result, err := c.Set(key, data,0).Result()
+	result, err := c.Set(key, data, 0).Result()
 	if err != nil && result != "OK" {
 		panic(fmt.Errorf("[MustSetData] rc.Set(key,value).Result() fail %s %s", err, result))
 	}
 }
 
+// @deprecated
 func MustGetData(c *redis.Client, key string) string {
 	result, err := c.Get(key).Result()
 	if err != nil {
@@ -66,6 +71,7 @@ func MustGetData(c *redis.Client, key string) string {
 	return result
 }
 
+// @deprecated
 func MustGetDataWithGob(c *redis.Client, key string, inData interface{}) {
 	result, err := c.Get(key).Result()
 	if err != nil {
@@ -77,6 +83,7 @@ func MustGetDataWithGob(c *redis.Client, key string, inData interface{}) {
 	}
 }
 
+// @deprecated
 func MustGetAllZRange(c *redis.Client, key string) []string {
 	result, err := c.ZRange(key, 0, -1).Result()
 	if err != nil {

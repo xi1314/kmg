@@ -6,8 +6,9 @@ import (
 )
 
 //目前只支持 Ubuntu
+// TODO data race?
 func SyncTime() {
-	if kmgPlatform.GetCompiledPlatform().Os != kmgPlatform.LinuxAmd64.Os {
+	if !kmgPlatform.IsLinux(){
 		return
 	}
 	if !kmgCmd.Exist("ntpdate") {

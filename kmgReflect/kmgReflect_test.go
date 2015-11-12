@@ -12,17 +12,16 @@ type ta struct {
 }
 
 func TestGetFullName(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	name := kmgReflect.GetTypeFullName(reflect.TypeOf(""))
-	t.Equal(name, "string")
+	kmgTest.Equal(name, "string")
 
 	name = kmgReflect.GetTypeFullName(reflect.TypeOf(1))
-	t.Equal(name, "int")
+	kmgTest.Equal(name, "int")
 
 	name = kmgReflect.GetTypeFullName(reflect.TypeOf(&ta{}))
-	t.Equal(name, "github.com/bronze1man/kmg/kmgReflect.ta")
+	kmgTest.Equal(name, "github.com/bronze1man/kmg/kmgReflect_test.ta")
 
 	name = kmgReflect.GetTypeFullName(reflect.TypeOf([]string{}))
-	t.Equal(name, "")
+	kmgTest.Equal(name, "")
 
 }

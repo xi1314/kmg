@@ -51,7 +51,7 @@ func UploadDirMulitThread(ctx *Context, localRoot string, remoteRoot string) (er
 	tm := kmgTask.NewLimitThreadErrorHandleTaskManager(ThreadNum, 3)
 	defer tm.Close()
 	requestList := []uploadFileRequest{}
-	remotePathList :=[]string{}
+	remotePathList := []string{}
 	//dispatch task 分配任务
 	err = filepath.Walk(localRoot, func(path string, info os.FileInfo, inErr error) (err error) {
 		if inErr != nil {
@@ -74,18 +74,18 @@ func UploadDirMulitThread(ctx *Context, localRoot string, remoteRoot string) (er
 			remotePath: remotePath,
 			expectHash: expectHash,
 		})
-		remotePathList = append(remotePathList,remotePath)
+		remotePathList = append(remotePathList, remotePath)
 		return
 	})
 	if len(requestList) == 0 {
 		return ErrNoFile
 	}
-	batchRet,err:=ctx.BatchStat(remotePathList)
-	if err!=nil{
+	batchRet, err := ctx.BatchStat(remotePathList)
+	if err != nil {
 		return
 	}
-	for i,ret:=range batchRet{
-		i:=i
+	for i, ret := range batchRet {
+		i := i
 		if ret.IsExist() && ret.Hash == requestList[i].expectHash {
 			continue
 		}

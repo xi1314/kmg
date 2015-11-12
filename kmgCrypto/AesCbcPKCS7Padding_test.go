@@ -9,17 +9,16 @@ import (
 )
 
 func TestAesCbc(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	in := []byte("123")
 	key := kmgBase64.MustStdBase64DecodeString("6VRHJsip3mQ2r1qVI9Gbk7h2v0yfQjqQTbs8hFKUMRo=")
 	out := AesCbcPKCS7PaddingEncrypt(in, key)
 	out2, err := AesCbcPKCS7PaddingDecrypt(out, key)
-	t.Equal(err, nil)
-	t.Equal(in, out2)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(in, out2)
 
 	out2, err = AesCbcPKCS7PaddingDecrypt(kmgBase64.MustStdBase64DecodeString("BemxQXTV13r3D6dToE0o9qRNNhaNM5VlvZQu6CCcLjc="), key)
-	t.Equal(err, nil)
-	t.Equal(in, out2)
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(in, out2)
 
 	for _, in := range [][]byte{
 		[]byte(""),
@@ -45,7 +44,7 @@ func TestAesCbc(ot *testing.T) {
 		key := kmgBase64.MustStdBase64DecodeString("6VRHJsip3mQ2r1qVI9Gbk7h2v0yfQjqQTbs8hFKUMRo=")
 		out := AesCbcPKCS7PaddingEncrypt(in, key)
 		out2, err := AesCbcPKCS7PaddingDecrypt(out, key)
-		t.Equal(err, nil)
-		t.Equal(in, out2)
+		kmgTest.Equal(err, nil)
+		kmgTest.Equal(in, out2)
 	}
 }

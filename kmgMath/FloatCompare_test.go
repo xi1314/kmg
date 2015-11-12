@@ -4,7 +4,6 @@ import "testing"
 import "github.com/bronze1man/kmg/kmgTest"
 
 func TestFloatCompare(ot *testing.T) {
-	t := kmgTest.NewTestTools(ot)
 	for i, testCase := range []struct {
 		f      func(x float64, y float64) bool
 		x      float64
@@ -29,7 +28,7 @@ func TestFloatCompare(ot *testing.T) {
 		{Float64GreaterEqualThan, 2.0, 1.0, true},
 		{Float64GreaterEqualThan, 1.0, 1.0, true},
 	} {
-		t.EqualMsg(testCase.f(testCase.x, testCase.y), testCase.result,
+		kmgTest.Equal(testCase.f(testCase.x, testCase.y), testCase.result,
 			"fail at %d", i)
 	}
 }

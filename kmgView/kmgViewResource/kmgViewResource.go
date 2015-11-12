@@ -5,12 +5,12 @@ import (
 	"github.com/bronze1man/kmg/kmgConfig"
 	"github.com/bronze1man/kmg/kmgCrypto"
 	"github.com/bronze1man/kmg/kmgFile"
+	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
 	"github.com/bronze1man/kmg/kmgStrings"
 	"github.com/bronze1man/kmg/third/kmgQiniu"
 	"path"
 	"path/filepath"
 	"sort"
-	"github.com/bronze1man/kmg/kmgGoSource/kmgFormat"
 )
 
 type ResourceUploadRequest struct {
@@ -68,8 +68,8 @@ func get` + req.Name + `ViewResource() *kmgViewResource.Generated{
 	return ` + req.Name + `generated
 }
 `)
-	outGoContent,err := kmgFormat.Source(outGoContent)
-	if err!=nil{
+	outGoContent, err := kmgFormat.Source(outGoContent)
+	if err != nil {
 		panic(err)
 	}
 	kmgFile.MustWriteFile(req.OutGoFilePath, outGoContent)

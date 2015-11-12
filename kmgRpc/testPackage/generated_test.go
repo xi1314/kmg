@@ -34,9 +34,9 @@ func TestGenerated(ot *testing.T) {
 	kmgTest.Equal(err, nil)
 	kmgTest.Ok(outT.Equal(kmgTime.MustParseAutoInDefault("2001-01-01T02:01:01.001000001+08:00")), outT)
 
-	ip,err:=client.DemoClientIp()
-	kmgTest.Equal(err,nil)
-	kmgTest.Equal(ip,"127.0.0.1")
+	ip, err := client.DemoClientIp()
+	kmgTest.Equal(err, nil)
+	kmgTest.Equal(ip, "127.0.0.1")
 }
 
 func BenchmarkGenerated(ot *testing.B) {

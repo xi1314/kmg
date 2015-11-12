@@ -98,7 +98,8 @@ func newChartBaseConfig() *Chart {
 }
 
 func (l Chart) GetOptionString() string {
-	return kmgJson.MustMarshalIndentToString(l.Option)
+	//return kmgJson.MustMarshalIndentToString(l.Option) // 使用这个调试
+	return kmgJson.MustMarshalToString(l.Option) // 使用这个减少数据体积
 }
 
 func (l Chart) HtmlRender() string {

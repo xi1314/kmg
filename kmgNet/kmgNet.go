@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 //从一个net.Listener里面读取需要Dial的地址(测试用的比较多)
@@ -64,10 +64,10 @@ func SizeString(byteNum int64) string {
 }
 
 // 在开头加padding,尝试使长度一致,如果数据超级大有可能会坏掉
-func SizeStringWithPadding(byteNum int64) string{
-	s:=SizeString(byteNum)
-	if len(s)<10{
-		return strings.Repeat(" ",10-len(s))+s
+func SizeStringWithPadding(byteNum int64) string {
+	s := SizeString(byteNum)
+	if len(s) < 10 {
+		return strings.Repeat(" ", 10-len(s)) + s
 	}
 	return s
 }

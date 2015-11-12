@@ -23,6 +23,7 @@ type InputWrapVertical struct {
 	ShowName string
 	Comment  string
 	Body     kmgView.HtmlRenderer
+	AppendTpl kmgView.HtmlRenderer
 	Need     bool
 }
 
@@ -64,20 +65,23 @@ type SelectVerticalString struct {
 	Value      string
 	ReadOnly   bool
 	OptionList []SelectOption
-	ShowName string
-	Comment  string
-	Need     bool
+	ShowName   string
+	Comment    string
+	Need       bool
 }
 
-func (s SelectVerticalString) HtmlRender () string {
+func (s SelectVerticalString) HtmlRender() string {
+	if s.ShowName == ""{
+		s.ShowName = s.Name
+	}
 	return InputWrapVertical{
 		ShowName: s.ShowName,
 		Comment:  s.Comment,
 		Need:     s.Need,
 		Body: Select{
-			Name: s.Name,
-			Value: s.Value,
-			ReadOnly: s.ReadOnly,
+			Name:       s.Name,
+			Value:      s.Value,
+			ReadOnly:   s.ReadOnly,
 			OptionList: s.OptionList,
 		},
 	}.HtmlRender()
@@ -101,9 +105,13 @@ type InputVerticalString struct {
 	Comment  string
 	Need     bool
 	ReadOnly bool
+	AppendTpl     kmgView.HtmlRenderer
 }
 
 func (f InputVerticalString) HtmlRender() string {
+	if f.ShowName == ""{
+		f.ShowName = f.Name
+	}
 	return InputWrapVertical{
 		ShowName: f.ShowName,
 		Comment:  f.Comment,
@@ -114,6 +122,7 @@ func (f InputVerticalString) HtmlRender() string {
 			Value:    f.Value,
 			ReadOnly: f.ReadOnly,
 		},
+		AppendTpl: f.AppendTpl,
 	}.HtmlRender()
 }
 
@@ -127,6 +136,9 @@ type InputVerticalInt struct {
 }
 
 func (f InputVerticalInt) HtmlRender() string {
+	if f.ShowName == ""{
+		f.ShowName = f.Name
+	}
 	return InputWrapVertical{
 		ShowName: f.ShowName,
 		Comment:  f.Comment,
@@ -150,6 +162,9 @@ type TextAreaVerticalString struct {
 }
 
 func (f TextAreaVerticalString) HtmlRender() string {
+	if f.ShowName == ""{
+		f.ShowName = f.Name
+	}
 	return InputWrapVertical{
 		ShowName: f.ShowName,
 		Comment:  f.Comment,

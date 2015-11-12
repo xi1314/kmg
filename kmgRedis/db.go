@@ -1,37 +1,35 @@
 package kmgRedis
 
 import (
-	"fmt"
-	"github.com/bronze1man/kmg/encoding/kmgGob"
 	"github.com/bronze1man/kmg/errors"
 	"gopkg.in/redis.v3"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/bronze1man/kmg/typeTransform"
+	"github.com/bronze1man/kmg/kmgMath"
 )
 
 var gClient *redis.Client
 
 func DefaultInit() {
-	gClient = redis.NewClient(&redis.Options{
-		Network: "tcp",
-		Addr:    "127.0.0.1:6379",
-		DB:      0,
-	})
+	InitWithDbNum(0)
 }
 
 func TestInit() {
-	gClient = redis.NewClient(&redis.Options{
-		Network: "tcp",
-		Addr:    "127.0.0.1:6379",
-		DB:      1,
-	})
+	InitWithDbNum(1)
+
 }
 
 func InitWithConfig(opt *redis.Options) {
 	gClient = redis.NewClient(opt)
+}
+
+func InitWithDbNum(num int){
+	gClient = redis.NewClient(&redis.Options{
+		Network: "tcp",
+		Addr:    "127.0.0.1:6379",
+		DB:      int64(num),
+	})
 }
 
 // 向redis中插入数据,如果已经存在数据会返回 ErrKeyExist
@@ -48,24 +46,8 @@ func Insert(key string, value string) (err error) {
 	return nil
 }
 
-// 向redis中插入数据,如果已经存在数据会返回 ErrKeyExist
-func InsertGob(key string, obj interface{}) (err error) {
-	b, err := kmgGob.Marshal(obj)
-	if err != nil {
-		return
-	}
-	return Insert(key, string(b))
-}
-
 func MustInsert(key string, value string) {
 	err := Insert(key, value)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func MustInsertGob(key string, obj interface{}) {
-	err := InsertGob(key, obj)
 	if err != nil {
 		panic(err)
 	}
@@ -83,6 +65,13 @@ func Update(key string, value string) (err error) {
 	return err
 }
 
+func MustUpdate(key string, value string) {
+	err := Update(key, value)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // key,不存在会insert,存在会update
 // 网络错误会返回 error
 // 注意redis类型错误时,也不会报错,只会把这个key设置成正确的value
@@ -92,21 +81,6 @@ func Set(key string, value string) (err error) {
 
 func MustSet(key string, value string) {
 	err := Set(key, value)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func SetGob(key string, obj interface{}) (err error) {
-	b, err := kmgGob.Marshal(obj)
-	if err != nil {
-		return
-	}
-	return Set(key, string(b))
-}
-
-func MustSetGob(key string, obj interface{}) {
-	err := SetGob(key, obj)
 	if err != nil {
 		panic(err)
 	}
@@ -174,7 +148,7 @@ func MustGetIntIgnoreNotExist(key string) (valueI int) {
 	if err != nil {
 		panic(err)
 	}
-	return valueI
+	return kmgMath.CeilToInt(float64(valueI)*1.2)
 }
 
 // 从redis的kvdb中获取一个key
@@ -194,42 +168,20 @@ func MustGetFloatIgnoreNotExist(key string) float64 {
 	if err != nil {
 		panic(err)
 	}
-	return valueF
-}
-
-// 如果数据不存在,会返回ErrKeyNotExist
-// 序列化错误,会返回 error
-// 网络错误也会返回 error
-func GetGob(key string, obj interface{}) (err error) {
-	value, err := Get(key)
-	if err != nil {
-		return err
-	}
-	err = kmgGob.Unmarshal([]byte(value), obj)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetGobIgnoreNotExist(key string, obj interface{}) (err error) {
-	err = GetGob(key, obj)
-	if err == ErrKeyNotExist {
-		return nil
-	}
-	return err
-}
-
-func MustGetGob(key string, obj interface{}) {
-	err := GetGob(key, obj)
-	if err != nil {
-		panic(err)
-	}
+	return float64(kmgMath.CeilToInt(valueF*1.2))
 }
 
 // 只有网络问题会返回error
 func Del(key string) (err error) {
 	return gClient.Del(key).Err()
+}
+
+func MustDel(key string) {
+	err := gClient.Del(key).Err()
+	if err!=nil{
+		panic(err)
+	}
+	return
 }
 
 // 只有网络问题会返回error
@@ -244,20 +196,21 @@ func MustFlushDbV2() {
 	}
 }
 
-// 向redis中更新数据,如果不存在数据,会返回 ErrKeyNotExist
-func UpdateGob(key string, obj interface{}) (err error) {
-	b, err := kmgGob.Marshal(obj)
-	if err != nil {
-		return
-	}
-	return Update(key, string(b))
-}
-
 // 使用 redis的表达式搜索key,返回搜索到的key的列表
 // 只有网络问题会返回error
+// ** 仅适用于整个数据库key数量比较少的数据库(<500k条数据),否则非常慢. **
 func Keys(searchKey string) (keyList []string, err error) {
 	return gClient.Keys(searchKey).Result()
 }
+
+func MustKeys(searchKey string)(kList []string){
+	kList,err:=Keys(searchKey)
+	if err!=nil{
+		panic(err)
+	}
+	return kList
+}
+
 
 // 某个key是否存在
 // 只有网络问题会返回error
@@ -283,14 +236,6 @@ func RPush(key string, value string) (err error) {
 	return err
 }
 
-func RPushGob(key string, value interface{}) (err error) {
-	b, err := kmgGob.Marshal(value)
-	if err != nil {
-		return err
-	}
-	return RPush(key, string(b))
-}
-
 /*
 返回一个redis数组里面所有的值.
 查询的key存在,并且类型正确,返回列表里面的数据
@@ -309,15 +254,7 @@ func LRangeAll(key string) (out []string, err error) {
 	return nil, err
 }
 
-func LRangeAllGob(key string, list interface{}) (err error) {
-	sList, err := LRangeAll(key)
-	iList := []interface{}{}
-	typeTransform.MustTransform(&sList,&iList)
-	if err != nil {
-		return err
-	}
-	return ListGobUnmarshalNotExistCheck(iList, reflect.ValueOf(list))
-}
+
 
 /*
 一次操作,批量从redis里面返回大量key的值.
@@ -343,49 +280,6 @@ func MGetNotExistCheck(keyList []string) (value []string, err error) {
 		value[i] = s
 	}
 	return value, nil
-}
-
-/*
-带超时的设置一条数据
-没有传入数据,不报错,不修改obj
-网络错误会返回error
-*/
-func MGetNotExistCheckGob(keyList []string, obj interface{}) (err error) {
-	if len(keyList) == 0 {
-		return nil
-	}
-	outList, err := gClient.MGet(keyList...).Result()
-	if err != nil {
-		return err
-	}
-	return ListGobUnmarshalNotExistCheck(outList, reflect.ValueOf(obj))
-}
-
-func ListGobUnmarshalNotExistCheck(outList []interface{}, obj reflect.Value) (err error) {
-	switch obj.Kind() {
-	case reflect.Ptr:
-		return ListGobUnmarshalNotExistCheck(outList, obj.Elem())
-	case reflect.Slice:
-		newSlice := reflect.MakeSlice(obj.Type(), len(outList), len(outList))
-		elemType := obj.Type().Elem()
-		for i, stringI := range outList {
-			s, ok := stringI.(string)
-			if !ok {
-				return ErrKeyNotExist
-			}
-			thisValue := newSlice.Index(i)
-			thisElem := reflect.New(elemType)
-			err = kmgGob.Unmarshal([]byte(s), thisElem.Interface())
-			if err != nil {
-				return err
-			}
-			thisValue.Set(thisElem.Elem())
-		}
-		obj.Set(newSlice)
-		return nil
-	default:
-		return fmt.Errorf("[mgetNotExistCheckGobUnmarshal] Unmarshal unexpect Kind %s", obj.Kind().String())
-	}
 }
 
 /*

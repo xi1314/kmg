@@ -38,7 +38,7 @@ func SetFixNowFromString(s string) {
 	NowTime = NewFixedNower(MustParseAutoInDefault(s))
 }
 
-func SetNowerToDefault(){
+func SetNowerToDefault() {
 	NowTime = tDefaultNower{}
 }
 

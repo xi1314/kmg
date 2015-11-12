@@ -1,8 +1,12 @@
 package levelFinder
+import (
+	"testing"
+	"github.com/bronze1man/kmg/kmgTest"
+)
 
-func (t *Tester) TestMaxLevelLimitProvider() {
+func TestMaxLevelLimitProvider(t *testing.T) {
 	ExpTable, err := MaxLevelLimitProvider(ArrayLevelProvider{12, 29, 57}, 4)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	levelTestTable := []struct {
 		exp        int
 		actualExp  int
@@ -22,15 +26,15 @@ func (t *Tester) TestMaxLevelLimitProvider() {
 	}
 	for _, c := range levelTestTable {
 		result := GetLevelByExp(ExpTable, c.exp)
-		t.EqualMsg(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
-		t.EqualMsg(result.Level, c.lv, "Level at exp:%d", c.exp)
-		t.EqualMsg(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
-		t.EqualMsg(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
-		t.EqualMsg(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
+		kmgTest.Equal(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
+		kmgTest.Equal(result.Level, c.lv, "Level at exp:%d", c.exp)
+		kmgTest.Equal(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
+		kmgTest.Equal(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
+		kmgTest.Equal(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
 	}
 
 	ExpTable, err = MaxLevelLimitProvider(ArrayLevelProvider{12, 29, 57}, 1)
-	t.Equal(err, nil)
+	kmgTest.Equal(err, nil)
 	levelTestTable = []struct {
 		exp        int
 		actualExp  int
@@ -43,10 +47,10 @@ func (t *Tester) TestMaxLevelLimitProvider() {
 	}
 	for _, c := range levelTestTable {
 		result := GetLevelByExp(ExpTable, c.exp)
-		t.EqualMsg(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
-		t.EqualMsg(result.Level, c.lv, "Level at exp:%d", c.exp)
-		t.EqualMsg(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
-		t.EqualMsg(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
-		t.EqualMsg(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
+		kmgTest.Equal(result.Exp, c.actualExp, "actualExp at exp:%d", c.exp)
+		kmgTest.Equal(result.Level, c.lv, "Level at exp:%d", c.exp)
+		kmgTest.Equal(result.CurrentLevelExcessExp, c.excess, "CurrentLevelExcessExp at exp:%d", c.exp)
+		kmgTest.Equal(result.NextLevelAllNeedExp, c.nextAll, "NextLevelAllNeedExp at exp:%d", c.exp)
+		kmgTest.Equal(result.IsMaxLevel, c.isMaxLevel, "IsMaxLevel at exp:%d", c.exp)
 	}
 }
